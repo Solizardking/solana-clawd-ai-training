@@ -1,0 +1,71 @@
+# Secrets and credentials
+.env
+.env.*
+*.env
+credentials*
+credential*
+secrets*
+id.json
+keypair*
+*.json
+!package.json
+!tsconfig.json
+!schema.sql
+!.gitattributes
+
+# Build artifacts
+dist/
+build/
+*.js
+*.d.ts
+!src/**/*.ts
+!*.config.js
+!bridge_client.js
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+wandb/
+runs/
+
+# Solana/blockchain artifacts
+*.safetensors
+*.bin
+*.pt
+*.gguf
+*.pkl
+checkpoints/
+outputs/
+
+# Memory artifacts
+*.json
+*.log
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+
+# NanoChat / Solana-chat
+solana-chat/.venv/
+solana-chat/__pycache__/
+nanochat-master/.venv/
+nanochat-master/__pycache__/
+solana-chat/data/*.jsonl
+solana-chat/data/*.json
+
+# Strategy artifacts
+paper_state.json
+strategy_ledger_*.json
+
+# Reports
+report.md
+*.report.md

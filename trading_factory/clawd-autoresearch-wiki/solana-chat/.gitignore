@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+dev-ignore/
+report.md
+eval_bundle/
+
+# Secrets
+.env
+PLAN_SOLANA_REWRITE.md
+# Local setup
+CLAUDE.md
+wandb/

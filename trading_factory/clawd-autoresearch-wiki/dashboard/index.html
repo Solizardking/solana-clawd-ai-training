@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLAWDBOT OS :: AGENT COMMAND CENTER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Orbitron:wght@400;600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="os.css">
+<script src="https://terminal.jup.ag/main-v2.js" data-preload defer></script>
+</head>
+<body>
+<div id="app">
+  <!-- TOPBAR -->
+  <header id="topbar">
+    <span class="logo">CLAWD<span>BOT</span></span>
+    <span class="logo" style="font-size:13px;color:var(--text-dim);font-family:'Share Tech Mono';letter-spacing:2px">OS</span>
+    <div class="top-stat"><span class="top-stat-label">Agent</span><span class="top-stat-val" id="hdr-status">—</span></div>
+    <div class="top-stat"><span class="top-stat-label">Cycles</span><span class="top-stat-val" id="hdr-cycles">—</span></div>
+    <div class="top-stat"><span class="top-stat-label">Positions</span><span class="top-stat-val" id="hdr-positions">—</span></div>
+    <div class="top-stat"><span class="top-stat-label">Mode</span><span class="top-stat-val" id="hdr-mode">—</span></div>
+    <div class="top-stat"><span class="top-stat-label">Bridge</span><span class="top-stat-val" id="hdr-bridge">—</span></div>
+    <div class="top-actions">
+      <div class="ws-status"><span class="dot" id="ws-dot"></span><span id="ws-label" class="text-dim">offline</span></div>
+      <button class="btn-secondary" onclick="triggerCycle()">↺ CYCLE</button>
+      <button id="agent-toggle" onclick="toggleAgent()">START AGENT</button>
+    </div>
+  </header>
+
+  <!-- TICKER -->
+  <div id="ticker-bar"><div class="ticker-inner" id="ticker"><span class="tick-item"><span class="sym">SOL</span> loading…</span></div></div>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <button class="nav-btn active" onclick="showPage('overview',this)" data-page="overview">⬡<span class="nav-tooltip">OVERVIEW</span></button>
+    <button class="nav-btn" onclick="showPage('signals',this)" data-page="signals">⚡<span class="nav-tooltip">SIGNALS</span></button>
+    <button class="nav-btn" onclick="showPage('positions',this)" data-page="positions">📊<span class="nav-tooltip">POSITIONS</span></button>
+    <button class="nav-btn" onclick="showPage('market',this)" data-page="market">🌐<span class="nav-tooltip">MARKET</span></button>
+    <button class="nav-btn" onclick="showPage('strategy',this)" data-page="strategy">🧬<span class="nav-tooltip">STRATEGY</span></button>
+    <button class="nav-btn" onclick="showPage('memory',this)" data-page="memory">🧠<span class="nav-tooltip">MEMORY</span></button>
+    <button class="nav-btn" onclick="showPage('research',this)" data-page="research">🔬<span class="nav-tooltip">RESEARCH</span></button>
+    <button class="nav-btn" onclick="showPage('explorer',this)" data-page="explorer">🔍<span class="nav-tooltip">EXPLORER</span></button>
+    <div style="flex:1"></div>
+    <button class="nav-btn" onclick="showPage('settings',this)" data-page="settings">⚙<span class="nav-tooltip">SETTINGS</span></button>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main">
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="grid4" style="margin-bottom:16px">
+        <div class="stat-card"><div class="stat-card-label">Agent Status</div><div class="stat-card-val" id="ov-status">—</div><div class="stat-card-sub" id="ov-mode">mode: —</div></div>
+        <div class="stat-card"><div class="stat-card-label">Cycle Count</div><div class="stat-card-val green" id="ov-cycles">0</div><div class="stat-card-sub" id="ov-lastcycle">last: —</div></div>
+        <div class="stat-card"><div class="stat-card-label">Open Positions</div><div class="stat-card-val amber" id="ov-positions">0</div><div class="stat-card-sub">max: 5</div></div>
+        <div class="stat-card"><div class="stat-card-label">Win Rate</div><div class="stat-card-val green" id="ov-winrate">—</div><div class="stat-card-sub" id="ov-pnl">avg pnl: —</div></div>
+      </div>
+      <div class="grid2">
+        <div>
+          <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Recent Signals</span><span class="text-dim" id="ov-sig-count">0</span></div>
+            <div class="scroll-area" style="max-height:220px"><table class="data-table"><thead><tr><th>Asset</th><th>Dir</th><th>Strength</th><th>Time</th></tr></thead><tbody id="ov-signals-body"><tr><td colspan="4"><div class="loading-state"><span class="spinner"></span>awaiting signals</div></td></tr></tbody></table></div>
+          </div>
+          <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Agent Log</span></div><div class="terminal" id="agent-log"><div class="log-line"><span class="ts">--:--:--</span><span class="lvl-info">INFO</span> <span class="msg">Connecting to bridge…</span></div></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Open Positions</span></div><div id="ov-positions-list"><div class="empty-state"><div class="empty-state-icon">◌</div><div class="empty-state-text">No open positions</div></div></div></div>
+          <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Strategy Snapshot</span></div><div id="ov-strategy-snap" class="scroll-area" style="max-height:180px"><div class="loading-state"><span class="spinner"></span>loading strategy</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNALS -->
+    <div class="page" id="page-signals">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Live Signal Feed</span><button class="btn-secondary" onclick="loadSignals()">↺</button></div>
+        <div class="scroll-area-tall"><table class="data-table" style="width:100%"><thead><tr><th>Asset</th><th>Direction</th><th>Strength</th><th>Confidence</th><th>Sources</th><th>Time</th></tr></thead><tbody id="signals-tbody"><tr><td colspan="6"><div class="loading-state"><span class="spinner"></span>loading signals</div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- POSITIONS -->
+    <div class="page" id="page-positions">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Open Positions</span><button class="btn-secondary" onclick="loadPositions()">↺</button></div><div id="positions-grid" class="grid2"><div class="loading-state"><span class="spinner"></span>loading</div></div></div>
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Trade History</span><button class="btn-secondary" onclick="loadTrades()">↺</button></div>
+        <div class="scroll-area-tall"><table class="data-table"><thead><tr><th>Asset</th><th>Dir</th><th>Entry</th><th>Exit</th><th>PnL</th><th>Outcome</th><th>Time</th></tr></thead><tbody id="trades-tbody"><tr><td colspan="7"><div class="loading-state"><span class="spinner"></span>loading</div></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- MARKET -->
+    <div class="page" id="page-market">
+      <div class="grid2">
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Token Lookup (Birdeye)</span></div>
+          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="token-addr" placeholder="Solana token address…" value="So11111111111111111111111111111111111111112" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none"><button class="btn-secondary" onclick="loadToken()">LOAD</button></div>
+          <div id="token-info"><div class="empty-state"><div class="empty-state-text">Enter address above</div></div></div>
+        </div>
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Aster DEX Orderbook</span></div>
+          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="ob-symbol" placeholder="e.g. BTCUSDT" value="BTCUSDT" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none"><button class="btn-secondary" onclick="loadOrderbook()">LOAD</button></div>
+          <div id="orderbook-display"><div class="empty-state"><div class="empty-state-text">Load a symbol</div></div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Trending Tokens</span><button class="btn-secondary" onclick="loadTrending()">↺</button></div><div id="trending-list" class="scroll-area"><div class="loading-state"><span class="spinner"></span>loading</div></div></div>
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Aster Markets</span><button class="btn-secondary" onclick="loadAsterDigest()">↺</button></div><div id="aster-digest" class="scroll-area"><div class="loading-state"><span class="spinner"></span>loading</div></div></div>
+      </div>
+    </div>
+
+    <!-- STRATEGY -->
+    <div class="page" id="page-strategy">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">ClawdBot RSI/EMA Parameters</span><button class="btn-secondary" onclick="loadStrategyState()">↺ RELOAD</button></div>
+        <div id="params-grid" class="param-grid"><div class="loading-state"><span class="spinner"></span>loading</div></div>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="page" id="page-memory">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Query Memory</span></div>
+        <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="mem-query" placeholder="e.g. SOL momentum…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none" onkeyup="if(event.key==='Enter')queryMemory()"><button class="btn-secondary" onclick="queryMemory()">SEARCH</button></div>
+        <div id="mem-results" class="scroll-area-tall"><div class="empty-state"><div class="empty-state-icon">🧠</div><div class="empty-state-text">Enter query above</div></div></div>
+      </div>
+    </div>
+
+    <!-- RESEARCH -->
+    <div class="page" id="page-research">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">ClawdBot Chat</span></div>
+        <div class="terminal" id="chat-log" style="height:300px;margin-bottom:10px"></div>
+        <div class="row" style="gap:8px"><input type="text" id="chat-input" placeholder="Talk to ClawdBot…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none" onkeyup="if(event.key==='Enter')sendChat()"><button class="btn-secondary text-green" onclick="sendChat()">SEND</button></div>
+      </div>
+    </div>
+
+    <!-- EXPLORER -->
+    <div class="page" id="page-explorer">
+      <div class="grid2">
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Wallet Balance (Helius DAS)</span><button class="btn-secondary" onclick="loadDashExplorer()">↺</button></div>
+          <div id="dash-explorer-balances"><div class="loading-state"><span class="spinner"></span>loading balances via Helius DAS…</div></div>
+        </div>
+        <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Live Transactions (Helius WSS)</span><span class="text-dim" id="dash-wss-status">◉ connecting…</span></div>
+          <div id="dash-live-tx" style="max-height:200px;overflow-y:auto"></div>
+          <div id="dash-tx-history"><div class="loading-state"><span class="spinner"></span>loading tx history…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Connection</span></div>
+        <div class="field-group"><div class="field"><label>Bridge URL</label><input type="text" id="api-url-input" value="http://localhost:3777"></div></div>
+        <button class="btn-secondary text-green" onclick="applySettings()">APPLY</button>
+      </div>
+      <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Health</span></div><div id="health-info"><div class="loading-state"><span class="spinner"></span>loading</div></div></div>
+    </div>
+  </main>
+
+  <!-- STATUSBAR -->
+  <footer id="statusbar">
+    <span id="sb-time" class="text-dim">--:--:--</span>
+    <span class="dot dot-dim" id="sb-dot"></span>
+    <span id="sb-bridge">bridge: offline</span>
+    <span class="spacer"></span>
+    <span class="text-dim">ClawdBot OS v2.0 :: Droids Lead The Way</span>
+    <span class="spacer"></span>
+    <span class="text-dim">BRIDGE :3777</span>
+  </footer>
+</div>
+
+<div id="notif-stack"></div>
+<script src="os.js"></script>
+<script src="integrations.js"></script>
+<script>
+// Wire explorer page into main dashboard
+async function loadDashExplorer(){
+  const balEl = document.getElementById('dash-explorer-balances');
+  const txEl = document.getElementById('dash-tx-history');
+  if(balEl) balEl.innerHTML = '<div class="loading-state"><span class="spinner"></span>loading…</div>';
+  const [balances, txHistory] = await Promise.all([
+    typeof getWalletBalances==='function' ? getWalletBalances() : null,
+    typeof getTransactionHistory==='function' ? getTransactionHistory() : null
+  ]);
+  if(balances && balEl) {
+    const nBal = balances.nativeBalance;
+    const solBal = nBal ? (nBal.lamports/1e9).toFixed(4) : '—';
+    const tokens = (balances.items||[]).filter(i=>i.token_info?.price_info?.price_per_token>0).sort((a,b)=>(b.token_info?.price_info?.total_price||0)-(a.token_info?.price_info?.total_price||0)).slice(0,10);
+    const walletDisplay = typeof TRACKED_WALLET !== 'undefined' ? TRACKED_WALLET : 'YOUR_WALLET';
+    balEl.innerHTML = `<div style="padding:10px"><div style="font-size:8px;color:var(--text-dim);margin-bottom:6px;word-break:break-all">WALLET: ${walletDisplay}</div><div class="grid4" style="margin-bottom:10px"><div class="stat-card"><div class="stat-card-label">SOL</div><div class="stat-card-val green">${solBal}</div></div><div class="stat-card"><div class="stat-card-label">Tokens</div><div class="stat-card-val amber">${tokens.length}</div></div></div><table class="data-table"><thead><tr><th>Token</th><th>Balance</th><th>Value</th></tr></thead><tbody>${tokens.map(t=>{const sym=t.content?.metadata?.symbol||t.token_info?.symbol||'???';const bal=t.token_info?.balance&&t.token_info?.decimals!=null?(t.token_info.balance/Math.pow(10,t.token_info.decimals)).toFixed(4):'—';const val=t.token_info?.price_info?.total_price?'$'+t.token_info.price_info.total_price.toFixed(2):'—';return `<tr><td class="text-green">${sym}</td><td>${bal}</td><td>${val}</td></tr>`}).join('')}</tbody></table></div>`;
+  }
+  if(txHistory && txHistory.length && txEl) {
+    txEl.innerHTML = `<table class="data-table"><thead><tr><th>Type</th><th>Description</th><th>Time</th><th>Sig</th></tr></thead><tbody>${txHistory.map(tx=>{const type=tx.type||'UNKNOWN';const desc=(tx.description||'—').slice(0,50);const time=tx.timestamp?new Date(tx.timestamp*1000).toLocaleTimeString():'—';const sig=tx.signature?tx.signature.slice(0,12)+'…':'—';const sigUrl=tx.signature?'https://solscan.io/tx/'+tx.signature:'#';return `<tr><td><span class="tag ${type==='SWAP'?'tag-purple':type==='TRANSFER'?'tag-teal':'tag-green'}">${type}</span></td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</td><td class="text-dim">${time}</td><td><a href="${sigUrl}" target="_blank" class="text-teal" style="text-decoration:none;font-size:9px">${sig}</a></td></tr>`}).join('')}</tbody></table>`;
+  }
+  const wssEl = document.getElementById('dash-wss-status');
+  if(wssEl) wssEl.innerHTML = '◉ <span class="text-green">live</span>';
+  if(typeof onLiveTx==='function'){
+    onLiveTx((tx)=>{
+      const feed=document.getElementById('dash-live-tx');
+      if(!feed)return;
+      const div=document.createElement('div');
+      div.style.cssText='padding:4px 8px;font-size:9px;border-bottom:1px solid var(--border2);display:flex;gap:6px;align-items:center;animation:slideIn .3s ease';
+      div.innerHTML=`<span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span><span class="text-teal">${new Date(tx.time).toLocaleTimeString()}</span><span class="text-green">${tx.signature?.slice(0,16)}…</span><span class="${tx.err?'text-red':'text-dim'}">${tx.err?'FAILED':'confirmed'}</span>`;
+      feed.prepend(div);
+      while(feed.children.length>15)feed.lastChild.remove();
+    });
+  }
+}
+// Auto-load explorer when navigating to it
+const origShowPage = typeof showPage==='function' ? showPage : null;
+if(origShowPage){ window._origShowPage = origShowPage; }
+document.addEventListener('DOMContentLoaded', ()=>{
+  const navBtns = document.querySelectorAll('.nav-btn[data-page="explorer"]');
+  navBtns.forEach(btn=>btn.addEventListener('click',()=>setTimeout(loadDashExplorer,200)));
+});
+</script>
+</body>
+</html>
