@@ -1,7 +1,31 @@
-# ONCHAINAI.md
+# Onchain Model Kit
 
+> The **Onchain Model Kit** is the complete, one-shot pipeline for training, registering, and serving a Solana-native AI model.
+> It ships inside `ai-training/` and includes: a 36K example SFT dataset, LoRA training configs, a 13-tool Solana perps function-calling library (`perps/`), and this onchain registry layer.
+>
 > **Agent skill: Onchain AI Registry** — how to register models, submit training data, create attestations, and query the Clawd onchain AI stack at `onchain.x402.wtf`.
 > Load this document when the user asks about model registration, onchain credentials, the `solana_ai_inference` program, or SAS attestations.
+
+## Kit components
+
+| Component | Location | What it does |
+| --- | --- | --- |
+| Training pipeline | `scripts/` | Dataset prep → LoRA SFT → eval → HF Hub push |
+| Dataset | `data/solana_clawd_merged.jsonl` | 36,109 Solana SFT examples (canonical training input) |
+| Realtime dataset | `scripts/realtime_dataset_ingest.py` | Submit PDFs/JSON/notebooks/parquet/text → `solanaclawd/solana-clawd-realtime-research-instruct` |
+| Perps tool template | `perps/` | 13 Phoenix/Jupiter tools ready for Hermes-3 function calling |
+| Configs | `configs/` | LoRA, CPT, eval configs for Qwen2.5-1.5B and Hermes-3-8B |
+| Onchain registry | `dao/` | Model registration, SAS attestations, DAO governance |
+| Ollama | `ollama/` | Modelfile templates for local serving after weight merge |
+
+One-shot training path:
+
+```bash
+git clone https://github.com/Solizardking/solana-clawd && cd solana-clawd/ai-training
+pip install -r requirements.txt && export HF_TOKEN=hf_...
+./scripts/launch_hf_jobs.sh a100-large        # train on A100 (~$3-6)
+./dao/register_model.sh --hf-model YOUR_ORG/your-model --eval-accuracy 0.60 --dataset-size 36109
+```
 
 ---
 
@@ -146,6 +170,11 @@ await program.methods
 **DataType enum values:** `{ text: {} }` | `{ image: {} }` | `{ audio: {} }` | `{ video: {} }` | `{ tradingData: {} }` | `{ solanaTransactions: {} }` | `{ nftMetadata: {} }` | `{ defiData: {} }`
 
 **From AutoResearch (automatic):** `scripts/auto_research.py` calls this instruction for every research cycle when `--push-to-hub` is set. No manual step needed if the pipeline is running.
+
+**From realtime submissions:** `scripts/realtime_dataset_ingest.py` writes
+`data/realtime_research_dataset_manifest.json` with `dataset_sha256`, source
+SHA256s, row counts, and skipped-record counts. Use that manifest hash when
+registering submitted PDF/JSON/notebook/parquet datasets for attribution.
 
 ---
 
@@ -338,7 +367,7 @@ Each cycle: fetch → summarize → append to JSONL → `submit_data` PDA onchai
 
 ## Decision tree for the agent
 
-```
+```text
 User wants to register a model?
   → No wallet / quick path   → use section 1 (curl)
   → Permanent onchain record → use section 2 (Anchor)

@@ -1,0 +1,49 @@
+# NVIDIA NIM configuration for Clawd agents
+# Set NVIDIA_API_KEY in your environment — never write keys here.
+
+nim:
+  base_url: https://integrate.api.nvidia.com/v1
+  # Override with CLAWD_NIM_URL env var to point at a self-hosted NIM endpoint
+
+models:
+  # Primary reasoning model — Nemotron Nano 30B (fast, cheap, OpenAI-compatible)
+  # Override: NVIDIA_MODEL=nvidia/nemotron-3-ultra-550b-a55b for teacher runs
+  foundation: nvidia/nemotron-3-nano-30b-a3b
+
+  # Super 120B for research / distillation teacher
+  reasoning_teacher: nvidia/nemotron-3-super-120b-a12b
+
+  # Embedding model for RAG (Blueprint 5 — enterprise-rag)
+  embedding: nvidia/nv-embedqa-e5-v5
+
+  # Reranker for RAG
+  reranker: nvidia/nv-rerankqa-mistral-4b-v3
+
+  # Student model (fine-tuned locally, pushed to Hub)
+  student: solanaclawd/solana-clawd-core-ai-1.5b-lora
+
+  # Transaction foundation model (after Blueprint 1 CPT + SFT)
+  tx_foundation: solanaclawd/solana-tx-foundation-1.5b
+
+defaults:
+  max_tokens: 512
+  temperature: 0.1
+  top_p: 0.9
+  seed: 42
+  stream: true
+
+# NIM endpoint after Blueprint 1 CPT fine-tuning completes.
+# Set CLAWD_TX_NIM_URL to override.
+tx_foundation_url: ${CLAWD_TX_NIM_URL:-https://integrate.api.nvidia.com/v1}
+
+# HuggingFace model/dataset IDs published from this pipeline
+hf:
+  org: solanaclawd
+  models:
+    - solanaclawd/solana-clawd-core-ai-1.5b-lora
+    - solanaclawd/solana-tx-foundation-1.5b
+  datasets:
+    - solanaclawd/solana-clawd-core-ai-instruct
+    - solanaclawd/solana-clawd-instruct
+    - solanaclawd/solana-clawd-nvidia-trading-factory-instruct
+    - solanaclawd/solana-tx-foundation-cpt
