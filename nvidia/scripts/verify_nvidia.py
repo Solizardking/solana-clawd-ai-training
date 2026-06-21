@@ -13,14 +13,17 @@ from typing import Iterable
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BASE_DIR / "trading_factory"))
+sys.path.insert(0, str(BASE_DIR / "nvidia" / "integration"))
 
 from solana_factory.factory import build_strategy_bundle  # noqa: E402
 from solana_factory.nvidia_agent import NVIDIA_BLUEPRINTS  # noqa: E402
+from nemo_clawd import write_nemo_clawd_assets  # noqa: E402
 
 
 REQUIRED_FILES = [
     "nvidia/README.md",
     "nvidia/configs/nemo_clawd_factory.yaml",
+    "nvidia/integration/nemo_clawd.py",
     "nvidia/integration/nemo_clawd_agent.py",
     "nvidia/blueprints/aiq/agent.py",
     "nvidia/blueprints/aiq/tools.py",
@@ -116,6 +119,37 @@ def verify_generated_bundle() -> bool:
         return True
 
 
+def verify_nemo_clawd_assets() -> bool:
+    print("[nemo-clawd]")
+    with tempfile.TemporaryDirectory(prefix="solana-clawd-nemoclawd-") as tmpdir:
+        output_dir = Path(tmpdir)
+        assets = write_nemo_clawd_assets(output_dir=output_dir, core_ai_dir=BASE_DIR.parent / "core-ai")
+        inventory_path = assets["inventory_path"]
+        blueprint_path = assets["blueprint_path"]
+        if not inventory_path.exists() or not blueprint_path.exists():
+            print("FAIL Nemo Clawd inventory/blueprint files were not written")
+            return False
+        inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+        blueprint = json.loads(blueprint_path.read_text(encoding="utf-8"))
+        missing = inventory.get("missing_required_paths", [])
+        if missing:
+            print(f"FAIL Core AI inventory missing required paths: {missing}")
+            return False
+        if blueprint.get("slug") != "nemo-clawd":
+            print(f"FAIL unexpected Nemo Clawd slug: {blueprint.get('slug')}")
+            return False
+        if not blueprint.get("network_policy", {}).get("allowed_egress"):
+            print("FAIL Nemo Clawd network policy missing allowed_egress")
+            return False
+        print(
+            "OK   Nemo Clawd inventory + blueprint "
+            f"packages={len(inventory.get('packages', []))} "
+            f"skills={len(inventory.get('skills', []))} "
+            f"mcp_tools={len(inventory.get('mcp_tools', []))}"
+        )
+        return True
+
+
 def verify_secrets() -> bool:
     print("[secrets]")
     paths = [
@@ -139,6 +173,7 @@ def main() -> int:
     args = parser.parse_args()
     ok = verify_files()
     ok = verify_generated_bundle() and ok
+    ok = verify_nemo_clawd_assets() and ok
     ok = verify_secrets() and ok
     if args.strict and not ok:
         return 1
