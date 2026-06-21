@@ -555,16 +555,30 @@ def main() -> None:
             bnb_4bit_use_double_quant=quant_cfg.get("bnb_4bit_use_double_quant", True),
         )
 
+    # MPS: force all layers onto MPS via {"": "mps"} — "auto" causes meta-device
+    # offloading which breaks backward() on Apple Silicon.
+    if device == "mps":
+        _device_map: str | dict = {"": "mps"}
+    elif device == "cpu":
+        _device_map = None
+    else:
+        _device_map = "auto"
+
     model_kwargs: dict[str, Any] = {
         "trust_remote_code": True,
-        "device_map": "auto" if device != "cpu" else None,
+        "device_map": _device_map,
     }
     if device == "cuda":
         model_kwargs["torch_dtype"] = torch.bfloat16 if cfg["training"].get("bf16") else torch.float16
         if bnb_config:
             model_kwargs["quantization_config"] = bnb_config
     elif device == "mps":
-        model_kwargs["torch_dtype"] = torch.bfloat16
+        # With device_map={"": "mps"} (no meta-device splitting), bfloat16 is safe.
+        # Use float32 as default only when bf16 is not explicitly enabled — saves 15GB on 7B.
+        if cfg["training"].get("bf16"):
+            model_kwargs["torch_dtype"] = torch.bfloat16
+        else:
+            model_kwargs["torch_dtype"] = torch.float32
     else:
         model_kwargs["torch_dtype"] = torch.float32
 

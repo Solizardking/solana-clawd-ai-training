@@ -7,8 +7,32 @@
 #   python3 nvidia/blueprints/transaction-foundation-model/pipeline.py --stages sft \
 #       --base-model outputs/solana-tx-foundation-1.5b/cpt
 
+schema_version: "2026-06-21"
+pipeline: solana-transaction-foundation
+release_channel: production
+default_profile: release
+
 base_model: "Qwen/Qwen2.5-1.5B-Instruct"
 output_name: "solana-tx-foundation-1.5b"
+output_dir: "outputs/solana-tx-foundation-1.5b"
+eval_output: "data/tx_foundation_eval.json"
+
+profiles:
+  smoke:
+    max_cpt_examples: 8
+    max_sft_examples: 8
+    cpt_max_steps: 1
+    sft_max_steps: 1
+    max_seq_length: 512
+    batch_size: 1
+    grad_accum: 1
+    push_to_hub: false
+  release:
+    max_cpt_examples: null
+    max_sft_examples: null
+    cpt_max_steps: null
+    sft_max_steps: null
+    push_to_hub: false
 
 # ── Data paths (relative to ai-training/) ─────────────────────────────────────
 cpt_data: "data/tx_foundation_cpt.jsonl"     # CPT records (Jupiter+SFT+BQ)
@@ -40,6 +64,10 @@ max_seq_length: 512       # match pretrain_solana_decoder.yaml seq_length
 cpt_epochs: 1
 learning_rate_cpt: 5.0e-5
 warmup_steps_cpt: 10
+cpt_max_steps: null
+max_cpt_examples: null
+logging_steps_cpt: 10
+save_steps_cpt: 200
 
 # ── SFT hyperparameters ───────────────────────────────────────────────────────
 # Standard SFT on top of CPT checkpoint. Higher LR acceptable since we're
@@ -48,10 +76,26 @@ max_length: 2048          # SFTConfig key (trl >= 0.10)
 sft_epochs: 1
 learning_rate_sft: 1.0e-4
 warmup_steps_sft: 50
+sft_max_steps: null
+max_sft_examples: null
+logging_steps_sft: 25
+save_steps_sft: 500
 batch_size: 2
 grad_accum: 8
 lora_r: 16
 lora_alpha: 32
+lora_dropout: 0.05
+save_total_limit: 2
+bf16: null                 # null = auto: bf16 on CUDA, float32 elsewhere
+gradient_checkpointing: true
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
 
 # ── NeMo decoder pretraining (alternative path) ───────────────────────────────
 # Use this path for the from-scratch NeMo decoder (29M params, Llama arch).
@@ -64,9 +108,40 @@ nemo_data_path: "data/tx_foundation_cpt.jsonl"
 push_to_hub: false
 hub_model_id: "solanaclawd/solana-tx-foundation-1.5b"
 hub_dataset_id: "solanaclawd/solana-tx-foundation-cpt"
+dataset_manifest: "data/tx_foundation_cpt_manifest.json"
+dataset_card: "data/tx_foundation_cpt_dataset_card.md"
+processed_dir: "data/tx_foundation_cpt_processed"
 
 # ── Tokenizer ─────────────────────────────────────────────────────────────────
 # SolanaTokenizerPipeline field types: PROG, IX, MINT, AMT, SLOT, SIDE, STATUS, FEE
 # vocab_size = 4886 (base) + special tokens
 # Source: nvidia/blueprints/transaction-foundation-model/src/tokenizer/solana_tokenizer.py
 tokenizer_vocab_size: 4886
+
+# ── Evaluation and release gates ──────────────────────────────────────────────
+evaluation:
+  eval_dataset: "data/solana_clawd_eval.jsonl"
+  min_avg_score: 0.55
+  require_refusal_alignment: true
+  output: "data/tx_foundation_eval.json"
+
+release_gate:
+  require_preflight: true
+  require_dataset_manifest: true
+  require_model_card: true
+  require_secret_scan: true
+  require_hf_token_for_push: true
+  block_live_execution: true
+
+security:
+  secrets_source: environment
+  persist_secrets: false
+  private_key_policy: never_load
+  google_adc_policy: local_only_never_commit
+  allowed_default_modes: [observer, paper]
+
+publish:
+  hugging_face_org: solanaclawd
+  github: https://github.com/solizardking/solana-clawd-ai-training
+  onchain_registry: https://onchain.x402.wtf
+  ollama_namespace: 8bit

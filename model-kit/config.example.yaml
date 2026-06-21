@@ -47,6 +47,31 @@ training:
   push_to_hub: false
   wandb: false
 
+perps:
+  enabled: true
+  source_dir: ai-training/perps
+  manifest: ai-training/data/model_kit/perps_tool_manifest.json
+  handoff: ai-training/data/perps/nvidia_perps_handoff.json
+  default_market: SOL
+  default_mode: observer
+  threshold: 0.35
+  model: NousResearch/Hermes-3-Llama-3.1-8B
+  adapter: solanaclawd/solana-nvidia-trading-factory-8b-lora
+  tools:
+    - get_sol_price
+    - get_token_price
+    - get_perp_markets
+    - get_funding_rate
+    - get_orderbook
+    - check_positions
+    - check_sol_balance
+    - get_jupiter_quote
+    - paper_trade
+    - get_market_overview
+    - get_trader_history
+    - send_sol
+    - assess_position_risk
+
 publishing:
   ollama_namespace: 8bit
   default_endpoint: https://clawd-box-router.fly.dev/v1
@@ -59,3 +84,4 @@ safety:
   never_write_env_tokens: true
   secret_scan_before_upload: true
   live_trading: disabled
+  perps_live_env_requires_yes: true

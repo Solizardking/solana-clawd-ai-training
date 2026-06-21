@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solana AI Model Kit</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="topbar" aria-label="Model kit navigation">
+        <a class="brand" href="../README.md">
+          <span class="brand-mark">CAAP</span>
+          <span>Solana AI Model Kit</span>
+        </a>
+        <div class="nav-links">
+          <a href="https://onchain.x402.wtf">onchain.x402.wtf</a>
+          <a href="https://github.com/solizardking/solana-clawd-ai-training">GitHub</a>
+          <a href="https://huggingface.co/solanaclawd">Hugging Face</a>
+        </div>
+      </nav>
+
+      <section class="workspace">
+        <aside class="command-panel" aria-label="Command builder">
+          <div class="panel-head">
+            <p class="eyebrow">Terminal control</p>
+            <h1>Build a Solana training run</h1>
+          </div>
+
+          <label class="field">
+            <span>Lane</span>
+            <select id="lane">
+              <option value="custom">Custom dataset</option>
+              <option value="core-ai">Core AI</option>
+              <option value="trading-factory">NVIDIA trading factory</option>
+              <option value="perps">Perps tools</option>
+              <option value="tx-foundation">Transaction foundation</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Input paths</span>
+            <textarea id="inputs" rows="5">ai-training/data/incoming</textarea>
+          </label>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Dataset repo</span>
+              <input id="datasetRepo" value="solanaclawd/solana-clawd-realtime-research-instruct" />
+            </label>
+            <label class="field">
+              <span>Model repo</span>
+              <input id="modelRepo" value="solanaclawd/solana-clawd-custom-lora" />
+            </label>
+          </div>
+
+          <div class="switches" aria-label="Pipeline options">
+            <label><input id="pushDataset" type="checkbox" /> Push dataset</label>
+            <label><input id="train" type="checkbox" /> Train adapter</label>
+            <label><input id="remoteTrain" type="checkbox" /> HF Job</label>
+            <label><input id="pushModel" type="checkbox" /> Push model</label>
+            <label><input id="register" type="checkbox" /> Register</label>
+            <label><input id="liveRegister" type="checkbox" /> Live registry</label>
+            <label><input id="yes" type="checkbox" /> Allow side effects</label>
+          </div>
+
+          <div class="actions">
+            <button id="generate" type="button">Generate</button>
+            <button id="copy" type="button">Copy</button>
+          </div>
+        </aside>
+
+        <section class="main-stage">
+          <div class="hero-visual" aria-label="Model kit pipeline graphic">
+            <img src="../../../assets/solana-ai-model-kit.svg" alt="Solana AI Model Kit pipeline" />
+          </div>
+
+          <div class="status-grid" aria-label="Connected resources">
+            <article class="metric accent-green">
+              <span>Core dataset</span>
+              <strong>35,173</strong>
+              <a href="https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct">HF dataset</a>
+            </article>
+            <article class="metric accent-cyan">
+              <span>Research dataset</span>
+              <strong>29,058</strong>
+              <a href="https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct">HF dataset</a>
+            </article>
+            <article class="metric accent-violet">
+              <span>Trading factory</span>
+              <strong>195</strong>
+              <a href="https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct">HF dataset</a>
+            </article>
+            <article class="metric accent-red">
+              <span>Perps tools</span>
+              <strong>13</strong>
+              <a href="../docs/PERPS.md">tool lane</a>
+            </article>
+            <article class="metric accent-gold">
+              <span>Registry</span>
+              <strong>CAAP/1.0</strong>
+              <a href="https://onchain.x402.wtf/.well-known/clawd-registry.json">well-known</a>
+            </article>
+          </div>
+
+          <section class="terminal" aria-label="Generated terminal command">
+            <div class="terminal-bar">
+              <span></span>
+              <span></span>
+              <span></span>
+              <p>clawd-model-kit</p>
+            </div>
+            <pre id="commandOutput"></pre>
+          </section>
+
+          <section class="blueprints" aria-label="NVIDIA blueprint lanes">
+            <header>
+              <p class="eyebrow">NVIDIA lanes</p>
+              <h2>Blueprint adapters</h2>
+            </header>
+            <div class="blueprint-list">
+              <div><strong>Transaction FM</strong><span>Solana tx JSONL to decoder/pretraining data</span></div>
+              <div><strong>Distillation</strong><span>Nemotron/Hermes teacher to Clawd student</span></div>
+              <div><strong>Enterprise RAG</strong><span>nv-ingest, retrieval, rerank, generation</span></div>
+              <div><strong>Signal discovery</strong><span>Phoenix/Vulcan paper-mode signal loops</span></div>
+              <div><strong>Portfolio</strong><span>Mean-CVaR cuFOLIO and CVXPY fallback</span></div>
+              <div><strong>AI-Q</strong><span>Safety, completeness, and role coverage scoring</span></div>
+              <div><strong>Perps tools</strong><span>Hermes function calls for Phoenix, Jupiter, Solana RPC, and risk checks</span></div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script src="./app.js"></script>
+  </body>
+</html>

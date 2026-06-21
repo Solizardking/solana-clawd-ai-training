@@ -11,6 +11,7 @@ outputs/
 data/*.jsonl
 data/*_processed/
 data/incoming/
+data/model_kit/
 data/perps/
 data/strategies/
 
@@ -43,3 +44,5 @@ runs/
 .cache/
 data/docai_cache/
 data/nvidia_cache/
+data/processed/
+ollama/build/

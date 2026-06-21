@@ -88,6 +88,7 @@ Side effects are gated:
 | `docs/HUGGING_FACE.md` | HF CLI, upload, and Jobs guide. |
 | `docs/UNSLOTH.md` | Optional Unsloth local training guide. |
 | `docs/NVIDIA_BLUEPRINTS.md` | NVIDIA blueprint mapping. |
+| `docs/PERPS.md` | Solana perps tool lane and function-calling guide. |
 | `docs/ONCHAIN_X402.md` | Registry and CAAP handoff. |
 | `docs/SECURITY.md` | Release and credential safety contract. |
 
@@ -110,6 +111,7 @@ ai-training/model-kit/bin/clawd-model-kit --help
 | `register` | Dry-run or live-register CAAP/1.0 metadata. |
 | `ollama` | Build/push preview or fine-tuned Ollama models. |
 | `nvidia` | Run NVIDIA verifier, AI-Q scoring, or NemoClawd factory plan generation. |
+| `perps` | Inspect tools, write perps manifests, create NVIDIA handoffs, or run the function-calling agent. |
 | `ui` | Serve the static frontend console. |
 
 ## Supported Data
@@ -140,7 +142,10 @@ uploads.
 | Core AI dataset | `solanaclawd/solana-clawd-core-ai-instruct` | 35,173 examples |
 | Realtime research dataset | `solanaclawd/solana-clawd-realtime-research-instruct` | 29,058 examples |
 | NVIDIA trading factory dataset | `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | 142 examples, 127/7/8 splits |
+| Transaction foundation CPT dataset | `solanaclawd/solana-tx-foundation-cpt` | 19,542 examples, text CPT format |
+| Perps tool manifest | `data/model_kit/perps_tool_manifest.json` | 13 model-facing Solana/Phoenix/Jupiter tools |
 | Core 1.5B LoRA | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | Core AI adapter lane |
+| Solana TX Foundation 1.5B | `solanaclawd/solana-tx-foundation-1.5b` | Transaction CPT -> SFT lane |
 | Trading factory 8B LoRA | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | Completed HF job `ordlibrary/6a35a2ce953ed90bfb945009` |
 
 ## One-Shot Examples
@@ -220,7 +225,37 @@ ai-training/model-kit/bin/clawd-model-kit register \
 ai-training/model-kit/bin/clawd-model-kit nvidia verify --strict
 ai-training/model-kit/bin/clawd-model-kit nvidia strategies
 ai-training/model-kit/bin/clawd-model-kit nvidia aiq --strict
+ai-training/model-kit/bin/clawd-model-kit train --lane tx-foundation --train-dry-run
+ai-training/model-kit/bin/clawd-model-kit nvidia tx-preflight --strict
+ai-training/model-kit/bin/clawd-model-kit train --lane tx-foundation --remote --yes
+ai-training/model-kit/bin/clawd-model-kit nvidia tx-foundation --strict
 ```
+
+For remote transaction jobs, a `402 Payment Required` response means the
+authenticated Hugging Face account needs Jobs credits. After launch, watch with:
+
+```bash
+cd ai-training
+bash scripts/watch_transaction_foundation_hf_job.sh <JOB_ID>
+```
+
+## Perps Tool Lane
+
+The model kit bakes in the source perps tools from `ai-training/perps/`:
+`functions.py`, `functioncall.py`, `nvidia_perps.py`, `prompter.py`, `schema.py`,
+and `README.md`. Generated `__pycache__/` files are ignored.
+
+```bash
+ai-training/model-kit/bin/clawd-model-kit perps tools
+ai-training/model-kit/bin/clawd-model-kit perps tools --write --json
+ai-training/model-kit/bin/clawd-model-kit perps handoff --market SOL --mode observer
+ai-training/model-kit/bin/clawd-model-kit perps agent \
+  --query "Assess the risk of long SOL-PERP 500 USDC at 2x"
+```
+
+Perps commands stay observer/paper-first. If `LIVE_TRADING=true` is present in
+the environment, the model-kit wrapper refuses perps agent/handoff execution
+unless `--allow-live-env --yes` is explicitly supplied.
 
 ## Unsloth And Ollama
 

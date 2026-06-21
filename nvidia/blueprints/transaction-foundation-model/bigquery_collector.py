@@ -25,8 +25,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).parents[4]
-DATA = ROOT / "data"
+from tx_foundation_common import DATA_DIR as DATA
+
 BQ_DATASET  = "bigquery-public-data.crypto_solana_mainnet_us"
 GCP_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "x402-477302")
 WRAP = "<tx_context>\n{}\n</tx_context>"

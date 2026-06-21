@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import importlib.util
 import json
 import os
 import re
@@ -17,7 +18,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 MODEL_KIT_DIR = Path(__file__).resolve().parent
@@ -30,6 +31,7 @@ DEFAULT_DATASET_NAME = "Solana Clawd Model Kit Instruct"
 DEFAULT_OUTPUT_PREFIX = "data/model_kit/model_kit"
 DEFAULT_ENDPOINT = "https://clawd-box-router.fly.dev/v1"
 DEFAULT_REGISTRY = "https://onchain.x402.wtf"
+DEFAULT_PERPS_MANIFEST = "data/model_kit/perps_tool_manifest.json"
 
 LANES = {
     "custom": {
@@ -52,6 +54,20 @@ LANES = {
         "hub_model_id": "solanaclawd/solana-nvidia-trading-factory-8b-lora",
         "base_model": "NousResearch/Hermes-3-Llama-3.1-8B",
         "dataset_size": "142",
+    },
+    "perps": {
+        "config": "configs/nvidia_trading_factory_lora_config.yaml",
+        "dataset_repo": "solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+        "hub_model_id": "solanaclawd/solana-clawd-perps-tools-lora",
+        "base_model": "NousResearch/Hermes-3-Llama-3.1-8B",
+        "dataset_size": "195",
+    },
+    "tx-foundation": {
+        "config": "nvidia/configs/solana_tx_foundation.yaml",
+        "dataset_repo": "solanaclawd/solana-tx-foundation-cpt",
+        "hub_model_id": "solanaclawd/solana-tx-foundation-1.5b",
+        "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+        "dataset_size": "19542",
     },
 }
 
@@ -191,6 +207,11 @@ def load_manifest(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def dataset_size_from_manifest(path: Path, fallback: str = "0") -> str:
     manifest = load_manifest(path)
     counts = manifest.get("counts") or {}
@@ -233,6 +254,90 @@ def fail_on_secret_findings(paths: Iterable[Path]) -> None:
     if findings:
         details = "\n".join(f"  - {path}: {kind}" for path, kind in findings[:20])
         raise KitError(f"secret-like patterns found:\n{details}\nRotate any real credential before publishing.")
+
+
+def load_perps_functions_module():
+    module_path = AI_TRAINING_DIR / "perps" / "functions.py"
+    spec = importlib.util.spec_from_file_location("clawd_perps_functions", module_path)
+    if spec is None or spec.loader is None:
+        raise KitError(f"could not load perps functions module: {rel(module_path)}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def perps_tool_catalog() -> list[dict[str, Any]]:
+    module = load_perps_functions_module()
+    return list(module.get_openai_tools())
+
+
+def perps_source_files() -> list[Path]:
+    return [
+        AI_TRAINING_DIR / "perps" / "README.md",
+        AI_TRAINING_DIR / "perps" / "functions.py",
+        AI_TRAINING_DIR / "perps" / "functioncall.py",
+        AI_TRAINING_DIR / "perps" / "nvidia_perps.py",
+        AI_TRAINING_DIR / "perps" / "prompter.py",
+        AI_TRAINING_DIR / "perps" / "schema.py",
+    ]
+
+
+def build_perps_manifest(market: str, mode: str, threshold: float) -> dict[str, Any]:
+    tools = perps_tool_catalog()
+    return {
+        "name": "Solana Clawd Model Kit Perps Tools",
+        "generated_at": dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat(),
+        "tool_count": len(tools),
+        "tools": [
+            {
+                "name": tool["function"]["name"],
+                "description": tool["function"].get("description", ""),
+                "parameters": tool["function"].get("parameters", {}),
+            }
+            for tool in tools
+        ],
+        "source_files": {
+            path.name: rel(path)
+            for path in perps_source_files()
+        },
+        "handoff": {
+            "script": "perps/nvidia_perps.py",
+            "default_market": market,
+            "default_mode": mode,
+            "threshold": threshold,
+            "output": "data/perps/nvidia_perps_handoff.json",
+        },
+        "agent": {
+            "script": "perps/functioncall.py",
+            "default_model": "NousResearch/Hermes-3-Llama-3.1-8B",
+            "local_adapter_env": "HERMES_ADAPTER",
+            "router_token_env": "HF_TOKEN",
+        },
+        "safety": {
+            "default_modes": ["observer", "paper"],
+            "live_trading_env": "LIVE_TRADING",
+            "live_trading_default": False,
+            "wallet_keypair_env": "AGENT_WALLET_KEYPAIR",
+            "private_key_policy": "never write or read private keys through model-kit manifests",
+            "side_effect_gate": "--allow-live-env --yes is required if LIVE_TRADING=true is present",
+        },
+    }
+
+
+def resolve_ai_path(raw: str | Path) -> Path:
+    path = Path(raw).expanduser()
+    if path.is_absolute():
+        return path
+    return AI_TRAINING_DIR / path
+
+
+def guard_perps_live_env(args: argparse.Namespace) -> None:
+    live_env = os.environ.get("LIVE_TRADING", "false").lower() == "true"
+    if not live_env:
+        return
+    if not getattr(args, "allow_live_env", False):
+        raise KitError("Refusing perps command while LIVE_TRADING=true. Unset LIVE_TRADING or pass --allow-live-env --yes after review.")
+    require_yes(args, "perps command with LIVE_TRADING=true")
 
 
 def lane_defaults(lane: str) -> dict[str, str]:
@@ -282,6 +387,11 @@ def build_ingest_command(args: argparse.Namespace) -> tuple[list[str | Path], di
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
+    perps_tools_count = 0
+    try:
+        perps_tools_count = len(perps_tool_catalog())
+    except Exception:
+        perps_tools_count = 0
     checks = {
         "repo_root": REPO_ROOT.exists(),
         "ai_training": (AI_TRAINING_DIR / "scripts" / "realtime_dataset_ingest.py").exists(),
@@ -295,6 +405,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         "hf_token_present": env_present("HF_TOKEN"),
         "model_kit_frontend": (MODEL_KIT_DIR / "frontend" / "index.html").exists(),
         "onchain_docs": (AI_TRAINING_DIR / "onchain.md").exists(),
+        "perps_functions": (AI_TRAINING_DIR / "perps" / "functions.py").exists(),
+        "perps_agent": (AI_TRAINING_DIR / "perps" / "functioncall.py").exists(),
+        "perps_tool_count": perps_tools_count >= 13,
+        "perps_handoff": (AI_TRAINING_DIR / "data" / "perps" / "nvidia_perps_handoff.json").exists(),
     }
     if args.json:
         print(json.dumps(checks, indent=2))
@@ -310,6 +424,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     dirs = [
         AI_TRAINING_DIR / "data" / "incoming",
         AI_TRAINING_DIR / "data" / "model_kit",
+        AI_TRAINING_DIR / "data" / "perps",
         AI_TRAINING_DIR / "outputs" / "model_kit",
     ]
     for path in dirs:
@@ -376,6 +491,38 @@ def cmd_verify(args: argparse.Namespace) -> int:
 
 def cmd_train(args: argparse.Namespace) -> int:
     lane = lane_defaults(args.lane)
+    if args.lane == "tx-foundation":
+        if args.remote:
+            require_yes(args, "remote transaction foundation HF Jobs training")
+            return run(["bash", "scripts/launch_transaction_foundation_hf_job.sh", args.flavor, args.timeout], dry_run=args.dry_run)
+        if args.push:
+            require_yes(args, "transaction foundation model push")
+        cmd: list[str | Path] = [
+            PYTHON,
+            "nvidia/blueprints/transaction-foundation-model/pipeline.py",
+            "--config",
+            args.config or lane["config"],
+            "--stages",
+            "cpt",
+            "sft",
+        ]
+        if args.train_dry_run:
+            cmd.append("--dry-run")
+        rc = run(cmd, dry_run=args.dry_run)
+        if args.push:
+            return run(
+                [
+                    PYTHON,
+                    "nvidia/blueprints/transaction-foundation-model/pipeline.py",
+                    "--config",
+                    args.config or lane["config"],
+                    "--stages",
+                    "push",
+                ],
+                dry_run=args.dry_run,
+            )
+        return rc
+
     if args.remote:
         require_yes(args, "remote Hugging Face Jobs training")
         script = "scripts/launch_trading_factory_hf_job.sh" if args.lane == "trading-factory" else "scripts/launch_core_ai_hf_job.sh"
@@ -496,7 +643,77 @@ def cmd_nvidia(args: argparse.Namespace) -> int:
     if args.action == "strategies":
         run([PYTHON, "scripts/build_solana_trading_factory_strategies.py"], dry_run=args.dry_run)
         return run([PYTHON, "nvidia/integration/nemo_clawd_agent.py", "--mode", "paper"], dry_run=args.dry_run)
+    if args.action == "tx-foundation":
+        cmd = [PYTHON, "nvidia/blueprints/transaction-foundation-model/post_train.py"]
+        if args.strict:
+            cmd.extend(["--bundle", "--register"])
+        return run(cmd, dry_run=args.dry_run)
+    if args.action == "tx-preflight":
+        cmd = [PYTHON, "nvidia/blueprints/transaction-foundation-model/preflight.py"]
+        if args.strict:
+            cmd.append("--run-smoke-dry-run")
+        return run(cmd, dry_run=args.dry_run)
     raise KitError(f"unknown NVIDIA action: {args.action}")
+
+
+def cmd_perps(args: argparse.Namespace) -> int:
+    if args.action in {"agent", "handoff"}:
+        guard_perps_live_env(args)
+
+    if args.action in {"tools", "manifest"}:
+        manifest = build_perps_manifest(args.market, args.mode, args.threshold)
+        if args.write or args.action == "manifest":
+            output = resolve_ai_path(args.output)
+            if not args.dry_run:
+                write_json(output, manifest)
+            info(f"perps manifest: {rel(output)}")
+        if args.json or args.action == "manifest":
+            print(json.dumps(manifest, indent=2, sort_keys=True))
+        else:
+            print(f"Perps tools: {manifest['tool_count']}")
+            for tool in manifest["tools"]:
+                print(f"- {tool['name']}: {tool['description'][:96]}")
+        return 0
+
+    if args.action == "handoff":
+        cmd: list[str | Path] = [
+            PYTHON,
+            "perps/nvidia_perps.py",
+            "--market",
+            args.market,
+            "--mode",
+            args.mode,
+            "--threshold",
+            str(args.threshold),
+            "--output",
+            args.handoff_output,
+        ]
+        if args.tick:
+            cmd.append("--tick")
+        return run(cmd, dry_run=args.dry_run)
+
+    if args.action == "agent":
+        cmd = [
+            PYTHON,
+            "perps/functioncall.py",
+            "--query",
+            args.query,
+            "--max-depth",
+            str(args.max_depth),
+        ]
+        if args.wallet:
+            cmd.extend(["--wallet", args.wallet])
+        if args.local:
+            cmd.append("--local")
+        if args.adapter:
+            cmd.extend(["--adapter", args.adapter])
+        if args.goap:
+            cmd.append("--goap")
+        if args.verbose:
+            cmd.append("--verbose")
+        return run(cmd, dry_run=args.dry_run)
+
+    raise KitError(f"unknown perps action: {args.action}")
 
 
 def cmd_one_shot(args: argparse.Namespace) -> int:
@@ -728,9 +945,30 @@ def build_parser() -> argparse.ArgumentParser:
 
     nvidia = sub.add_parser("nvidia", help="Run NVIDIA blueprint helpers")
     add_common(nvidia)
-    nvidia.add_argument("action", choices=["verify", "aiq", "strategies"])
+    nvidia.add_argument("action", choices=["verify", "aiq", "strategies", "tx-foundation", "tx-preflight"])
     nvidia.add_argument("--strict", action="store_true")
     nvidia.set_defaults(func=cmd_nvidia)
+
+    perps = sub.add_parser("perps", help="Inspect or run the baked-in Solana perps tool lane")
+    add_common(perps)
+    perps.add_argument("action", choices=["tools", "manifest", "handoff", "agent"])
+    perps.add_argument("--market", default="SOL")
+    perps.add_argument("--mode", choices=["observer", "paper"], default="observer")
+    perps.add_argument("--threshold", type=float, default=0.35)
+    perps.add_argument("--output", default=DEFAULT_PERPS_MANIFEST, help="Model-kit perps manifest output")
+    perps.add_argument("--handoff-output", default="data/perps/nvidia_perps_handoff.json")
+    perps.add_argument("--query", default="What is the SOL price and Phoenix perp funding rate?")
+    perps.add_argument("--wallet", default="")
+    perps.add_argument("--max-depth", type=int, default=5)
+    perps.add_argument("--local", action="store_true")
+    perps.add_argument("--adapter")
+    perps.add_argument("--goap", action="store_true")
+    perps.add_argument("--verbose", "-v", action="store_true")
+    perps.add_argument("--tick", action="store_true", help="Run one observer/paper signal tick for handoff")
+    perps.add_argument("--write", action="store_true", help="Write manifest when action=tools")
+    perps.add_argument("--json", action="store_true")
+    perps.add_argument("--allow-live-env", action="store_true", help="Permit running when LIVE_TRADING=true is set; also requires --yes")
+    perps.set_defaults(func=cmd_perps)
 
     ui = sub.add_parser("ui", help="Serve or print the static model-kit console")
     add_common(ui)

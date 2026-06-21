@@ -3,6 +3,11 @@
 This folder integrates six NVIDIA AI Blueprints and the cuFOLIO portfolio
 optimization library into the Solana Clawd AI training pipeline.
 
+## Organization
+
+The bridge modules are mapped in [`integration/README.md`](integration/README.md).
+The full training workspace map is in [`../STRUCTURE.md`](../STRUCTURE.md).
+
 ## Blueprints
 
 | Folder | What it does |
@@ -182,13 +187,15 @@ Run the local NVIDIA verifier from `ai-training/`:
 
 ```bash
 python3 nvidia/scripts/verify_nvidia.py --strict
+python3 nvidia/scripts/validate_configs.py --strict
 python3 nvidia/blueprints/aiq/agent.py --strict
 ```
 
 `verify_nvidia.py` checks that all six blueprint folders exist, builds the
 Solana strategy bundle in a temporary directory, confirms the NemoClawd agent
 plan is emitted, confirms the Nemo Clawd Core AI inventory and blueprint can be
-generated, and scans the NVIDIA integration files for credential-like patterns.
+generated, validates the NVIDIA YAML config contracts, and scans the NVIDIA
+integration files for credential-like patterns.
 
 ## Folder layout
 
