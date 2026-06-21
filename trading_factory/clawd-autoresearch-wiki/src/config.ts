@@ -46,6 +46,15 @@ export const config = {
     model: env('OPENROUTER_MODEL', 'openai/gpt-5.4'),
   },
 
+  // ── Clawd Models ──────────────────────────────────────
+  clawd: {
+    provider: env('CLAWD_MODEL_PROVIDER', 'ollama'),
+    model: env('CLAWD_MODEL', '8bit/solana-clawd-core-ai'),
+    tradingModel: env('CLAWD_TRADING_MODEL', '8bit/solana-trading-factory'),
+    ollamaUrl: env('CLAWD_OLLAMA_URL', 'http://localhost:11434/v1'),
+    hfToken: env('HF_TOKEN', ''),
+  },
+
   // ── Data Sources ──────────────────────────────────────
   helius: {
     apiKey: env('HELIUS_API_KEY', ''),

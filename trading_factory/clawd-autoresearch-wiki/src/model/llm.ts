@@ -1,12 +1,15 @@
 /**
- * OpenRouter LLM Client — GPT-5.4 with Reasoning
+ * LLM Client — Multi-provider: OpenRouter, Ollama, HF Router
  *
- * Routes through OpenRouter API using the OpenAI SDK.
- * Supports reasoning (chain-of-thought) for improved trading decisions.
- * Preserves reasoning_details across multi-turn conversations.
+ * Provider is selected via CLAWD_MODEL_PROVIDER env var:
+ *   openrouter  (default) — OpenRouter.ai, any model
+ *   ollama                — local Ollama (8bit/solana-clawd-core-ai, 8bit/solana-trading-factory)
+ *   hf-router             — HuggingFace Router (solanaclawd/* models)
+ *
+ * callLlm()    — generic call, uses DEFAULT_PROVIDER
+ * callClawd()  — Solana-specific call, always routes to a Clawd model
  */
 
-import OpenAI from "openai";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
@@ -19,11 +22,12 @@ export interface TokenUsage {
 export interface LlmMessage {
   role: "user" | "assistant" | "system";
   content: string;
-  reasoning_details?: unknown; // Preserved from GPT-5.4 reasoning
+  reasoning_details?: unknown;
 }
 
 export interface LlmCallOptions {
   model?: string;
+  provider?: ModelProvider;
   systemPrompt?: string;
   reasoning?: boolean;
   maxTokens?: number;
@@ -38,169 +42,159 @@ export interface LlmResult {
   rawMessage?: unknown;
 }
 
-// ── Client ────────────────────────────────────────────────────────────
+// ── Provider registry ─────────────────────────────────────────────────
 
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL ?? "openai/gpt-5.4";
+export type ModelProvider = "openrouter" | "ollama" | "hf-router";
 
-let _client: OpenAI | null = null;
+const DEFAULT_PROVIDER: ModelProvider =
+  (process.env.CLAWD_MODEL_PROVIDER as ModelProvider) ?? "openrouter";
 
-function getClient(): OpenAI {
-  if (!_client) {
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) throw new Error("Missing OPENROUTER_API_KEY env var");
-    _client = new OpenAI({
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey,
+const PROVIDER_BASES: Record<ModelProvider, string> = {
+  openrouter:  "https://openrouter.ai/api/v1",
+  ollama:      process.env.CLAWD_OLLAMA_URL ?? "http://localhost:11434/v1",
+  "hf-router": "https://router.huggingface.co/v1",
+};
+
+// Default model per provider (overridable via CLAWD_MODEL / OPENROUTER_MODEL)
+const PROVIDER_DEFAULT_MODELS: Record<ModelProvider, string> = {
+  openrouter:  process.env.OPENROUTER_MODEL ?? "openai/gpt-5.4",
+  ollama:      process.env.CLAWD_MODEL ?? "8bit/solana-clawd-core-ai",
+  "hf-router": process.env.CLAWD_MODEL ?? "solanaclawd/solana-clawd-core-ai-1.5b-lora",
+};
+
+// Trading-specific model per provider
+const TRADING_MODELS: Record<ModelProvider, string> = {
+  openrouter:  process.env.OPENROUTER_MODEL ?? "openai/gpt-5.4",
+  ollama:      process.env.CLAWD_TRADING_MODEL ?? "8bit/solana-trading-factory",
+  "hf-router": process.env.CLAWD_TRADING_MODEL ?? "solanaclawd/solana-nvidia-trading-factory-8b-lora",
+};
+
+// ── Core call helper ──────────────────────────────────────────────────
+
+async function _call(
+  messages: Array<Record<string, unknown>>,
+  options: LlmCallOptions & { resolvedModel: string; resolvedProvider: ModelProvider }
+): Promise<LlmResult> {
+  const { resolvedModel, resolvedProvider, reasoning, maxTokens, temperature, signal } = options;
+
+  // Reasoning only supported on OpenRouter (GPT-5.4 / Claude)
+  const useReasoning = reasoning ?? (resolvedProvider === "openrouter");
+
+  const body: Record<string, unknown> = {
+    model: resolvedModel,
+    messages,
+    max_tokens: maxTokens ?? 2048,
+  };
+  if (useReasoning) body.reasoning = { enabled: true };
+  if (temperature !== undefined) body.temperature = temperature;
+
+  const result = await withRetry(async () => {
+    const url = `${PROVIDER_BASES[resolvedProvider]}/chat/completions`;
+    const apiKey =
+      resolvedProvider === "openrouter" ? process.env.OPENROUTER_API_KEY :
+      resolvedProvider === "hf-router"  ? process.env.HF_TOKEN :
+      "ollama";
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: signal ?? AbortSignal.timeout(120_000),
     });
-  }
-  return _client;
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`[${resolvedProvider}] HTTP ${res.status}: ${text}`);
+    }
+
+    return (await res.json()) as Record<string, unknown>;
+  });
+
+  const choices = result.choices as Array<{ message: Record<string, unknown> }>;
+  const msg = choices?.[0]?.message;
+  const usage = result.usage as
+    | { prompt_tokens: number; completion_tokens: number; total_tokens: number }
+    | undefined;
+
+  return {
+    content: (msg?.content as string) ?? "",
+    reasoning_details: msg?.reasoning_details,
+    usage: usage
+      ? {
+          inputTokens: usage.prompt_tokens,
+          outputTokens: usage.completion_tokens,
+          totalTokens: usage.total_tokens,
+        }
+      : undefined,
+    rawMessage: msg,
+  };
 }
 
-// ── Single Call ───────────────────────────────────────────────────────
+// ── Public API ────────────────────────────────────────────────────────
 
+/** Generic LLM call — uses DEFAULT_PROVIDER (CLAWD_MODEL_PROVIDER env var). */
 export async function callLlm(
   prompt: string,
   options: LlmCallOptions = {}
 ): Promise<LlmResult> {
-  const client = getClient();
-  const model = options.model ?? DEFAULT_MODEL;
-  const reasoning = options.reasoning ?? true;
+  const provider = options.provider ?? DEFAULT_PROVIDER;
+  const model = options.model ?? PROVIDER_DEFAULT_MODELS[provider];
 
   const messages: Array<{ role: string; content: string }> = [];
-
-  if (options.systemPrompt) {
-    messages.push({ role: "system", content: options.systemPrompt });
-  }
+  if (options.systemPrompt) messages.push({ role: "system", content: options.systemPrompt });
   messages.push({ role: "user", content: prompt });
 
-  const body: Record<string, unknown> = {
-    model,
-    messages,
-    max_tokens: options.maxTokens ?? 2048,
-  };
-
-  if (reasoning) {
-    body.reasoning = { enabled: true };
-  }
-  if (options.temperature !== undefined) {
-    body.temperature = options.temperature;
-  }
-
-  const result = await withRetry(async () => {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-      signal: options.signal ?? AbortSignal.timeout(60_000),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`OpenRouter HTTP ${res.status}: ${text}`);
-    }
-
-    return (await res.json()) as Record<string, unknown>;
-  });
-
-  const choices = result.choices as Array<{ message: Record<string, unknown> }>;
-  const msg = choices?.[0]?.message;
-  const usage = result.usage as
-    | { prompt_tokens: number; completion_tokens: number; total_tokens: number }
-    | undefined;
-
-  return {
-    content: (msg?.content as string) ?? "",
-    reasoning_details: msg?.reasoning_details,
-    usage: usage
-      ? {
-          inputTokens: usage.prompt_tokens,
-          outputTokens: usage.completion_tokens,
-          totalTokens: usage.total_tokens,
-        }
-      : undefined,
-    rawMessage: msg,
-  };
+  return _call(messages, { ...options, resolvedModel: model, resolvedProvider: provider });
 }
 
-// ── Multi-Turn with Reasoning Preservation ───────────────────────────
-
+/** Multi-turn call with reasoning preservation. */
 export async function callLlmMultiTurn(
   messages: LlmMessage[],
   options: LlmCallOptions = {}
 ): Promise<LlmResult> {
-  const model = options.model ?? DEFAULT_MODEL;
-  const reasoning = options.reasoning ?? true;
+  const provider = options.provider ?? DEFAULT_PROVIDER;
+  const model = options.model ?? PROVIDER_DEFAULT_MODELS[provider];
 
-  // Build the message array, preserving reasoning_details from prior turns
   const apiMessages = messages.map((m) => {
-    const msg: Record<string, unknown> = {
-      role: m.role,
-      content: m.content,
-    };
-    if (m.reasoning_details) {
-      msg.reasoning_details = m.reasoning_details;
-    }
+    const msg: Record<string, unknown> = { role: m.role, content: m.content };
+    if (m.reasoning_details) msg.reasoning_details = m.reasoning_details;
     return msg;
   });
 
-  const body: Record<string, unknown> = {
-    model,
-    messages: apiMessages,
-    max_tokens: options.maxTokens ?? 2048,
-  };
+  return _call(apiMessages, { ...options, resolvedModel: model, resolvedProvider: provider });
+}
 
-  if (reasoning) {
-    body.reasoning = { enabled: true };
-  }
+/**
+ * Solana-specific call — routes to a Clawd model.
+ * Defaults to CLAWD_MODEL_PROVIDER for provider, falls back to ollama.
+ * Use `trading: true` to route to the trading-factory model.
+ */
+export async function callClawd(
+  prompt: string,
+  options: LlmCallOptions & { trading?: boolean } = {}
+): Promise<LlmResult> {
+  const provider = options.provider ?? (DEFAULT_PROVIDER !== "openrouter" ? DEFAULT_PROVIDER : "ollama");
+  const modelMap = options.trading ? TRADING_MODELS : PROVIDER_DEFAULT_MODELS;
+  const model = options.model ?? modelMap[provider];
 
-  const result = await withRetry(async () => {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-      signal: options.signal ?? AbortSignal.timeout(60_000),
-    });
+  const messages: Array<{ role: string; content: string }> = [];
+  if (options.systemPrompt) messages.push({ role: "system", content: options.systemPrompt });
+  messages.push({ role: "user", content: prompt });
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`OpenRouter HTTP ${res.status}: ${text}`);
-    }
-
-    return (await res.json()) as Record<string, unknown>;
+  return _call(messages, {
+    ...options,
+    reasoning: false, // local models don't support OpenRouter reasoning format
+    resolvedModel: model,
+    resolvedProvider: provider,
   });
-
-  const choices = result.choices as Array<{ message: Record<string, unknown> }>;
-  const msg = choices?.[0]?.message;
-  const usage = result.usage as
-    | { prompt_tokens: number; completion_tokens: number; total_tokens: number }
-    | undefined;
-
-  return {
-    content: (msg?.content as string) ?? "",
-    reasoning_details: msg?.reasoning_details,
-    usage: usage
-      ? {
-          inputTokens: usage.prompt_tokens,
-          outputTokens: usage.completion_tokens,
-          totalTokens: usage.total_tokens,
-        }
-      : undefined,
-    rawMessage: msg,
-  };
 }
 
 // ── Retry Helper ─────────────────────────────────────────────────────
 
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  maxAttempts = 3
-): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3): Promise<T> {
   let lastErr: Error = new Error("unknown");
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -208,10 +202,7 @@ async function withRetry<T>(
     } catch (e) {
       lastErr = e as Error;
       const msg = lastErr.message;
-      // Don't retry auth or validation errors
-      if (msg.includes("401") || msg.includes("403") || msg.includes("422")) {
-        throw lastErr;
-      }
+      if (msg.includes("401") || msg.includes("403") || msg.includes("422")) throw lastErr;
       if (attempt < maxAttempts - 1) {
         await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
       }

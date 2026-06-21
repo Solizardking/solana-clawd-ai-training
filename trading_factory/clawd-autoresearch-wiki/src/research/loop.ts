@@ -10,7 +10,7 @@
  */
 
 import fs from "fs/promises";
-import { callLlm } from "../model/llm.js";
+import { callClawd } from "../model/llm.js";
 import { ClawVault } from "../memory/vault.js";
 import { BirdeyeConnector } from "../data/birdeye.js";
 import { AsterConnector } from "../data/aster.js";
@@ -234,10 +234,8 @@ Return JSON:
 }
 `;
 
-    const result = await callLlm(prompt, {
-      reasoning: true,
-      maxTokens: 1024,
-    });
+    // Use the Clawd trading model for Solana-specific hypothesis generation
+    const result = await callClawd(prompt, { trading: true, maxTokens: 1024 });
 
     if (result.usage) this.tokenCounter.add(result.usage);
 
@@ -284,7 +282,7 @@ Valid ranges:
 - fundingRateThreshold: 0.0001-0.002
 `;
 
-    const result = await callLlm(prompt, { reasoning: true, maxTokens: 512 });
+    const result = await callClawd(prompt, { trading: true, maxTokens: 512 });
     if (result.usage) this.tokenCounter.add(result.usage);
 
     const jsonMatch = result.content.match(/\{[\s\S]+\}/);
