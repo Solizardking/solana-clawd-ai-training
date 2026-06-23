@@ -36,6 +36,9 @@ platform-tools-*.tar.bz2
 *client_secret*.json
 vault/
 
+# Proprietary product code — kept private, not for public training repo
+8bitlabs.ai/
+
 # System
 .DS_Store
 *.log
