@@ -239,12 +239,13 @@ function bytesToBase64(bytes) {
 }
 
 function buildGrokWalletProofMessage(wallet) {
+  const nonce = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
   return [
     "8 Bit Labs Clawd Grok Sandbox",
     `Wallet: ${wallet}`,
     "Intent: launch clawd-grok sandbox computer",
     `Origin: ${window.location.origin}`,
-    `Nonce: ${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`,
+    `Nonce: ${nonce}`,
     `Issued At: ${new Date().toISOString()}`,
   ].join("\n");
 }
@@ -298,10 +299,11 @@ function formatGrokSandboxStatus(payload) {
   return JSON.stringify({
     enabled: payload.enabled,
     hasE2BKey: payload.hasE2BKey,
-    requiresToken: payload.requiresToken,
+    holderGate: payload.holderGate,
+    operatorTokenConfigured: payload.operatorTokenConfigured,
+    advancedControlsRequireToken: payload.advancedControlsRequireToken,
     providerKeysForwarded: payload.providerKeysForwarded,
     solanaReadKeysForwarded: payload.solanaReadKeysForwarded,
-    holderGate: payload.holderGate,
     manifest: payload.manifest,
   }, null, 2);
 }

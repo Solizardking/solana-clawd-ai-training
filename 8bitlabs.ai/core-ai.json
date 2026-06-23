@@ -39,7 +39,15 @@
         "manifest": "/clawd-grok.json",
         "status_endpoint": "/api/clawd-grok-sandbox",
         "runner_script": "scripts/e2b-clawd-grok-sandbox.mjs",
-        "default_command": "npm run e2b:clawd-grok"
+        "default_command": "npm run e2b:clawd-grok",
+        "holder_gate": {
+          "token": "$CLAWD",
+          "mint": "8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump",
+          "min_balance": 1000,
+          "min_tier": "SHALLOW",
+          "wallet_connect": "Phantom/Solana provider",
+          "proof": "Fresh Ed25519 wallet signature verified server-side before E2B Sandbox.create()"
+        }
       }
     },
     {

@@ -137,10 +137,16 @@ E2B_API_KEY=e2b_...
 CLAWD_GROK_SANDBOX_ENABLED=true
 ```
 
-Optional gates:
+Every real site launch also requires a connected Solana wallet to sign a fresh
+launch proof. The API verifies that signature server-side, checks the wallet's
+mainnet `$CLAWD` balance, and only calls `E2B Sandbox.create()` for wallets with
+at least the `SHALLOW` holder tier, currently `1,000` `$CLAWD`.
+
+Optional operator controls:
 
 ```bash
 CLAWD_GROK_SANDBOX_TOKEN=<shared-server-token>
+CLAWD_GROK_MIN_CLAWD_BALANCE=1000
 CLAWD_GROK_FORWARD_PROVIDER_KEYS=true
 CLAWD_GROK_FORWARD_SOLANA_READ_KEYS=true
 CLAWD_GROK_ALLOW_KEEP=true
@@ -148,8 +154,10 @@ CLAWD_GROK_ALLOW_CUSTOM_COMMANDS=true
 ```
 
 `/api/clawd-grok-sandbox` supports `GET` for readiness, `POST {"dryRun":true}`
-for the plan, and guarded `POST {}` for the default `status --output json`
-smoke command.
+for the plan, and guarded `POST {"walletProof":{...}}` for the default
+`status --output json` smoke command. The shared token is not a public launch
+gate; it only unlocks advanced operator options such as custom commands and
+keep-alive runs when those features are separately enabled.
 
 ## Deployment
 

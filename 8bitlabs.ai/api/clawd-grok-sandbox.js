@@ -31,7 +31,7 @@ const solanaReadEnvKeys = [
 ];
 
 function setCors(res) {
-  res.setHeader("Access-Control-Allow-Origin", process.env.CLAWD_GROK_SANDBOX_ALLOWED_ORIGIN || "https://8bitlabs.ai");
+  res.setHeader("Access-Control-Allow-Origin", primaryAllowedOrigin());
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Clawd-Sandbox-Token,X-Gateway-API-Key,X-Clawd-Wallet");
 }
@@ -98,6 +98,17 @@ function hasOperatorToken(req) {
   return requestToken(req) === token;
 }
 
+function allowedOrigins() {
+  return String(process.env.CLAWD_GROK_SANDBOX_ALLOWED_ORIGIN || "https://8bitlabs.ai")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function primaryAllowedOrigin() {
+  return allowedOrigins()[0] || "https://8bitlabs.ai";
+}
+
 function boundedText(value, max) {
   const text = String(value || "");
   return text.length > max ? `${text.slice(0, max)}\n[truncated]` : text;
@@ -143,6 +154,7 @@ function verifyWalletProof(proof) {
   const fields = parseProofFields(message);
   if (fields.wallet !== wallet) throw new Error("Wallet proof address mismatch");
   if (fields.intent !== WALLET_PROOF_INTENT) throw new Error("Wallet proof intent mismatch");
+  if (fields.origin && !allowedOrigins().includes(fields.origin)) throw new Error("Wallet proof origin mismatch");
 
   const issuedAt = Date.parse(fields["issued at"] || "");
   if (!Number.isFinite(issuedAt)) throw new Error("Wallet proof is missing a valid issued-at timestamp");
@@ -287,7 +299,9 @@ function statusPayload() {
     manifest: "/clawd-grok.json",
     enabled: boolEnv("CLAWD_GROK_SANDBOX_ENABLED"),
     hasE2BKey: Boolean(process.env.E2B_API_KEY),
-    requiresToken: Boolean(requiredToken()),
+    requiresToken: false,
+    operatorTokenConfigured: Boolean(requiredToken()),
+    advancedControlsRequireToken: true,
     providerKeysForwarded: boolEnv("CLAWD_GROK_FORWARD_PROVIDER_KEYS"),
     solanaReadKeysForwarded: boolEnv("CLAWD_GROK_FORWARD_SOLANA_READ_KEYS"),
     customCommandsEnabled: boolEnv("CLAWD_GROK_ALLOW_CUSTOM_COMMANDS"),
@@ -400,16 +414,6 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (!hasToken) {
-    json(res, 401, { error: "Sandbox launch token required" });
-    return;
-  }
-
-  if (!process.env.E2B_API_KEY) {
-    json(res, 503, { error: "E2B_API_KEY is not configured on the server" });
-    return;
-  }
-
   let access;
   try {
     access = await requireClawdHolderAccess(body);
@@ -418,6 +422,11 @@ module.exports = async function handler(req, res) {
       error: error.message || "CLAWD holder gate failed",
       ...(error.details ? error.details : {}),
     });
+    return;
+  }
+
+  if (!process.env.E2B_API_KEY) {
+    json(res, 503, { error: "E2B_API_KEY is not configured on the server" });
     return;
   }
 

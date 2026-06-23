@@ -30,6 +30,7 @@
     "requires_server_env": ["E2B_API_KEY", "CLAWD_GROK_SANDBOX_ENABLED=true"],
     "optional_server_env": [
       "CLAWD_GROK_SANDBOX_TOKEN",
+      "CLAWD_GROK_MIN_CLAWD_BALANCE=1000",
       "CLAWD_GROK_FORWARD_PROVIDER_KEYS=true",
       "XAI_API_KEY",
       "AI_API_KEY",
@@ -75,6 +76,6 @@
     "section_id": "clawd-grok-computer",
     "manifest_url": "/clawd-grok.json",
     "status_endpoint": "/api/clawd-grok-sandbox",
-    "description": "8 Bit Labs launch surface for a disposable Clawd Grok sandbox computer. It presents the safe plan publicly and only executes when server-side E2B credentials and launch gates are enabled."
+    "description": "8 Bit Labs launch surface for a disposable Clawd Grok sandbox computer. It presents the safe plan publicly and only executes after server-side E2B credentials are enabled and a connected Solana wallet proves the configured $CLAWD holder tier."
   }
 }
