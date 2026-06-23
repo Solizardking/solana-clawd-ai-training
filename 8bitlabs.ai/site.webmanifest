@@ -1,0 +1,17 @@
+{
+  "name": "8 Bit Labs",
+  "short_name": "8 Bit Labs",
+  "description": "Solana AI training data, model releases, inference mesh, and on-chain registry proofs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090414",
+  "theme_color": "#090414",
+  "icons": [
+    {
+      "src": "assets/8bitlabs-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

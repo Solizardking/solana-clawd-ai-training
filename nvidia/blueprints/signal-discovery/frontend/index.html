@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Signal Discovery Dashboard</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Clawd Quantitative Signal Discovery</p>
+        <h1>Signal Discovery</h1>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBtn" type="button">Refresh</button>
+        <button id="scanBtn" type="button" class="primary">Scan</button>
+        <label class="toggle">
+          <input id="autoRefresh" type="checkbox">
+          <span>Auto</span>
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <section class="control-band" aria-label="Scan controls">
+        <label>
+          <span>Markets</span>
+          <input id="marketsInput" value="SOL, BTC, ETH, JUP, JTO" spellcheck="false">
+        </label>
+        <label>
+          <span>Timeframe</span>
+          <select id="timeframeInput">
+            <option value="15m">15m</option>
+            <option value="1h" selected>1h</option>
+            <option value="4h">4h</option>
+            <option value="1d">1d</option>
+          </select>
+        </label>
+        <div class="status-line" id="statusLine">Starting</div>
+      </section>
+
+      <section class="metric-grid" id="metricGrid" aria-label="Overview"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Data</p>
+            <h2>Catalog</h2>
+          </div>
+          <span class="pill" id="dataTimestamp">No data</span>
+        </div>
+        <div class="table-wrap catalog-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>File</th>
+                <th>Type</th>
+                <th>Records</th>
+                <th>Size</th>
+                <th>Updated</th>
+                <th>Preview</th>
+              </tr>
+            </thead>
+            <tbody id="dataRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel wide">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Live</p>
+              <h2>Market Scan</h2>
+            </div>
+            <span class="pill" id="scanTimestamp">No scan</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th>Regime</th>
+                  <th>Composite</th>
+                  <th>Strength</th>
+                  <th>Verdict</th>
+                  <th>Confidence</th>
+                  <th>ATR</th>
+                  <th>ADX</th>
+                  <th>Strategy</th>
+                </tr>
+              </thead>
+              <tbody id="scanRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Signals</p>
+              <h2>Current Strength</h2>
+            </div>
+          </div>
+          <div id="signalBars" class="signal-bars"></div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Report</p>
+              <h2>Verdicts</h2>
+            </div>
+          </div>
+          <div id="verdictChart" class="bar-chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Report</p>
+              <h2>Regimes</h2>
+            </div>
+          </div>
+          <div id="regimeChart" class="bar-chart"></div>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Latest</p>
+              <h2>Discoveries</h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th>Regime</th>
+                  <th>Direction</th>
+                  <th>Strength</th>
+                  <th>Verdict</th>
+                  <th>Confidence</th>
+                  <th>Risk</th>
+                  <th>Rationale</th>
+                </tr>
+              </thead>
+              <tbody id="discoveryRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Training</p>
+              <h2>Data Counts</h2>
+            </div>
+          </div>
+          <div id="trainingStats" class="stat-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Runtime</p>
+              <h2>Environment</h2>
+            </div>
+          </div>
+          <div id="runtimeStats" class="stat-list"></div>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Strategies</p>
+              <h2>Active Runs</h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th>Run ID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="strategyRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Evolution</p>
+            <h2>Recent Adaptation Log</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tick</th>
+                <th>Market</th>
+                <th>Regime</th>
+                <th>Verdict</th>
+                <th>Strength</th>
+                <th>Confidence</th>
+                <th>Active Strategy</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="evolutionRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">API</p>
+            <h2>Raw Data</h2>
+          </div>
+        </div>
+        <div id="rawPanels" class="raw-grid"></div>
+      </section>
+    </main>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

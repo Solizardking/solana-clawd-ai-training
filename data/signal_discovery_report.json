@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-20T00:46:27.456345+00:00",
+  "timestamp": "2026-06-22T20:33:32.242356+00:00",
   "n_markets": 3,
   "verdict_summary": {
     "hold": 3
@@ -15,9 +15,9 @@
       "composite_strength": 0.0,
       "verdict": "hold",
       "confidence": 0.0,
-      "rationale": "parse error",
+      "rationale": "ranging regime, composite neutral strength 0.00",
       "risk_flags": [
-        "parse_error"
+        "weak_trend"
       ],
       "regime": "ranging",
       "strategy_id": null
@@ -28,9 +28,9 @@
       "composite_strength": 0.0,
       "verdict": "hold",
       "confidence": 0.0,
-      "rationale": "parse error",
+      "rationale": "ranging regime, composite neutral strength 0.00",
       "risk_flags": [
-        "parse_error"
+        "weak_trend"
       ],
       "regime": "ranging",
       "strategy_id": null
@@ -41,9 +41,9 @@
       "composite_strength": 0.0,
       "verdict": "hold",
       "confidence": 0.0,
-      "rationale": "parse error",
+      "rationale": "ranging regime, composite neutral strength 0.00",
       "risk_flags": [
-        "parse_error"
+        "weak_trend"
       ],
       "regime": "ranging",
       "strategy_id": null

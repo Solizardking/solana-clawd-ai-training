@@ -66,6 +66,18 @@ IMAGE_SUFFIXES = {
     ".tiff",
 }
 
+CODE_SUFFIXES = {
+    ".py",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+    ".sql",
+    ".toml",
+}
+
 SUPPORTED_SUFFIXES = {
     ".pdf",
     ".json",
@@ -77,7 +89,21 @@ SUPPORTED_SUFFIXES = {
     ".txt",
     ".yaml",
     ".yml",
-} | IMAGE_SUFFIXES
+} | IMAGE_SUFFIXES | CODE_SUFFIXES
+
+SKIP_DIR_NAMES = {
+    ".git",
+    ".hg",
+    ".svn",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "target",
+    ".clawvault",
+}
 
 IMAGE_MIME_TYPES = {
     ".png": "image/png",
@@ -313,6 +339,12 @@ def secret_like(text: str) -> bool:
     return any(pattern.search(text) for pattern in SECRET_PATTERNS)
 
 
+def redact_secret_like(text: str) -> str:
+    for pattern in SECRET_PATTERNS:
+        text = pattern.sub("[REDACTED_SECRET]", text)
+    return text
+
+
 def file_sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -328,6 +360,8 @@ def example_sha(messages: list[dict[str, str]]) -> str:
 
 def source_type_for(path: Path) -> str:
     suffix = path.suffix.lower()
+    if suffix in CODE_SUFFIXES:
+        return "code"
     if suffix == ".pdf":
         return "pdf"
     if suffix == ".ipynb":
@@ -363,6 +397,8 @@ def discover_files(inputs: list[str], watch_dirs: list[str]) -> tuple[list[Path]
             continue
         if path.is_dir():
             for child in sorted(path.rglob("*")):
+                if any(part in SKIP_DIR_NAMES for part in child.parts):
+                    continue
                 if child.is_file() and child.suffix.lower() in SUPPORTED_SUFFIXES:
                     files.append(child)
         elif path.is_file() and path.suffix.lower() in SUPPORTED_SUFFIXES:
@@ -1375,7 +1411,10 @@ def process_json(path: Path, source: SourceStats, settings: dict[str, Any]) -> l
 
 def process_text(path: Path, source: SourceStats, settings: dict[str, Any]) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8", errors="ignore")
-    source.metadata = {"chars": len(text)}
+    original_chars = len(text)
+    if source.source_type == "code":
+        text = redact_secret_like(text)
+    source.metadata = {"chars": original_chars, "redacted": source.source_type == "code"}
     examples: list[dict[str, Any]] = []
     for chunk_index, chunk in enumerate(chunk_text(text, settings["chunk_chars"], settings["chunk_overlap"]), 1):
         if len(chunk) < settings["min_text_chars"]:
@@ -1552,7 +1591,7 @@ def process_file(path: Path, settings: dict[str, Any]) -> tuple[SourceStats, lis
         examples = process_json(path, source, settings)
     elif suffix in IMAGE_SUFFIXES:
         examples = process_image(path, source, settings)
-    elif suffix in {".md", ".txt", ".yaml", ".yml"}:
+    elif suffix in {".md", ".txt", ".yaml", ".yml"} or suffix in CODE_SUFFIXES:
         examples = process_text(path, source, settings)
     else:
         source.skipped += 1

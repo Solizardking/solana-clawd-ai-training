@@ -37,6 +37,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
     "output_name": DEFAULT_OUTPUT_NAME,
     "output_dir": f"outputs/{DEFAULT_OUTPUT_NAME}",
+    "processed_dir": "data/tx_foundation_cpt_processed",
     "cpt_data": "data/tx_foundation_cpt.jsonl",
     "sft_data": "data/solana_clawd_merged.jsonl",
     "eval_output": "data/tx_foundation_eval.json",
@@ -142,6 +143,9 @@ def load_tx_config(path: str | Path | None = None) -> dict[str, Any]:
     cfg["sft_data"] = str(resolve_ai_training_path(cfg["sft_data"], config_path))
     cfg["output_dir"] = str(resolve_ai_training_path(cfg.get("output_dir") or f"outputs/{cfg['output_name']}", config_path))
     cfg["eval_output"] = str(resolve_ai_training_path(cfg.get("eval_output") or DEFAULT_EVAL_OUTPUT, config_path))
+    for key in ("processed_dir", "dataset_manifest", "dataset_card", "nemo_data_path", "deep_solana_data"):
+        if cfg.get(key):
+            cfg[key] = str(resolve_ai_training_path(cfg[key], config_path))
     return cfg
 
 
@@ -185,11 +189,13 @@ def build_dataset_manifest(
     config_path: Path = DEFAULT_CONFIG_PATH,
     eval_path: Path = DEFAULT_EVAL_OUTPUT,
     model_path: Path = DEFAULT_MODEL_OUTPUT / "sft",
+    repo_id: str = DEFAULT_HUB_DATASET_ID,
+    training_model: str = DEFAULT_HUB_MODEL_ID,
 ) -> dict[str, Any]:
     total = count_jsonl(dataset_path)
     manifest = {
         "name": "Solana Transaction Foundation CPT",
-        "repo_id": DEFAULT_HUB_DATASET_ID,
+        "repo_id": repo_id,
         "generated_at": dt.datetime.now(dt.UTC).replace(microsecond=0).isoformat(),
         "source_jsonl": str(dataset_path),
         "source_sha256": sha256_file(dataset_path),
@@ -199,7 +205,7 @@ def build_dataset_manifest(
         "processed_files": processed_files(processed_dir),
         "schema": {"text": "NeMo CPT record, one Solana transaction context per row"},
         "config": str(config_path),
-        "training_model": DEFAULT_HUB_MODEL_ID,
+        "training_model": training_model,
         "local_model_path": str(model_path),
         "local_model_present": model_path.exists(),
         "eval_output": str(eval_path),

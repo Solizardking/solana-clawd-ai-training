@@ -1,0 +1,83 @@
+# LOCAL SMOKE TEST — Qwen3.5-9B-Fable-5 clawd-lora on MPS
+#
+# 9B in bf16 = 18GB model weights. With LoRA (adapter-only gradients) + activations
+# at seq_len=512, total MPS memory ≈ 20-22GB — fits in 48GB M4 Max.
+#
+# This is a 20-step smoke test to verify the pipeline compiles and the tokenizer /
+# chat template wire up correctly. NOT a production training run — use the cloud
+# config (qwen35_fable5_clawd_lora.yaml) for real adapters.
+#
+# Run:
+#   python3 scripts/train_lora.py --config configs/qwen35_fable5_clawd_lora_mac.yaml
+
+base_model: "TeichAI/Qwen3.5-9B-Fable-5-v1"
+model_revision: "main"
+torch_dtype: "bfloat16"
+device_map: "mps"
+
+dataset_repo: null
+dataset_path: "data/clawd_fable5_qwen35_sft.jsonl"
+max_seq_length: 512             # keep small for MPS smoke test
+train_split: "train"
+eval_split: null
+
+output_dir: "outputs/qwen35-fable5-clawd-lora-mac-smoke"
+push_to_hub: false
+hub_model_id: "solanaclawd/Qwen3.5-9B-Fable5-clawd-lora"
+
+lora:
+  r: 8                          # lower rank for smoke test
+  alpha: 16
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+training:
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 4
+  num_train_epochs: 1
+  max_steps: 20                 # smoke test only — just verify pipeline runs
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_steps: 5
+  weight_decay: 0.01
+  optim: "adamw_torch"
+  bf16: false                   # MPS uses float32 by default for training stability
+  fp16: false
+  tf32: false
+  gradient_checkpointing: false # MPS: gradient checkpointing not supported
+  logging_steps: 5
+  save_steps: 50
+  save_total_limit: 1
+  eval_strategy: "no"
+  report_to: ["none"]
+  seed: 42
+  dataloader_num_workers: 0     # MPS: must be 0
+  remove_unused_columns: false
+  dataloader_pin_memory: false  # MPS: not supported
+
+quantization:
+  enabled: false                # bitsandbytes not supported on MPS
+
+sft:
+  packing: false
+  assistant_only_loss: true
+
+eval:
+  base_model: "TeichAI/Qwen3.5-9B-Fable-5-v1"
+  adapter_repo: "outputs/qwen35-fable5-clawd-lora-mac-smoke"
+  eval_dataset_repo: null
+  max_new_tokens: 128
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
+  output_dir: "outputs/eval-qwen35-fable5-clawd-mac"
+  report_to: "json"

@@ -102,11 +102,7 @@ cpt_training:
 # ── Quantization ─────────────────────────────────────────────────────────────
 # Required on 24 GB GPUs (L4, A10G). Disable on A100-80 / H200 for speed.
 quantization:
-  enabled: true
-  load_in_4bit: true
-  bnb_4bit_compute_dtype: "bfloat16"
-  bnb_4bit_quant_type: "nf4"
-  bnb_4bit_use_double_quant: true
+  enabled: false   # A100-80GB: 7B in bf16 = ~14.5 GB, no quantization needed
 
 # ── SFT ──────────────────────────────────────────────────────────────────────
 sft:

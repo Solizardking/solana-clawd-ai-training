@@ -21,6 +21,7 @@ import json
 import os
 import subprocess
 import time
+from dataclasses import dataclass, asdict
 from typing import Optional
 
 import numpy as np
@@ -50,6 +51,23 @@ JUPITER_MINTS = {
     "BONK": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
     "PYTH": "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",
 }
+
+
+@dataclass
+class PriceSeries:
+    asset: str
+    prices: list[float]
+    source: str
+    days: int
+    last_price: float
+    synthetic: bool = False
+    notes: list[str] | None = None
+
+
+@dataclass
+class PriceBundle:
+    prices: dict[str, list[float]]
+    sources: dict[str, dict]
 
 
 def fetch_phoenix_candles(market: str, n_days: int = 90) -> list[float] | None:
@@ -144,15 +162,29 @@ def fetch_prices(
 
     Returns dict[asset -> list[float]] with at least n_days prices.
     """
+    return fetch_price_bundle(assets, n_days=n_days, verbose=verbose).prices
+
+
+def fetch_price_bundle(
+    assets: list[str],
+    n_days: int = 90,
+    verbose: bool = True,
+) -> PriceBundle:
+    """Fetch prices plus machine-readable source metadata."""
     prices = {}
+    sources: dict[str, dict] = {}
     for asset in assets:
         closes = None
+        source = ""
+        notes: list[str] = []
 
         # Try Vulcan/Phoenix first for any supported market
         if asset in PHOENIX_MARKETS:
             closes = fetch_phoenix_candles(asset, n_days)
             if closes and verbose:
                 print(f"  [{asset}] phoenix/vulcan  {len(closes)} days  last={closes[-1]:.4f}")
+            if closes:
+                source = "phoenix_vulcan"
 
         # Jupiter price API (spot) — offline in sandboxed envs
         if closes is None:
@@ -160,10 +192,14 @@ def fetch_prices(
             closes = fetch_jupiter_history(spot, n_days)
             if closes and verbose:
                 print(f"  [{asset}] jupiter  {len(closes)} days  last={closes[-1]:.4f}")
+            if closes:
+                source = "jupiter_anchor"
 
         # Synthetic fallback (no network needed)
         if closes is None:
             closes = _synthetic_stub(asset, n_days)
+            source = "synthetic"
+            notes.append("offline synthetic fallback")
             if verbose:
                 print(f"  [{asset}] synthetic (offline)  last={closes[-1]:.4f}")
 
@@ -177,10 +213,25 @@ def fetch_prices(
                 print(f"  [{asset}] prices nearly constant (std/mean={arr.std()/arr.mean():.4f}) "
                       f"— anchoring synthetic history to last={last_price:.4f}")
             closes = _synthetic_stub(asset, n_days, anchor=last_price)
+            source = f"{source}+synthetic_anchor"
+            notes.append("near-constant source series replaced with synthetic history anchored to last price")
 
-        prices[asset] = closes[:n_days] if len(closes) >= n_days else closes
+        final = closes[:n_days] if len(closes) >= n_days else closes
+        prices[asset] = final
+        sources[asset] = asdict(
+            PriceSeries(
+                asset=asset,
+                prices=[],
+                source=source,
+                days=len(final),
+                last_price=float(final[-1]),
+                synthetic="synthetic" in source,
+                notes=notes,
+            )
+        )
+        sources[asset].pop("prices", None)
 
-    return prices
+    return PriceBundle(prices=prices, sources=sources)
 
 
 if __name__ == "__main__":

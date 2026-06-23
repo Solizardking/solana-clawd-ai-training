@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -19,6 +20,8 @@ class OptResult:
     cvar: float                # CVaR at alpha
     sharpe: float
     solver: str
+    weight_sum: float
+    diagnostics: dict[str, Any] | None = None
 
 
 def optimize(
@@ -48,18 +51,30 @@ def optimize(
     """
     n_scenarios, n_assets = scenarios.shape
 
+    diagnostics: dict[str, Any] = {
+        "n_scenarios": int(n_scenarios),
+        "n_assets": int(n_assets),
+        "cvar_alpha": float(cvar_alpha),
+        "max_cvar": float(max_cvar),
+        "max_leverage": float(max_leverage),
+        "max_cardinality": max_cardinality,
+        "turnover_limit": turnover_limit,
+    }
+
     try:
         weights = _solve_cufolio(
             scenarios, cvar_alpha, max_cvar, max_leverage,
             max_cardinality, turnover_limit, current_weights,
         )
         solver = "cufolio"
-    except Exception:
+    except Exception as exc:
+        diagnostics["cufolio_error"] = f"{type(exc).__name__}: {exc}"
         weights = _solve_cvxpy(
             scenarios, cvar_alpha, max_cvar, max_leverage,
             max_cardinality, turnover_limit, current_weights,
         )
         solver = "cvxpy"
+    weights = _sanitize_weights(weights, n_assets, max_leverage, max_cardinality)
 
     port_returns = scenarios @ weights
     cvar = _compute_cvar(port_returns, cvar_alpha)
@@ -67,13 +82,42 @@ def optimize(
     vol = float(port_returns.std())
     sharpe = (exp_ret - risk_free) / vol if vol > 1e-9 else 0.0
 
-    return OptResult(weights, asset_names, exp_ret, cvar, sharpe, solver)
+    return OptResult(weights, asset_names, exp_ret, cvar, sharpe, solver, float(weights.sum()), diagnostics)
 
 
 def _compute_cvar(port_returns: np.ndarray, alpha: float) -> float:
     var = float(np.percentile(port_returns, (1 - alpha) * 100))
     tail = port_returns[port_returns <= var]
     return float(-tail.mean()) if len(tail) > 0 else 0.0
+
+
+def _sanitize_weights(
+    weights: np.ndarray,
+    n_assets: int,
+    max_leverage: float,
+    max_cardinality: int | None,
+) -> np.ndarray:
+    weights = np.asarray(weights, dtype=np.float64)
+    if weights.shape != (n_assets,) or not np.all(np.isfinite(weights)):
+        weights = np.ones(n_assets, dtype=np.float64) / n_assets
+    weights = np.clip(weights, 0.0, None)
+    if max_cardinality is not None and 0 < max_cardinality < n_assets:
+        keep = np.argsort(weights)[-max_cardinality:]
+        pruned = np.zeros_like(weights)
+        pruned[keep] = weights[keep]
+        weights = pruned
+    total = float(weights.sum())
+    if total <= 1e-12:
+        weights = np.ones(n_assets, dtype=np.float64) / n_assets
+        total = 1.0
+    cap = max(float(max_leverage), 1e-9)
+    if total > cap:
+        weights = weights * (cap / total)
+        total = cap
+    # For the normal long-only budget case, remove tiny solver drift.
+    if cap >= 1.0 and 0.999 <= total <= 1.001:
+        weights = weights / max(float(weights.sum()), 1e-12)
+    return weights
 
 
 def _solve_cufolio(
@@ -119,9 +163,8 @@ def _solve_cvxpy(
         cp.sum(w) <= max_leverage,
         w >= 0,
     ]
-    if max_cardinality is not None:
-        b = cp.Variable(n_assets, boolean=True)
-        constraints += [w <= b, cp.sum(b) <= max_cardinality]
+    # Cardinality is applied after solve in the CPU fallback. Keeping the CVXPY
+    # problem continuous avoids requiring a mixed-integer solver on local Macs.
     if turnover_limit is not None and current_weights is not None:
         constraints.append(cp.norm1(w - current_weights) <= turnover_limit)
 
@@ -130,7 +173,7 @@ def _solve_cvxpy(
     prob = cp.Problem(objective, constraints)
 
     # Try ECOS first (faster, LP-friendly); fall back to SCS for larger problems
-    for solver in [cp.ECOS, cp.SCS]:
+    for solver in [cp.ECOS, cp.CLARABEL, cp.SCS]:
         try:
             prob.solve(solver=solver, verbose=False)
             if w.value is not None:

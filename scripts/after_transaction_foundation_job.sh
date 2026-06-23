@@ -21,8 +21,24 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-MODEL_PATH="${MODEL_PATH:-outputs/solana-tx-foundation-1.5b/sft}"
 CONFIG_PATH="${CONFIG_PATH:-nvidia/configs/solana_tx_foundation.yaml}"
+
+config_value() {
+  local key="$1"
+  python3 - "$CONFIG_PATH" "$key" <<'PY'
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path("nvidia/blueprints/transaction-foundation-model").resolve()))
+from tx_foundation_common import load_tx_config
+
+cfg = load_tx_config(sys.argv[1])
+value = cfg.get(sys.argv[2], "")
+print("" if value is None else value)
+PY
+}
+
+MODEL_PATH="${MODEL_PATH:-$(config_value output_dir)/sft}"
 
 cmd=(
   python3

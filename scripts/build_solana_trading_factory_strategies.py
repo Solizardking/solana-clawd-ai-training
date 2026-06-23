@@ -16,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "trading_factory"))
 
 from solana_factory.factory import build_strategy_bundle  # noqa: E402
+from solana_factory.validation import load_strategy_manifest, validate_strategy_bundle  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,17 +25,31 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--paper-notional-usdc", type=float, default=150.0)
     parser.add_argument("--max-ticks", type=int, default=60)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Validate an existing strategy_manifest.json without regenerating artifacts.",
+    )
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
     output_dir = Path(args.output_dir)
-    manifest = build_strategy_bundle(
+    if args.validate_only:
+        manifest = load_strategy_manifest(output_dir)
+    else:
+        manifest = build_strategy_bundle(
+            repo_root=BASE_DIR,
+            output_dir=output_dir,
+            paper_notional_usdc=args.paper_notional_usdc,
+            max_ticks=args.max_ticks,
+        )
+
+    validation_report = validate_strategy_bundle(
+        manifest=manifest,
         repo_root=BASE_DIR,
         output_dir=output_dir,
-        paper_notional_usdc=args.paper_notional_usdc,
-        max_ticks=args.max_ticks,
     )
     summary = {
         "output_dir": output_dir.as_posix(),
@@ -48,11 +63,13 @@ def main() -> None:
         "rise_data_plan": manifest["rise_data_plan"],
         "vulcan_command_plans": manifest["vulcan_command_plans"],
         "nvidia_clawd_agent_plan": manifest["nvidia_clawd_agent_plan"],
+        "bundle_validation": validation_report.to_dict(),
     }
     print(json.dumps(summary, indent=2, sort_keys=True))
     if args.dry_run:
         print("dry-run requested: files were still generated for deterministic review")
+    return 0 if validation_report.ok else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

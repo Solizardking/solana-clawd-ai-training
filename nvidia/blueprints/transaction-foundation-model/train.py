@@ -59,6 +59,8 @@ DEFAULT_CONFIG = {
     "max_seq_length": 2048,
     "cpt_epochs": 1,
     "sft_epochs": 1,
+    "cpt_max_seq_length": None,
+    "sft_max_seq_length": None,
     "learning_rate_cpt": 2e-4,
     "learning_rate_sft": 1e-4,
     "warmup_steps_cpt": 10,
@@ -155,7 +157,8 @@ def run_cpt(cfg: dict, dry_run: bool) -> Path:
     from peft import LoraConfig, get_peft_model
     from trl import SFTTrainer
 
-    print(f"\n[CPT] base={cfg['base_model']}  data={cfg['cpt_data']}")
+    seq_len = int(cfg.get("cpt_max_seq_length") or cfg.get("max_seq_length") or 2048)
+    print(f"\n[CPT] base={cfg['base_model']}  data={cfg['cpt_data']}  max_length={seq_len}")
     if dry_run:
         print("[DRY RUN] skipping CPT training")
         return Path(cfg["output_dir"]) / "cpt"
@@ -168,7 +171,7 @@ def run_cpt(cfg: dict, dry_run: bool) -> Path:
     dataset = _load_cpt_dataset(
         Path(cfg["cpt_data"]),
         tokenizer,
-        cfg["max_seq_length"],
+        seq_len,
         max_examples=cfg.get("max_cpt_examples"),
     )
     if len(dataset) == 0:
@@ -205,7 +208,7 @@ def run_cpt(cfg: dict, dry_run: bool) -> Path:
         save_steps=cfg.get("save_steps_cpt", 200),
         save_total_limit=cfg.get("save_total_limit", 2),
         remove_unused_columns=False,
-        max_length=cfg["max_seq_length"],
+        max_length=seq_len,
         packing=True,
         dataset_text_field="text",
         max_steps=cfg.get("cpt_max_steps") or -1,
@@ -227,7 +230,8 @@ def run_sft(cfg: dict, cpt_checkpoint: Path | None, dry_run: bool) -> Path:
     from trl import SFTConfig, SFTTrainer
 
     base = str(cpt_checkpoint) if cpt_checkpoint and cpt_checkpoint.exists() else cfg["base_model"]
-    print(f"\n[SFT] base={base}  data={cfg['sft_data']}")
+    seq_len = int(cfg.get("sft_max_seq_length") or cfg.get("max_length") or cfg.get("max_seq_length") or 2048)
+    print(f"\n[SFT] base={base}  data={cfg['sft_data']}  max_length={seq_len}")
     if dry_run:
         print("[DRY RUN] skipping SFT training")
         return Path(cfg["output_dir"]) / "sft"
@@ -270,8 +274,10 @@ def run_sft(cfg: dict, cpt_checkpoint: Path | None, dry_run: bool) -> Path:
         save_steps=cfg.get("save_steps_sft", 500),
         save_total_limit=cfg.get("save_total_limit", 2),
         remove_unused_columns=False,
-        max_length=cfg["max_seq_length"],
+        max_length=seq_len,
         max_steps=cfg.get("sft_max_steps") or -1,
+        push_to_hub=bool(cfg.get("push_to_hub") and os.environ.get("HF_TOKEN")),
+        hub_model_id=cfg.get("hub_model_id") or None,
     )
 
     trainer = SFTTrainer(
@@ -287,7 +293,7 @@ def run_sft(cfg: dict, cpt_checkpoint: Path | None, dry_run: bool) -> Path:
     tokenizer.save_pretrained(str(out_dir))
 
     if cfg.get("push_to_hub") and os.environ.get("HF_TOKEN"):
-        trainer.push_to_hub(cfg["hub_model_id"])
+        trainer.push_to_hub()
         print(f"[SFT] pushed → {cfg['hub_model_id']}")
 
     print(f"[SFT] saved → {out_dir}")
@@ -333,6 +339,8 @@ if __name__ == "__main__":
         cfg["max_sft_examples"] = 8
         cfg["cpt_max_steps"] = 1
         cfg["sft_max_steps"] = 1
+        cfg["cpt_max_seq_length"] = min(int(cfg.get("cpt_max_seq_length") or cfg.get("max_seq_length", 2048)), 512)
+        cfg["sft_max_seq_length"] = min(int(cfg.get("sft_max_seq_length") or cfg.get("max_length") or cfg.get("max_seq_length", 2048)), 512)
         cfg["max_seq_length"] = min(int(cfg.get("max_seq_length", 2048)), 512)
         cfg["batch_size"] = 1
         cfg["grad_accum"] = 1

@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Generator
 
@@ -19,6 +20,18 @@ from typing import Generator
 EMBED_MODEL = "nvidia/nv-embedqa-e5-v5"
 CHUNK_SIZE = 512
 CHUNK_OVERLAP = 64
+TEXT_SUFFIXES = {
+    ".dockerignore",
+    ".json",
+    ".md",
+    ".py",
+    ".toml",
+    ".txt",
+    ".yaml",
+    ".yml",
+}
+TEXT_FILENAMES = {"Dockerfile", "Dockerfile.fly", "requirements.txt", "requirements-fly.txt"}
+SKIP_PARTS = {".git", ".mypy_cache", ".pytest_cache", ".ruff_cache", ".venv", "__pycache__", "node_modules"}
 
 
 def chunk_text(text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
@@ -49,6 +62,10 @@ def read_jsonl_docs(path: Path) -> Generator[str, None, None]:
 
 
 def read_markdown(path: Path) -> Generator[str, None, None]:
+    yield path.read_text(errors="replace")
+
+
+def read_text_file(path: Path) -> Generator[str, None, None]:
     yield path.read_text(errors="replace")
 
 
@@ -124,7 +141,10 @@ def build_store(sources: list[Path], store_path: Path) -> None:
 
     for src in sources:
         if src.is_dir():
-            files = list(src.rglob("*.jsonl")) + list(src.rglob("*.md")) + list(src.rglob("*.pdf"))
+            files = [
+                path for path in sorted(src.rglob("*"))
+                if path.is_file() and _is_supported(path) and not _should_skip(path)
+            ]
         else:
             files = [src]
 
@@ -134,7 +154,12 @@ def build_store(sources: list[Path], store_path: Path) -> None:
                 docs = list(read_jsonl_docs(f))
             elif f.suffix == ".pdf":
                 docs = list(read_pdf_nvidia(f))
+            elif _is_supported(f):
+                docs = list(read_text_file(f))
             else:
+                docs = []
+
+            if f.suffix == ".md":
                 docs = list(read_markdown(f))
 
             for doc in docs:
@@ -163,7 +188,33 @@ def build_store(sources: list[Path], store_path: Path) -> None:
     (store_path / "chunks.jsonl").write_text(
         "\n".join(json.dumps({"text": t, "meta": m}) for t, m in zip(all_chunks, all_meta))
     )
+    sources_summary: dict[str, int] = {}
+    for meta in all_meta:
+        source = meta["source"]
+        sources_summary[source] = sources_summary.get(source, 0) + 1
+    manifest = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "embedding_model": EMBED_MODEL if os.environ.get("NVIDIA_API_KEY") else "local-hash-fallback",
+        "chunk_size": CHUNK_SIZE,
+        "chunk_overlap": CHUNK_OVERLAP,
+        "embedding_dim": dim,
+        "chunks": len(all_chunks),
+        "sources": sources_summary,
+    }
+    (store_path / "manifest.json").write_text(json.dumps(manifest, indent=2))
     print(f"[ingest] store saved to {store_path}  (dim={dim}, n={len(all_chunks)})")
+
+
+def _is_supported(path: Path) -> bool:
+    if path.name in TEXT_FILENAMES:
+        return True
+    if path.suffix in TEXT_SUFFIXES:
+        return True
+    return path.suffix == ".pdf"
+
+
+def _should_skip(path: Path) -> bool:
+    return any(part in SKIP_PARTS for part in path.parts)
 
 
 def main() -> None:

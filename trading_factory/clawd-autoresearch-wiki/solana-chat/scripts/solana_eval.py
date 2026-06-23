@@ -7,6 +7,9 @@ Can also run the standard CORE metric alongside Solana tasks.
 Usage:
     python -m scripts.solana_eval --model-tag d12 --device-batch-size=16
     python -m scripts.solana_eval --hf-path NousResearch/Hermes-3-Llama-3.1-8B
+    python -m scripts.solana_eval --hf-path Qwen/Qwen2.5-1.5B-Instruct \
+      --adapter ../../../outputs/clawd-autoresearch-wiki-qwen15-lora-mac \
+      --device-type mps
 """
 import argparse
 import torch
@@ -18,10 +21,19 @@ from nanochat.tokenizer import HuggingFaceTokenizer
 from solana.tasks import SolanaKnowledgeTask
 
 
-def load_hf_model_simple(hf_path: str, device):
+def load_hf_model_simple(hf_path: str, device, adapter: str | None = None):
     """Load a HuggingFace model with minimal wrapper."""
     from transformers import AutoModelForCausalLM
-    model = AutoModelForCausalLM.from_pretrained(hf_path)
+    dtype = torch.bfloat16 if str(device).startswith(("mps", "cuda")) else torch.float32
+    model = AutoModelForCausalLM.from_pretrained(
+        hf_path,
+        dtype=dtype,
+        trust_remote_code=True,
+    )
+    if adapter:
+        from peft import PeftModel
+        print0(f"Attaching LoRA adapter: {adapter}")
+        model = PeftModel.from_pretrained(model, adapter, torch_dtype=dtype)
     model.to(device)
     model.eval()
 
@@ -34,12 +46,15 @@ def load_hf_model_simple(hf_path: str, device):
             logits = self.m(input_ids).logits
             if targets is None:
                 return logits
+            batch, seq_len = targets.shape
             loss = torch.nn.functional.cross_entropy(
                 logits.view(-1, logits.size(-1)),
                 targets.view(-1),
                 ignore_index=-1,
                 reduction=loss_reduction,
             )
+            if loss_reduction == 'none':
+                return loss.view(batch, seq_len)
             return loss
 
     return ModelWrapper(model)
@@ -53,6 +68,8 @@ def main():
                         help='Model step to load')
     parser.add_argument('--hf-path', type=str, default=None,
                         help='HuggingFace model path')
+    parser.add_argument('--adapter', type=str, default=None,
+                        help='Optional PEFT/LoRA adapter path or Hub repo for --hf-path')
     parser.add_argument('--max-questions', type=int, default=-1,
                         help='Max questions to evaluate')
     parser.add_argument('--device-type', type=str, default='',
@@ -67,7 +84,7 @@ def main():
     # Load model
     is_hf = args.hf_path is not None
     if is_hf:
-        model = load_hf_model_simple(args.hf_path, device)
+        model = load_hf_model_simple(args.hf_path, device, adapter=args.adapter)
         from nanochat.tokenizer import HuggingFaceTokenizer
         tokenizer = HuggingFaceTokenizer.from_pretrained(args.hf_path)
     else:
@@ -78,6 +95,8 @@ def main():
 
     print0(f"Evaluating Solana knowledge...")
     print0(f"  Model: {'HF: ' + args.hf_path if is_hf else 'nanochat: ' + str(args.model_tag)}")
+    if args.adapter:
+        print0(f"  Adapter: {args.adapter}")
     print0(f"  Device: {device}")
 
     # Run Solana knowledge evaluation

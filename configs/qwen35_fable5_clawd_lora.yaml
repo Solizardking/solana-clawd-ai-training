@@ -1,0 +1,96 @@
+# LoRA fine-tune: TeichAI/Qwen3.5-9B-Fable-5-v1 + clawd-code + Glint Fable-5 traces
+#
+# Base:    TeichAI/Qwen3.5-9B-Fable-5-v1  (Qwen3.5-9B already tuned on Fable-5 traces)
+# Source:  mradermacher/Qwen3.5-9B-Fable-5-v1-i1-GGUF → TeichAI safetensors
+# Data:    armand0e/claude-fable-5-claude-code  +  Glint-Research/Fable-5-traces
+# Format:  ChatML (Qwen native) with CoT <think> blocks from Glint traces
+# Goal:    Inject Solana clawd-code agent behaviour into a Fable-5 already-tuned model
+#
+# Prepare data:
+#   python3 scripts/prepare_clawd_code_dataset.py \
+#       --format chatml --datasets clawd-code glint \
+#       --output data/clawd_fable5_qwen35_sft.jsonl
+#
+# Train (HF Jobs — A100-80GB, ~1h):
+#   bash scripts/run_qwen35_fable5_clawd.sh cloud
+#
+# Local smoke (MPS, 20 steps):
+#   python3 scripts/train_lora.py --config configs/qwen35_fable5_clawd_lora_mac.yaml
+
+base_model: "TeichAI/Qwen3.5-9B-Fable-5-v1"
+model_revision: "main"
+torch_dtype: "bfloat16"         # Qwen3.5 ships in bf16; A100 handles it natively
+device_map: "auto"              # multi-GPU if available, single A100-80GB otherwise
+
+dataset_repo: null
+dataset_path: "data/clawd_fable5_qwen35_sft.jsonl"
+dataset_revision: "main"
+max_seq_length: 2048            # our pairs top out ~2048 tokens; context supports 262K
+train_split: "train"
+eval_split: null
+
+output_dir: "outputs/qwen35-fable5-clawd-lora"
+push_to_hub: true
+hub_model_id: "solanaclawd/Qwen3.5-9B-Fable5-clawd-lora"
+hub_private: false
+
+lora:
+  r: 16                         # 9B model — r=16 captures enough capacity without overfit
+  alpha: 32                     # alpha = 2×r standard
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"                  # full-attention layers (every 4th, 8 total)
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"               # FFN — MoE expert gate projections
+    - "up_proj"
+    - "down_proj"
+  # Note: linear attention (DeltaNet) layers share q/k/v names; PEFT applies
+  # LoRA wherever those modules exist regardless of attention type.
+
+training:
+  per_device_train_batch_size: 4      # A100-80GB: 9B bf16 ≈ 18GB, room for batch=4
+  gradient_accumulation_steps: 4      # effective batch = 16
+  per_device_eval_batch_size: 4
+  num_train_epochs: 3
+  max_steps: -1
+  learning_rate: 1.0e-4               # lower than GPT-2 run — 9B needs finer tuning
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+  optim: "adamw_torch"
+  bf16: true
+  fp16: false
+  tf32: true                          # A100 tf32 matmul for free speedup
+  gradient_checkpointing: true        # saves activation memory on long sequences
+  logging_steps: 10
+  save_steps: 100
+  save_total_limit: 2
+  eval_steps: 100
+  eval_strategy: "no"
+  report_to: ["none"]
+  seed: 42
+  dataloader_num_workers: 4
+  remove_unused_columns: false
+  dataloader_pin_memory: true
+
+quantization:
+  enabled: false                      # 9B in bf16 = 18GB; A100-80GB needs no quantization
+
+sft:
+  packing: false                      # dataset is pre-formatted ChatML; packing risks mixing sessions
+  assistant_only_loss: true           # only compute loss on <|im_start|>assistant turns
+
+eval:
+  base_model: "TeichAI/Qwen3.5-9B-Fable-5-v1"
+  adapter_repo: "solanaclawd/Qwen3.5-9B-Fable5-clawd-lora"
+  eval_dataset_repo: null
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
+  output_dir: "outputs/eval-qwen35-fable5-clawd"
+  report_to: "json"

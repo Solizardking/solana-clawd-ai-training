@@ -50,3 +50,15 @@ python3 blueprints/signal-discovery/agent.py \
   --markets SOL BTC ETH \
   --mode paper
 ```
+
+## Dashboard
+
+```bash
+cd ai-training/nvidia/blueprints/signal-discovery
+python3 -m uvicorn server:app --host 127.0.0.1 --port 8766
+```
+
+Open `http://127.0.0.1:8766/` to view the dark-mode Solana dashboard. It
+shows the live scan, signal strengths, latest report, strategy state, training
+counts, raw API payloads, and a data catalog for both the local blueprint data
+folder and the shared `ai-training/data` folder.

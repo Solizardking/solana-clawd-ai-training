@@ -1,0 +1,85 @@
+# LoRA fine-tune: ordlibrary/DeepSolana-GPT2 + claude-fable-5-clawd-code traces
+#
+# Base model:  ordlibrary/DeepSolana-GPT2   (GPT-2 architecture, Solana-pretrained CPT)
+# Dataset:     armand0e/claude-fable-5-clawd-code → data/clawd_code_deepsol_sft.jsonl
+# Goal:        inject Claude Code agent behaviour into the Solana-aware GPT-2 weights
+#
+# Prepare data first:
+#   python3 scripts/prepare_clawd_code_dataset.py
+#
+# Train:
+#   python3 scripts/train_lora.py --config configs/deepsol_clawd_code_lora_mac.yaml
+#
+# Cloud (A100, no quantization needed at 124M params):
+#   ./scripts/launch_hf_jobs.sh l4x1 configs/deepsol_clawd_code_lora_mac.yaml
+
+base_model: "ordlibrary/DeepSolana-GPT2"
+model_revision: "main"
+torch_dtype: "float32"      # GPT-2 base weights are float32; bfloat16 safe on MPS too
+device_map: "mps"
+
+dataset_repo: null          # local only — prepared by prepare_clawd_code_dataset.py
+dataset_path: "data/clawd_code_deepsol_sft.jsonl"
+dataset_revision: "main"
+max_seq_length: 512         # GPT-2 hard limit is 1024; 512 leaves room for packing overhead
+train_split: "train"
+eval_split: null            # 63-session corpus too small for a held-out eval split
+
+output_dir: "outputs/deepsol-clawd-code-lora-mac"
+push_to_hub: false
+hub_model_id: "ordlibrary/DeepSolana-GPT2-clawd-code-lora"
+hub_private: false
+
+lora:
+  r: 8                      # GPT-2 is 124M params — low rank is sufficient
+  alpha: 16
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "c_attn"              # GPT-2 fused QKV projection
+    - "c_proj"              # GPT-2 output projection
+
+training:
+  per_device_train_batch_size: 1    # MPS: smaller batches = fewer shader recompiles
+  gradient_accumulation_steps: 8    # effective batch = 8
+  per_device_eval_batch_size: 4
+  num_train_epochs: 3               # 3 epochs × 111 steps = ~333 total steps
+  max_steps: -1
+  learning_rate: 2.0e-4             # higher LR acceptable for small model + small dataset
+  lr_scheduler_type: "cosine"
+  warmup_steps: 10
+  weight_decay: 0.01
+  optim: "adamw_torch"
+  bf16: false
+  fp16: false
+  tf32: false
+  gradient_checkpointing: false     # not needed at 124M; also MPS prefers it off
+  logging_steps: 5
+  save_steps: 50
+  save_total_limit: 2
+  eval_steps: 50
+  eval_strategy: "no"               # no eval split
+  report_to: ["none"]
+  seed: 42
+  dataloader_num_workers: 0         # MPS: must be 0
+  remove_unused_columns: false
+  dataloader_pin_memory: false      # MPS: not supported
+
+quantization:
+  enabled: false            # 124M params in float32 ≈ 500 MB — quantization unnecessary
+
+sft:
+  packing: false            # MPS: packing creates large tensors that trigger shader recompiles
+  assistant_only_loss: false  # no chat template on GPT-2; train on all tokens
+
+eval:
+  base_model: "ordlibrary/DeepSolana-GPT2"
+  adapter_repo: "ordlibrary/DeepSolana-GPT2-clawd-code-lora"
+  eval_dataset_repo: null
+  max_new_tokens: 128
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
+  output_dir: "outputs/eval-deepsol-clawd-code"
+  report_to: "json"

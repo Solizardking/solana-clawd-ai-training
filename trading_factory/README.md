@@ -35,11 +35,58 @@ This writes:
 - `data/strategies/nvidia_clawd_agent_plan.json`
 - `data/strategies/strategy_manifest.json`
 
+The generator validates the full bundle after writing and exits non-zero if a
+strategy config, referenced artifact, read plan, command plan, or NVIDIA agent
+plan violates the paper-first contract.
+
+Validate an existing bundle without regenerating files:
+
+```bash
+python3 scripts/build_solana_trading_factory_strategies.py --validate-only
+```
+
+Useful knobs for deterministic reviews:
+
+```bash
+python3 scripts/build_solana_trading_factory_strategies.py \
+  --paper-notional-usdc 150 \
+  --max-ticks 60 \
+  --dry-run
+```
+
 Regenerate only the NVIDIA/NemoClawd plan:
 
 ```bash
 python3 nvidia/integration/nemo_clawd_agent.py --mode paper
 ```
+
+## Python API
+
+From `ai-training/`, the package can be imported without CUDA, Vulcan, wallet
+access, or network calls:
+
+```python
+import sys
+from pathlib import Path
+
+sys.path.insert(0, "trading_factory")
+
+from solana_factory import build_strategy_bundle, validate_strategy_bundle
+
+repo_root = Path(".").resolve()
+output_dir = repo_root / "data" / "strategies"
+manifest = build_strategy_bundle(repo_root=repo_root, output_dir=output_dir)
+report = validate_strategy_bundle(manifest, repo_root=repo_root, output_dir=output_dir)
+assert report.ok, report.errors
+```
+
+Public builders include:
+
+- Vulcan paper TA configs and guarded paper command plans.
+- Rise/Phoenix read-only market-data plans.
+- cuFOLIO Mean-CVaR optimizer handoff specs.
+- NVIDIA/NemoClawd agent-plan generation.
+- Bundle and sub-artifact validators.
 
 ## Execution Policy
 

@@ -51,7 +51,7 @@ from typing import Any
 import torch
 import yaml
 from datasets import DatasetDict, load_dataset, load_from_disk
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -444,6 +444,15 @@ def load_local_dataset(dataset_path: str, dataset_format: str | None) -> Dataset
     path = Path(dataset_path)
     inferred_format = (dataset_format or "").strip().lower()
     if path.is_dir():
+        parquet_files = {
+            split: str(path / f"{split}.parquet")
+            for split in ("train", "eval", "test")
+            if (path / f"{split}.parquet").exists()
+        }
+        if parquet_files:
+            loaded = load_dataset("parquet", data_files=parquet_files)
+            if isinstance(loaded, DatasetDict):
+                return loaded
         try:
             loaded = load_from_disk(str(path))
         except Exception:
@@ -592,15 +601,20 @@ def main() -> None:
     # ---- LoRA ----
     print("[3/6] Applying LoRA adapter")
     lora_cfg = cfg["lora"]
-    peft_config = LoraConfig(
-        r=lora_cfg["r"],
-        lora_alpha=lora_cfg["alpha"],
-        lora_dropout=lora_cfg.get("dropout", 0.05),
-        bias=lora_cfg.get("bias", "none"),
-        task_type=lora_cfg.get("task_type", "CAUSAL_LM"),
-        target_modules=lora_cfg.get("target_modules"),
-    )
-    model = get_peft_model(model, peft_config)
+    resume_adapter_path = cfg.get("resume_adapter_path") or lora_cfg.get("resume_adapter_path")
+    if resume_adapter_path:
+        print(f"      Continuing trainable LoRA from {resume_adapter_path}")
+        model = PeftModel.from_pretrained(model, resume_adapter_path, is_trainable=True)
+    else:
+        peft_config = LoraConfig(
+            r=lora_cfg["r"],
+            lora_alpha=lora_cfg["alpha"],
+            lora_dropout=lora_cfg.get("dropout", 0.05),
+            bias=lora_cfg.get("bias", "none"),
+            task_type=lora_cfg.get("task_type", "CAUSAL_LM"),
+            target_modules=lora_cfg.get("target_modules"),
+        )
+        model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 
     # ---- Dataset ----
@@ -610,6 +624,21 @@ def main() -> None:
     train_ds = ds[cfg.get("train_split", "train")]
     eval_split = cfg.get("eval_split", "eval")
     eval_ds = ds.get(eval_split, None) if eval_split else None
+
+    max_train_samples = cfg.get("max_train_samples")
+    if max_train_samples:
+        max_train_samples = int(max_train_samples)
+        if max_train_samples > 0 and len(train_ds) > max_train_samples:
+            print(f"  train capped={max_train_samples} of {len(train_ds)}")
+            train_ds = train_ds.select(range(max_train_samples))
+
+    max_eval_samples = cfg.get("max_eval_samples")
+    if eval_ds is not None and max_eval_samples:
+        max_eval_samples = int(max_eval_samples)
+        if max_eval_samples > 0 and len(eval_ds) > max_eval_samples:
+            print(f"  eval capped={max_eval_samples} of {len(eval_ds)}")
+            eval_ds = eval_ds.select(range(max_eval_samples))
+
     print(f"  train={len(train_ds)}  eval={len(eval_ds) if eval_ds else 0}")
 
     # ---- SFTConfig ----

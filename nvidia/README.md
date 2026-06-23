@@ -67,6 +67,34 @@ python3 nvidia/blueprints/signal-discovery/agent.py --mode paper
 python3 nvidia/scripts/verify_nvidia.py
 ```
 
+## Local Mac Control Plane
+
+For an Apple Silicon local run that ties the blueprints, model-kit, trading
+factory, AIQ, transaction-foundation preflight, and optional RAG path together:
+
+```bash
+cd /Users/8bit/Downloads/solana-clawd/ai-training
+python3 scripts/run_local_clawd_stack.py --best-effort
+```
+
+Details, local URLs, and model choices are in
+[`LOCAL_MAC_STACK.md`](LOCAL_MAC_STACK.md).
+
+Hosted RAG API:
+
+```bash
+open https://solana-clawd-rag.fly.dev/about
+curl -sS https://solana-clawd-rag.fly.dev/health
+curl -sS https://solana-clawd-rag.fly.dev/query \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What does the Solana Clawd NVIDIA stack do?","top_k":5}'
+```
+
+The protected dashboard lives at `https://solana-clawd-rag.fly.dev/admin` and
+requires `CLAWD_RAG_ADMIN_KEY` to be set as a Fly secret. Deployment notes and
+the Fly config are in
+[`blueprints/enterprise-rag/README.md`](blueprints/enterprise-rag/README.md).
+
 Perps signal agent quick start:
 
 ```bash

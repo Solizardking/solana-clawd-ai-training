@@ -1,6 +1,6 @@
 # Clawd DAO — Architecture and Safety Design
 
-*Last updated: June 18, 2026*
+*Last updated: June 22, 2026*
 
 ## Core constraint (non-negotiable)
 
@@ -186,20 +186,39 @@ pnpm trigger:deploy
 
 ---
 
-## Onchain registration: one-shot curl
+## Model-kit handoff and onchain registration
+
+The current DAO handoff lane is `solanaclawd/solana-tx-foundation-7b`, trained
+from `solanaclawd/solana-tx-foundation-unified` against
+`Qwen/Qwen2.5-7B-Instruct`. The unified dataset contains 82,169 rows: 17,262
+CPT examples and 64,907 SFT examples.
+
+The end-to-end model-kit handoff is documented in `MODEL_KIT_HANDOFF.md`:
+
+```text
+model-kit manifest
+  -> local SAS-style training_run / registry attestation record
+  -> CAAP/1.0 payload preview
+  -> off-chain registry write
+  -> optional initialize_model PDA on Solana
+```
 
 ### Off-chain index only (no Solana wallet required)
 
 ```bash
 ./dao/register_model.sh \
-  --hf-model "solanaclawd/solana-clawd-1.5b" \
-  --eval-accuracy 0.60 \
-  --dataset-size 36109
+  --dry-run \
+  --hf-model "solanaclawd/solana-tx-foundation-7b" \
+  --base-model "Qwen/Qwen2.5-7B-Instruct" \
+  --dataset-size 82169 \
+  --output outputs/dao/tx-foundation-caap.json
 
-# With auto-computed hash:
+# With an artifact or model-kit manifest hash:
 ./dao/register_model.sh \
-  --hf-model "solanaclawd/solana-clawd-1.5b" \
-  --model-hash "sha256:$(sha256sum ../scripts/train_lora.py | awk '{print $1}')"
+  --hf-model "solanaclawd/solana-tx-foundation-7b" \
+  --base-model "Qwen/Qwen2.5-7B-Instruct" \
+  --dataset-size 82169 \
+  --model-hash "sha256:<reviewed-artifact-hash>"
 ```
 
 This POSTs to `https://onchain.x402.wtf/api/register` with a CAAP/1.0 JSON payload. The registry at `onchain.x402.wtf/.well-known/clawd-registry.json` is updated immediately (no Solana tx cost).
@@ -208,7 +227,10 @@ This POSTs to `https://onchain.x402.wtf/api/register` with a CAAP/1.0 JSON paylo
 
 ```bash
 ./dao/register_model.sh --onchain \
-  --hf-model "solanaclawd/solana-clawd-1.5b" \
+  --hf-model "solanaclawd/solana-tx-foundation-7b" \
+  --base-model "Qwen/Qwen2.5-7B-Instruct" \
+  --dataset-size 82169 \
+  --model-hash "sha256:<reviewed-artifact-hash>" \
   --keypair ~/.config/solana/id.json \
   --cluster devnet
 
@@ -226,10 +248,11 @@ curl -X POST https://onchain.x402.wtf/api/register \
     "model_hash": "sha256:abc123",
     "model_type": "TextGeneration",
     "api_endpoint": "https://clawd-box-router.fly.dev/v1",
-    "hf_model_id": "solanaclawd/solana-clawd-1.5b",
-    "dataset_size": 36109,
-    "eval_accuracy": 0.60,
-    "wandb_run": "ktvtubjs",
+    "hf_model_id": "solanaclawd/solana-tx-foundation-7b",
+    "base_model": "Qwen/Qwen2.5-7B-Instruct",
+    "dataset_size": 82169,
+    "eval_accuracy": 0.00,
+    "wandb_run": "",
     "cluster": "devnet",
     "protocol": "CAAP/1.0",
     "clawd_token": "8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump"
@@ -246,6 +269,8 @@ Every major artifact gets a SAS attestation. Compressed attestations use Light P
 | --- | --- | --- | --- |
 | Dataset snapshot | compressed | no | ~0.00003 SOL |
 | Adapter upload | compressed | no | ~0.00003 SOL |
+| Training run | compressed | no | ~0.00003 SOL |
+| Registry handoff | standard | no | ~0.002 SOL |
 | Eval result (W&B Weave) | standard | no | ~0.002 SOL |
 | Governance proposal passed | standard | yes | ~0.003 SOL |
 | Key rotation | standard | yes | ~0.003 SOL |
@@ -256,19 +281,24 @@ Nullifiers (`NFLx5WGPrTHHvdRNsidcrNcLxRruMC92E4yv7zhZBoT`) prevent each proposal
 # Create compressed dataset attestation
 pnpm tsx dao/attestation/create_attestation.ts \
   --type dataset \
-  --model-id "solanaclawd/solana-clawd-1.5b" \
-  --size 36109 \
-  --hash "sha256:$(sha256sum ../data/solana_clawd_merged.jsonl | awk '{print $1}')" \
+  --model-id "solanaclawd/solana-tx-foundation-7b" \
+  --hf-repo "solanaclawd/solana-tx-foundation-unified" \
+  --size 82169 \
+  --hash "sha256:<reviewed-dataset-hash>" \
   --compressed \
   --keypair ~/.config/solana/id.json
 
-# Create eval attestation (dry run first)
+# Create training-run attestation (dry run first)
 pnpm tsx dao/attestation/create_attestation.ts \
-  --type eval \
-  --model-id "solanaclawd/solana-clawd-1.5b" \
-  --accuracy 0.60 \
-  --wandb-run "ktvtubjs" \
-  --dry-run
+  --type training_run \
+  --model-id "solanaclawd/solana-tx-foundation-7b" \
+  --base-model "Qwen/Qwen2.5-7B-Instruct" \
+  --hf-repo "solanaclawd/solana-tx-foundation-unified" \
+  --size 82169 \
+  --hash "sha256:<reviewed-artifact-hash>" \
+  --job-id "pending-hf-credits" \
+  --dry-run \
+  --output outputs/dao/attestations.jsonl
 
 # Verify any attestation (no trust required)
 solana account <ATTESTATION_PDA> --url devnet --output json
@@ -306,6 +336,7 @@ The DAO controls: model training priorities, dataset curation, compute budget, r
 | File | Purpose |
 | --- | --- |
 | `DAO_DESIGN.md` | This document |
+| `MODEL_KIT_HANDOFF.md` | Model-kit manifest to DAO registration/attestation runbook |
 | `register_model.sh` | One-shot curl/onchain model registration |
 | `register_model.ts` | TypeScript `initialize_model` Anchor instruction |
 | `attestation/create_attestation.ts` | SAS compressed attestation creator |

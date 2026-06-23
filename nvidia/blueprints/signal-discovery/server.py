@@ -32,6 +32,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # ── Path setup ────────────────────────────────────────────────────────────────
@@ -41,6 +43,12 @@ HERE  = Path(__file__).parent
 # parents[3] = solana-clawd repo root
 ROOT  = HERE.parents[3]
 DATA  = ROOT / "ai-training" / "data"
+BLUEPRINT_DATA = HERE / "data"
+DATA_SOURCES = {
+    "blueprint": BLUEPRINT_DATA,
+    "training": DATA,
+}
+FRONTEND = HERE / "frontend"
 
 sys.path.insert(0, str(HERE))
 
@@ -66,6 +74,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/assets", StaticFiles(directory=FRONTEND), name="assets")
+
 
 # ── Models ────────────────────────────────────────────────────────────────────
 
@@ -90,6 +100,75 @@ class FinalizeRequest(BaseModel):
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _iso_from_timestamp(value: float) -> str:
+    return datetime.fromtimestamp(value, tz=timezone.utc).isoformat()
+
+
+def _json_preview(path: Path, max_chars: int = 1800) -> str:
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".json":
+            with path.open() as f:
+                text = json.dumps(json.load(f), indent=2)
+        elif suffix == ".jsonl":
+            rows = []
+            with path.open() as f:
+                for _, line in zip(range(5), f):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        rows.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        rows.append(line)
+            text = json.dumps(rows, indent=2)
+        elif suffix in {".md", ".txt", ".csv"}:
+            with path.open(errors="replace") as f:
+                text = f.read(max_chars + 1)
+        else:
+            return ""
+    except Exception as exc:
+        return f"preview unavailable: {exc}"
+
+    if len(text) > max_chars:
+        return text[:max_chars] + "\n..."
+    return text
+
+
+def _record_count(path: Path, cap: int = 250_000) -> tuple[int | None, bool]:
+    suffix = path.suffix.lower()
+    try:
+        if suffix == ".jsonl":
+            count = 0
+            with path.open() as f:
+                for count, _ in enumerate(f, start=1):
+                    if count >= cap:
+                        return count, True
+            return count, False
+        if suffix == ".json":
+            with path.open() as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                return len(data), False
+            if isinstance(data, dict):
+                for key in ("discoveries", "rows", "records", "items", "data"):
+                    rows = data.get(key)
+                    if isinstance(rows, list):
+                        return len(rows), False
+                return len(data), False
+    except Exception:
+        return None, False
+    return None, False
+
+
+def _report_path() -> Path | None:
+    for base in (BLUEPRINT_DATA, DATA):
+        path = base / "signal_discovery_report.json"
+        if path.exists():
+            return path
+    return None
 
 
 def _signal_results_to_dict(market: str, timeframe: str = "1h") -> dict:
@@ -123,6 +202,16 @@ def _signal_results_to_dict(market: str, timeframe: str = "1h") -> dict:
 VULCAN_AVAILABLE = shutil.which("vulcan") is not None
 
 
+@app.get("/")
+def dashboard():
+    return FileResponse(FRONTEND / "index.html")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(FRONTEND / "favicon.svg", media_type="image/svg+xml")
+
+
 @app.get("/api/health")
 def health():
     return {
@@ -141,6 +230,7 @@ def status():
         "vulcan_available": VULCAN_AVAILABLE,
         "vulcan_path": shutil.which("vulcan"),
         "data_dir": str(DATA),
+        "data_sources": {name: str(path) for name, path in DATA_SOURCES.items()},
         "python": sys.version,
         "env": {
             "RENDER": os.environ.get("RENDER", ""),
@@ -189,11 +279,47 @@ def scan(req: ScanRequest):
 
 @app.get("/api/report")
 def get_report():
-    report_path = DATA / "signal_discovery_report.json"
-    if not report_path.exists():
+    report_path = _report_path()
+    if report_path is None:
         return {"error": "no report yet", "hint": "POST /api/scan first"}
     with report_path.open() as f:
-        return json.load(f)
+        report = json.load(f)
+    report["_source_path"] = str(report_path)
+    return report
+
+
+@app.get("/api/data/catalog")
+def data_catalog():
+    files = []
+    sources = {}
+    for source_name, base in DATA_SOURCES.items():
+        sources[source_name] = str(base)
+        if not base.exists():
+            continue
+        for path in sorted(base.rglob("*")):
+            if not path.is_file() or path.name.startswith("."):
+                continue
+            stat = path.stat()
+            record_count, records_truncated = _record_count(path)
+            files.append({
+                "source": source_name,
+                "path": str(path.relative_to(base)),
+                "absolute_path": str(path),
+                "extension": path.suffix.lower().lstrip(".") or "file",
+                "size_bytes": stat.st_size,
+                "modified": _iso_from_timestamp(stat.st_mtime),
+                "record_count": record_count,
+                "records_truncated": records_truncated,
+                "preview": _json_preview(path),
+            })
+
+    return {
+        "timestamp": _now(),
+        "sources": sources,
+        "files": files,
+        "count": len(files),
+        "total_bytes": sum(item["size_bytes"] for item in files),
+    }
 
 
 @app.post("/api/strategy/launch")
@@ -252,7 +378,7 @@ def finalize_strategy(req: FinalizeRequest):
 
 @app.get("/api/evolution")
 def evolution_log(limit: int = 100):
-    log_path = Path("data/strategy_evolution.jsonl")
+    log_path = BLUEPRINT_DATA / "strategy_evolution.jsonl"
     if not log_path.exists():
         log_path = DATA / "strategy_evolution.jsonl"
     if not log_path.exists():

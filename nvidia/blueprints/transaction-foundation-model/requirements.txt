@@ -11,6 +11,10 @@ peft>=0.12.0
 trl>=0.11.0
 huggingface_hub>=0.24.0
 
+# Optional accelerated backend for train_unsloth.py.
+# Install in the GPU environment:
+#   uv pip install unsloth --torch-backend=auto
+
 # NeMo AutoModel (for pretrain_financial_decoder.yaml path)
 # Install separately: pip install nemo-automodel
 # See: https://github.com/NVIDIA/NeMo

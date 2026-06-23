@@ -55,9 +55,11 @@ def header(stage: str) -> None:
 def build_runtime(config_path: str | Path | None) -> dict:
     cfg = load_tx_config(config_path)
     output_dir = Path(cfg["output_dir"])
+    trainer = "train_unsloth.py" if cfg.get("training_backend") == "unsloth" else "train.py"
     return {
         "cfg": cfg,
         "config": Path(cfg["config_path"]),
+        "trainer": HERE / trainer,
         "output_dir": output_dir,
         "cpt_data": Path(cfg["cpt_data"]),
         "sft_data": Path(cfg["sft_data"]),
@@ -89,7 +91,7 @@ def stage_cpt(dry_run: bool, ctx: dict, smoke: bool = False) -> bool:
         return False
 
     cmd = [
-        sys.executable, str(HERE / "train.py"),
+        sys.executable, str(ctx["trainer"]),
         "--config", str(ctx["config"]),
         "--stage", "cpt",
         "--cpt-data", str(ctx["cpt_data"]),
@@ -106,7 +108,7 @@ def stage_cpt(dry_run: bool, ctx: dict, smoke: bool = False) -> bool:
 def stage_sft(dry_run: bool, ctx: dict, smoke: bool = False) -> bool:
     header("sft")
     cmd = [
-        sys.executable, str(HERE / "train.py"),
+        sys.executable, str(ctx["trainer"]),
         "--config", str(ctx["config"]),
         "--stage", "sft",
         "--sft-data", str(ctx["sft_data"]),
@@ -198,6 +200,7 @@ def main() -> None:
     print(f"{'#'*60}")
     print(f"  stages:       {args.stages}")
     print(f"  config:       {ctx['config']}")
+    print(f"  trainer:      {ctx['trainer'].name}")
     print(f"  dry_run:      {args.dry_run}")
     print(f"  smoke:        {args.smoke}")
     print(f"  jupiter_key:  {'yes' if JUPITER_API_KEY else 'no'}")

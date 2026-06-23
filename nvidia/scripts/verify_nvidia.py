@@ -19,6 +19,7 @@ sys.path.insert(0, str(BASE_DIR / "nvidia" / "blueprints" / "transaction-foundat
 
 from solana_factory.factory import build_strategy_bundle  # noqa: E402
 from solana_factory.nvidia_agent import NVIDIA_BLUEPRINTS  # noqa: E402
+from solana_factory.validation import validate_strategy_bundle  # noqa: E402
 from nemo_clawd import write_nemo_clawd_assets  # noqa: E402
 from tx_foundation_common import build_dataset_manifest  # noqa: E402
 from notebook_bridge import NOTEBOOKS, check_notebook  # noqa: E402
@@ -164,6 +165,14 @@ def verify_generated_bundle() -> bool:
     with tempfile.TemporaryDirectory(prefix="solana-clawd-nvidia-") as tmpdir:
         output_dir = Path(tmpdir)
         manifest = build_strategy_bundle(repo_root=BASE_DIR, output_dir=output_dir)
+        validation_report = validate_strategy_bundle(
+            manifest=manifest,
+            repo_root=BASE_DIR,
+            output_dir=output_dir,
+        )
+        if not validation_report.ok:
+            print(f"FAIL generated bundle validation failed: {json.dumps(validation_report.errors, sort_keys=True)}")
+            return False
         required_keys = {
             "optimizer_handoff",
             "rise_data_plan",

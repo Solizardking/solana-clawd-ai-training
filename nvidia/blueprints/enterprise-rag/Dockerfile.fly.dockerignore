@@ -1,0 +1,15 @@
+**
+!nvidia/
+!nvidia/blueprints/
+!nvidia/blueprints/enterprise-rag/
+!nvidia/blueprints/enterprise-rag/**
+!data/
+!data/nvidia_rag_store/
+!data/nvidia_rag_store/**
+nvidia/blueprints/enterprise-rag/.venv
+nvidia/blueprints/enterprise-rag/.venv/**
+nvidia/blueprints/enterprise-rag/__pycache__
+nvidia/blueprints/enterprise-rag/__pycache__/**
+**/.DS_Store
+**/__pycache__
+**/__pycache__/**

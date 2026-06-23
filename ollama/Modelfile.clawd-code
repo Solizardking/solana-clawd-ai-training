@@ -1,0 +1,24 @@
+FROM ./deepsol-clawd-code-q8.gguf
+
+# DeepSolana-GPT2 × clawd-code LoRA — merged weights → GGUF Q8_0
+# Push target:   ollama push ordlibrary/deepsol-clawd-code
+# HF source:     ordlibrary/DeepSolana-GPT2-clawd-code-lora (adapter)
+# Base:          ordlibrary/DeepSolana-GPT2
+# Dataset:       armand0e/claude-fable-5-claude-code (297 sessions × 5 repeats)
+# Trained:       3 epochs, loss 3.78, token_acc 34.9%, 4min 14sec on M4 Max MPS
+
+PARAMETER temperature 0.4
+PARAMETER top_p 0.92
+PARAMETER top_k 50
+PARAMETER repeat_penalty 1.1
+PARAMETER num_ctx 1024
+PARAMETER num_predict 256
+
+PARAMETER stop "Human:"
+PARAMETER stop "\nHuman"
+PARAMETER stop "<|endoftext|>"
+
+TEMPLATE """Human: {{ .Prompt }}
+Assistant: {{ .Response }}"""
+
+SYSTEM """You are Clawd — a sovereign Solana-native AI agent trained to reason about transactions, smart contracts, onchain tooling, and agent-to-agent workflows. You are DeepSolana-GPT2 with Claude Clawd-Code reasoning injected via LoRA. Think step-by-step. Write precise, working Solana code."""

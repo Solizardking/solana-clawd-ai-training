@@ -35,6 +35,19 @@ python3 scripts/organize_ai_training.py --check
 python3 nvidia/scripts/verify_nvidia.py --strict
 ```
 
+## 8 Bit Labs Website
+
+The public website for the training stack lives in
+[`8bitlabs.ai/`](8bitlabs.ai/). It packages the current datasets, model family,
+NVIDIA trading factory lane, W&B/Hugging Face release trail, public inference
+mesh, Core AI runtime lanes, Clawd chat, and Solana devnet model-registry proofs
+into a domain-ready static site for `https://8bitlabs.ai`.
+
+```bash
+cd ai-training/8bitlabs.ai
+python3 -m http.server 8088
+```
+
 ## Fast Data Rerun
 
 Use the generated model-kit lane to rebuild cleaner reasoning/tooling datasets
@@ -50,15 +63,104 @@ git. The optimizer dedupes examples, filters malformed/secret-like rows, adds
 safe reasoning/tooling guidance, and emits processed train/eval/test splits via
 `scripts/prepare_dataset.py`.
 
+## Local Build Artifacts
+
+These files are produced by the local training and export pipeline and are
+**intentionally git-ignored** (large binaries). The table below documents what
+each artifact is, how it was produced, and how it is used.
+
+### Data — `data/model_kit/`
+
+| Path | Format | What it is |
+|---|---|---|
+| `data/model_kit/solana_clawd_reasoning_tooling_sft.jsonl` | JSONL `{"messages":[...]}` | Unified SFT corpus after dedup + quality filter. Source for all Qwen2.5-7B and Qwen2.5-1.5B LoRA runs. Built by `scripts/optimize_training_data.py` from the six merged SFT JSONL files. |
+| `data/model_kit/reasoning_tooling_processed/train/data-00000-of-00001.arrow` | Apache Arrow IPC | Tokenized + packed training split in Arrow format. Written by `scripts/prepare_dataset.py --output data/model_kit/reasoning_tooling_processed`. Loaded directly by HuggingFace `datasets.load_from_disk()` — faster than re-tokenizing from JSONL on every run. |
+| `data/model_kit/reasoning_tooling_processed/train.parquet` | Parquet | Parquet mirror of the same training split. Written alongside the Arrow shard. Used for Hub upload and inspection in tools like DuckDB or pandas. |
+| `data/model_kit/clawd_masterpiece_sft.jsonl` | JSONL `{"messages":[...]}` | Masterpiece-lane SFT corpus. Built by `scripts/build_masterpiece_dataset.py`. Covers advanced Solana reasoning, ZK, and DeFi strategy examples layered on top of the core-AI base. |
+| `data/model_kit/clawd_masterpiece_processed/train/data-00000-of-00001.arrow` | Apache Arrow IPC | Tokenized training split for the masterpiece lane. Same structure as `reasoning_tooling_processed` — produced by `prepare_dataset.py` on the masterpiece JSONL. |
+| `data/model_kit/clawd_masterpiece_processed/train.parquet` | Parquet | Parquet mirror of the masterpiece training split. |
+
+### Ollama Build — `ollama/build/`
+
+These are the artifacts used to push models to the local Ollama registry and
+publish to `registry.hub.docker.com/8bit/` via `ollama push`. The workflow is:
+train LoRA → merge weights → export GGUF → `ollama create` from Modelfile.
+
+| Path | Format | What it is |
+|---|---|---|
+| `ollama/build/solana-clawd-core-ai-1.5b-merged/model.safetensors` | SafeTensors | **Merged** Core AI 1.5B model — base Qwen2.5-1.5B-Instruct weights fused with the `solanaclawd/solana-clawd-core-ai-1.5b-lora` LoRA adapter using `peft.merge_adapter()`. This is the full-weight model before GGUF export. |
+| `ollama/build/solana-clawd-core-ai-1.5b-fp16.gguf` | GGUF FP16 | FP16 GGUF export of the merged Core AI 1.5B model. Produced by `llama.cpp convert-hf-to-gguf`. Full-precision; used as the source for quantization. |
+| `ollama/build/solana-clawd-core-ai-1.5b-Q4_K_M.gguf` | GGUF Q4_K_M | 4-bit K-quant (medium) GGUF — the **production Ollama model** pushed as `8bit/solana-clawd-core-ai:latest`. ~986 MB on disk. Best quality/size trade-off for local inference. |
+| `ollama/build/solana-trading-factory-8b-merged/model.safetensors` | SafeTensors | **Merged** Trading Factory 8B model — Hermes-3-Llama-3.1-8B base fused with the `solanaclawd/solana-nvidia-trading-factory-8b-lora` adapter. Full weights before GGUF export. |
+| `ollama/build/solana-trading-factory-8b-fp16.gguf` | GGUF FP16 | FP16 GGUF export of the merged Trading Factory 8B model. Source for quantization. |
+| `ollama/build/solana-trading-factory-8b-Q4_K_M.gguf` | GGUF Q4_K_M | 4-bit K-quant (medium) GGUF — the **production Ollama model** pushed as `8bit/solana-trading-factory:latest`. ~4.9 GB on disk. Runs tool-use, perps reasoning, and Phoenix DEX strategy generation locally. |
+
+### How these fit together
+
+```
+JSONL sources (data/*.jsonl)
+  └─► optimize_training_data.py       ← dedup, filter, quality-score
+        └─► data/model_kit/*_sft.jsonl
+              └─► prepare_dataset.py   ← tokenize, split, pack
+                    └─► *_processed/  (Arrow + Parquet)
+                          └─► train_lora.py / SFTTrainer
+
+LoRA adapter (Hub: solanaclawd/*.lora)
+  └─► merge_adapter / export script
+        ├─► ollama/build/*-merged/model.safetensors
+        ├─► ollama/build/*-fp16.gguf   ← llama.cpp convert
+        └─► ollama/build/*-Q4_K_M.gguf ← llama.cpp quantize
+              └─► ollama create / ollama push → 8bit/*:latest
+```
+
+## Next Training Job
+
+The next model to train is the transaction-foundation CPT+SFT lane:
+
+```bash
+python3 nvidia/blueprints/transaction-foundation-model/preflight.py --check-hf-dataset --check-hf-jobs
+python3 scripts/decide_next_training_job.py
+bash scripts/launch_transaction_foundation_hf_job.sh a100-large 12h
+```
+
+Current decision: train `solanaclawd/solana-tx-foundation-7b` from
+`solanaclawd/solana-tx-foundation-unified` on `Qwen/Qwen2.5-7B-Instruct`.
+The local preflight is ready, the unified HF dataset is present, and the public
+model repo does not yet expose adapter files. Previous launch logs show HF Jobs
+`402 Payment Required`, so add Jobs credits before the real launch.
+
+To bring the local Mac stack together first:
+
+```bash
+python3 scripts/run_local_clawd_stack.py --best-effort
+```
+
+This runs the model-kit doctor, NVIDIA config validation, strategy bundle,
+AIQ plan gate, tx-foundation preflight, tx-foundation dry-run plan, and perps
+manifest locally without uploads, live trading, or remote jobs. See
+[`nvidia/LOCAL_MAC_STACK.md`](nvidia/LOCAL_MAC_STACK.md) for the local server
+commands and model ladder.
+
+The hosted NVIDIA RAG API is published at `https://solana-clawd-rag.fly.dev`.
+It serves `/health` and `/query`, backed by the local FAISS store in
+`data/nvidia_rag_store` and NVIDIA/NIM generation when `NVIDIA_API_KEY` is set
+as a Fly secret.
+
+```bash
+curl -sS https://solana-clawd-rag.fly.dev/query \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What does the Solana Clawd RAG API know?","top_k":5}'
+```
+
 ## Models
 
 | Model | Size | Status | Links |
 |---|---|---|---|
+| `solanaclawd/clawd-solana-masterpiece-qwen15-lora` | 1.5B LoRA | ✅ **Live** — latest Qwen 1.5B adapter | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora) |
 | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | 1.5B LoRA | ✅ **Live** — train_loss 0.9008, token_acc 82.9% | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora) |
 | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | 8B LoRA | ✅ **Live** — Hermes-3, Solana perps | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora) |
-| `solanaclawd/solana-clawd-1.5b` | 1.5B merged | ✅ **Live** — vLLM / TGI / Ollama ready | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-1.5b) |
-| `solanaclawd/solana-clawd-7b-lora` | 7B LoRA | 🔄 **Training** | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-7b-lora) |
-| `solanaclawd/solana-tx-foundation-1.5b` | 1.5B CPT+SFT | 🔄 **Training** | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-tx-foundation-1.5b) |
+| `solanaclawd/solana-tx-foundation-7b` | 7B CPT+SFT LoRA | ⏭️ **Next** — ready to launch after HF Jobs credits | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-tx-foundation-7b) |
+| `solanaclawd/solana-clawd-1.5b` | 1.5B merged | ⚠️ **Placeholder** — public repo only has `.gitattributes` | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-1.5b) |
 
 ## Datasets
 
@@ -68,6 +170,7 @@ safe reasoning/tooling guidance, and emits processed train/eval/test splits via
 | `solanaclawd/solana-clawd-instruct` | 36,109 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) |
 | `solanaclawd/solana-clawd-realtime-research-instruct` | 29,058 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) |
 | `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | 142 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) |
+| `solanaclawd/solana-tx-foundation-unified` | 17,262 CPT + 64,907 SFT | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-unified) |
 | `solanaclawd/solana-tx-foundation-cpt` | 19,542 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-cpt) |
 | `solanaclawd/solana-clawd-eval` | 13 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-eval) |
 

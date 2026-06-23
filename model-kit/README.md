@@ -4,7 +4,9 @@ The Solana AI Model Kit is the terminal-first training surface for Clawd AI:
 drop in PDFs, JSON/JSONL, CSV/parquet, notebooks, markdown, YAML, or image
 context; build a public-safe SFT dataset; optionally train LoRA adapters; stage
 Hugging Face and Ollama releases; and register the model with CAAP/1.0 at
-`onchain.x402.wtf`.
+`onchain.x402.wtf`. The site also includes a live model arena for running chat
+or code-generation benchmarks across OpenAI-compatible providers, Anthropic,
+Gemini, and custom endpoints, with realtime results and X share links.
 
 ![Solana AI Model Kit](../../assets/solana-ai-model-kit.svg)
 
@@ -12,6 +14,9 @@ Hugging Face and Ollama releases; and register the model with CAAP/1.0 at
 
 | Surface | Link |
 | --- | --- |
+| Model kit site | https://models.x402.wtf |
+| 8 Bit Labs model kit | https://8bitlabs.ai/model-kit |
+| Register page | https://register.x402.wtf |
 | Onchain registry | https://onchain.x402.wtf |
 | Registry manifest | https://onchain.x402.wtf/.well-known/clawd-registry.json |
 | GitHub training repo | https://github.com/solizardking/solana-clawd-ai-training |
@@ -47,11 +52,66 @@ Open the frontend console:
 ai-training/model-kit/bin/clawd-model-kit ui
 ```
 
-The static app is also available at:
+The deployable static app is also available at:
 
 ```text
 ai-training/model-kit/frontend/index.html
+ai-training/model-kit/frontend/register.html
 ```
+
+Render/Vercel deployment is documented in `docs/DEPLOYMENT.md`.
+
+## Model Arena
+
+The homepage at `models.x402.wtf` starts with a model arena. It can compare any
+provider with an OpenAI-compatible `/chat/completions` endpoint, plus built-in
+adapters for Anthropic and Gemini. Provider keys can be supplied per run in the
+browser form or via backend environment variables such as `OPENROUTER_API_KEY`,
+`OPENAI_API_KEY`, `XAI_API_KEY`, `ANTHROPIC_API_KEY`, and `GEMINI_API_KEY`.
+Keys are not written into run records.
+
+OpenRouter is the primary multi-model lane. Set `OPENROUTER_API_KEY` on the API
+server, then choose one of the `OPENROUTER_*` presets from the arena model-id
+field. `/api/arena/providers` exposes each preset as `{ env, label, model }`,
+and `render.yaml` carries the deployment defaults. Repeated shell variable names
+follow normal environment semantics: the final value is canonical, with older
+meanings kept under explicit aliases such as `OPENROUTER_CHATGPT_LATEST`,
+`OPENROUTER_MODEL6`, `OPENROUTER_RIVER_FLOW`, and `OPENROUTER_FREE_MODEL1`.
+
+Primary OpenRouter defaults:
+
+| Env | Default model |
+| --- | --- |
+| `OPENROUTER_DEFAULT_FREE_MODEL` | `nvidia/llama-nemotron-rerank-vl-1b-v2:free` |
+| `OPENROUTER_FUSION` | `openrouter/fusion` |
+| `OPENROUTER_KIMI_MODEL` | `moonshotai/kimi-k2.7-code` |
+| `OPENROUTER_CLAWD_DEFAULT_MODEL` | `anthropic/claude-opus-4.8-fast` |
+| `OPENROUTER_GPT` | `openai/gpt-5.2` |
+| `OPENROUTER_GROK43` | `x-ai/grok-4.3` |
+| `OPENROUTER_CODEX` | `openai/gpt-5.1-codex-max` |
+| `OPENROUTER_NVIDIA_MODEL` | `nvidia/nemotron-3-ultra-550b-a55b` |
+| `OPENROUTER_QWEN_MODEL` | `qwen/qwen3.7-plus` |
+| `OPENROUTER_DEEP` | `deepseek/deepseek-v3.2` |
+
+Arena API:
+
+| Endpoint | Use |
+| --- | --- |
+| `GET /api/arena/providers` | Provider templates, adapter metadata, and code execution policy. |
+| `POST /api/arena/runs` | Start a chat or code arena run. |
+| `GET /api/arena/runs/{id}/events` | Server-sent realtime run events. |
+| `GET /api/arena/runs/{id}` | Fetch recorded outputs and benchmarks. |
+| `GET /api/arena/runs/{id}/share` | Build a shareable X intent URL. |
+
+Code mode asks each model for Python, extracts the fenced code block, and runs it
+with a timeout, temporary working directory, isolated Python flags, basic
+resource limits, and a denylist for filesystem/network/process imports. Set
+`MODEL_ARENA_ENABLE_CODE_EXECUTION=0` to disable server-side execution.
+
+Completed runs are held in memory for realtime reads and appended to
+`MODEL_ARENA_LOG_PATH` as JSONL, defaulting to `/tmp/model-arena-runs.jsonl`.
+The API rehydrates completed runs from that log for `/api/arena/runs/{id}` and
+shared `?arenaRun=` links; use a mounted path for long-lived production records.
 
 ## What It Builds
 
@@ -83,8 +143,14 @@ Side effects are gated:
 | `bin/clawd-model-kit` | Terminal entrypoint. |
 | `clawd_model_kit.py` | Python CLI wrapper around existing `ai-training/scripts/*`. |
 | `config.example.yaml` | Example project/lane defaults. |
-| `frontend/` | Static operational console and command builder. |
+| `frontend/` | Static `models.x402.wtf` and `register.x402.wtf` pages. |
+| `backend/` | Render-ready FastAPI status, arena, Constitution metadata, and registration proxy. |
+| `backend/constitution_manifest.json` | Public hash commitment for `CONSTITUTION.md`, `three-laws.md`, and `CLAWD.md`. |
+| `render.yaml` | Render blueprint for the backend API. |
+| `vercel.json` | Vercel static frontend and host rewrite config. |
+| `package.json` | Static-site build/dev scripts. |
 | `docs/ONBOARDING.md` | End-to-end local walkthrough. |
+| `docs/DEPLOYMENT.md` | Render/Vercel deployment and domain wiring. |
 | `docs/HUGGING_FACE.md` | HF CLI, upload, and Jobs guide. |
 | `docs/UNSLOTH.md` | Optional Unsloth local training guide. |
 | `docs/NVIDIA_BLUEPRINTS.md` | NVIDIA blueprint mapping. |
@@ -96,11 +162,13 @@ Side effects are gated:
 
 ```bash
 ai-training/model-kit/bin/clawd-model-kit --help
+ai-training/model-kit/bin/clawd-model-kit constitution --strict
 ```
 
 | Command | Use |
 | --- | --- |
 | `doctor` | Check Python, git, HF CLI/auth, Ollama, env-key presence, frontend files. |
+| `constitution` | Print the Constitution, three-laws, and Clawd context hash gate. |
 | `init` | Create `data/incoming`, `data/model_kit`, and `outputs/model_kit`. |
 | `ingest` | Parse files into SFT JSONL, dataset splits, manifest, and dataset card. |
 | `prepare` | Prepare an existing messages JSONL into HF Dataset splits. |
@@ -142,10 +210,11 @@ uploads.
 | Core AI dataset | `solanaclawd/solana-clawd-core-ai-instruct` | 35,173 examples |
 | Realtime research dataset | `solanaclawd/solana-clawd-realtime-research-instruct` | 29,058 examples |
 | NVIDIA trading factory dataset | `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | 142 examples, 127/7/8 splits |
-| Transaction foundation CPT dataset | `solanaclawd/solana-tx-foundation-cpt` | 19,542 examples, text CPT format |
+| Transaction foundation unified dataset | `solanaclawd/solana-tx-foundation-unified` | 82,169 examples: 17,262 CPT + 64,907 SFT |
 | Perps tool manifest | `data/model_kit/perps_tool_manifest.json` | 13 model-facing Solana/Phoenix/Jupiter tools |
 | Core 1.5B LoRA | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | Core AI adapter lane |
-| Solana TX Foundation 1.5B | `solanaclawd/solana-tx-foundation-1.5b` | Transaction CPT -> SFT lane |
+| Clawd Solana masterpiece LoRA | `solanaclawd/clawd-solana-masterpiece-qwen15-lora` | Core AI Qwen 1.5B adapter |
+| Solana TX Foundation 7B | `solanaclawd/solana-tx-foundation-7b` | Next HF Jobs lane, ready after compute credits |
 | Trading factory 8B LoRA | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | Completed HF job `ordlibrary/6a35a2ce953ed90bfb945009` |
 
 ## One-Shot Examples
@@ -289,6 +358,7 @@ Never put these in files that can be committed or uploaded:
 Before public release:
 
 ```bash
+ai-training/model-kit/bin/clawd-model-kit constitution --strict
 ai-training/model-kit/bin/clawd-model-kit verify
 python3 ai-training/scripts/verify_core_ai_release.py
 python3 ai-training/scripts/verify_trading_factory_release.py --local-only --strict
@@ -303,6 +373,12 @@ ai-training/model-kit/bin/clawd-model-kit verify --full-release
 Model outputs must never be accepted as transactions. Execution code must parse,
 validate, simulate, and risk-check every action first. Live trading remains
 outside this model-kit automation.
+
+The model kit treats `CONSTITUTION.md` as the interpretive authority and
+`three-laws.md` as the immutable on-chain execution law set. Ingest, prepare,
+train, upload, register, and one-shot workflows fail before side effects if the
+required Constitution files are missing or if `CLAWD_THREE_LAWS_SHA256` is set
+and does not match the local `three-laws.md` hash.
 
 ## References
 

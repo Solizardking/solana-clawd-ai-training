@@ -6,11 +6,29 @@ dry-run payloads that the registry consumes.
 
 ## Links
 
+- Model kit site: https://models.x402.wtf
+- Register page: https://register.x402.wtf
 - Registry: https://onchain.x402.wtf
 - Well-known manifest: https://onchain.x402.wtf/.well-known/clawd-registry.json
 - Model API: https://onchain.x402.wtf/api/models
 - Register API: https://onchain.x402.wtf/api/register
 - Source handoff: `ai-training/onchain.md`
+
+## Web Register
+
+`register.x402.wtf` uses the same CAAP/1.0 payload contract as
+`ai-training/dao/register_model.sh`.
+
+The page talks to the model-kit Render API:
+
+```text
+POST /api/register/preview
+POST /api/register
+```
+
+`/api/register` remains a dry-run unless the request includes `live: true`.
+Live requests require a real `model_hash` unless `allow_generated_hash: true`
+is deliberately supplied for a provisional entry.
 
 ## Dry-Run
 

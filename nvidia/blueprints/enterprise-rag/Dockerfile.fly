@@ -1,0 +1,21 @@
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY nvidia/blueprints/enterprise-rag/requirements-fly.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY nvidia/blueprints/enterprise-rag /app/enterprise-rag
+COPY data/nvidia_rag_store /app/data/nvidia_rag_store
+
+WORKDIR /app/enterprise-rag
+
+ENV CLAWD_RAG_STORE=/app/data/nvidia_rag_store
+ENV CLAWD_RAG_OLLAMA_MODEL=8bit/solana-clawd-core-ai:latest
+
+EXPOSE 8765
+
+CMD ["python", "pipeline.py", "--store", "/app/data/nvidia_rag_store", "--host", "0.0.0.0", "--port", "8765"]

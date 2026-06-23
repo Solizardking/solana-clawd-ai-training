@@ -18,8 +18,10 @@ from tx_foundation_common import (
     DEFAULT_CONFIG_PATH,
     DEFAULT_DATASET_MANIFEST,
     DEFAULT_EVAL_OUTPUT,
+    DEFAULT_HUB_DATASET_ID,
     DEFAULT_HUB_MODEL_ID,
     DEFAULT_MODEL_OUTPUT,
+    DEFAULT_PROCESSED_DIR,
     build_dataset_manifest,
     load_tx_config,
     write_dataset_manifest,
@@ -81,9 +83,12 @@ def main() -> int:
 
     manifest_kwargs = {
         "dataset_path": Path(cfg["cpt_data"]),
+        "processed_dir": Path(cfg.get("processed_dir") or DEFAULT_PROCESSED_DIR),
         "config_path": Path(cfg["config_path"]),
         "eval_path": eval_path,
         "model_path": model if not str(model).startswith("solanaclawd/") else DEFAULT_MODEL_OUTPUT / "sft",
+        "repo_id": cfg.get("hub_dataset_id", DEFAULT_HUB_DATASET_ID),
+        "training_model": cfg.get("hub_model_id", DEFAULT_HUB_MODEL_ID),
     }
     if args.dry_run:
         manifest = build_dataset_manifest(**manifest_kwargs)
@@ -149,9 +154,12 @@ def main() -> int:
 
     summary = build_dataset_manifest(
         dataset_path=Path(cfg["cpt_data"]),
+        processed_dir=Path(cfg.get("processed_dir") or DEFAULT_PROCESSED_DIR),
         config_path=Path(cfg["config_path"]),
         eval_path=eval_path,
-        model_path=model if model.exists() else DEFAULT_MODEL_OUTPUT / "sft",
+        model_path=model if model.exists() else Path(cfg["output_dir"]) / "sft",
+        repo_id=cfg.get("hub_dataset_id", DEFAULT_HUB_DATASET_ID),
+        training_model=cfg.get("hub_model_id", DEFAULT_HUB_MODEL_ID),
     )
     summary.update(
         {

@@ -1,0 +1,71 @@
+# Mac-local refinement pass for the Clawd Solana conversational masterpiece adapter.
+#
+# This continues from the broad adapter and focuses on weak behavior found by
+# targeted sanity prompts: GLM-scale training tradeoffs, Solana BigQuery schema,
+# secret-safe coding, TypeScript Solana helpers, and trust-gated tool behavior.
+
+base_model: "Qwen/Qwen2.5-1.5B-Instruct"
+model_revision: "main"
+torch_dtype: "bfloat16"
+device_map: "mps"
+resume_adapter_path: "outputs/clawd-solana-masterpiece-qwen15-lora-mac"
+
+dataset_path: "data/model_kit/clawd_future_refinement_processed"
+max_seq_length: 768
+train_split: "train"
+eval_split: "eval"
+max_eval_samples: 24
+
+output_dir: "outputs/clawd-solana-masterpiece-qwen15-lora-mac-v2"
+push_to_hub: false
+hub_model_id: "solanaclawd/clawd-solana-masterpiece-qwen15-lora"
+hub_private: false
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+
+training:
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 2
+  per_device_eval_batch_size: 1
+  num_train_epochs: 1
+  max_steps: 64
+  learning_rate: 7.0e-5
+  lr_scheduler_type: "cosine"
+  warmup_steps: 4
+  weight_decay: 0.0
+  optim: "adamw_torch"
+  bf16: true
+  fp16: false
+  tf32: false
+  gradient_checkpointing: false
+  logging_steps: 4
+  save_steps: 32
+  save_total_limit: 2
+  eval_steps: 64
+  eval_strategy: "steps"
+  report_to: ["none"]
+  seed: 52
+  dataloader_num_workers: 0
+  remove_unused_columns: false
+  dataloader_pin_memory: false
+
+quantization:
+  enabled: false
+
+sft:
+  packing: false
+  assistant_only_loss: true
+  chat_template_kwargs: {}
