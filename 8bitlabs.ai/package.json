@@ -15,7 +15,7 @@
     "check": "node --check script.js && node --check model-kit.js && node --check api/clawd-chat.js && node --check api/clawd-grok-sandbox.js && node --check scripts/serve.mjs",
     "build": "npm run check",
     "vercel:build": "vercel build --prod",
-    "deploy": "vercel deploy --prebuilt --prod"
+    "deploy": "vercel deploy --prod"
   },
   "keywords": [
     "8bitlabs",
