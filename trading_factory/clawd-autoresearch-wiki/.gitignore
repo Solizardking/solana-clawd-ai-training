@@ -45,6 +45,9 @@ runs/
 checkpoints/
 outputs/
 
+# Agent runtime state (session logs, graph index, OODA checkpoints)
+.clawvault/
+
 # Memory artifacts
 *.json
 *.log
