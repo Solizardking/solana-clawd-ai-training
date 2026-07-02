@@ -35,19 +35,6 @@ python3 scripts/organize_ai_training.py --check
 python3 nvidia/scripts/verify_nvidia.py --strict
 ```
 
-## 8 Bit Labs Website
-
-The public website for the training stack lives in
-[`8bitlabs.ai/`](8bitlabs.ai/). It packages the current datasets, model family,
-NVIDIA trading factory lane, W&B/Hugging Face release trail, public inference
-mesh, Core AI runtime lanes, Clawd chat, and Solana devnet model-registry proofs
-into a domain-ready static site for `https://8bitlabs.ai`.
-
-```bash
-cd ai-training/8bitlabs.ai
-python3 -m http.server 8088
-```
-
 ## Fast Data Rerun
 
 Use the generated model-kit lane to rebuild cleaner reasoning/tooling datasets
@@ -682,69 +669,108 @@ Composio provider, ZK primitives, HF Router, ClawdRouter, x402).
 ```text
 ai-training/
 ├── README.md                       ← you are here
+├── STRUCTURE.md                    ← full lane/ownership map with safety rules
 ├── requirements.txt                ← Python deps (HF stack + openai + httpx + mcp)
-├── .gitignore                      ← excludes checkpoints / outputs / secrets
-├── data/
-│   ├── solana_clawd_seed.jsonl     ← original seed SFT pairs (47 constitutional conversations)
-│   ├── solana_clawd_merged.jsonl   ← merged dataset v2 (36,109 conversations — canonical training input)
-│   ├── solana_clawd_eval.jsonl     ← held-out eval prompts (13 conversations)
-│   ├── eval_card.md                ← eval dataset card (upload to Hub)
-│   └── processed/                  ← output of prepare_dataset.py (parquet + arrow, train/eval/test)
-├── solana1_yourgpt.jsonl           ← source: 8,970 Solana Alpaca-format QA pairs (normalized into merged)
-├── trainingday.jsonl               ← source: 27,092 Solana API/RPC messages-format pairs (normalized into merged)
+├── .gitignore                      ← excludes checkpoints / outputs / secrets / proprietary dirs
+├── Anchor.toml                     ← Solana program workspace config (devnet + mainnet addresses)
+├── Cargo.toml / Cargo.lock         ← Rust workspace manifest
+├── solana1_yourgpt.jsonl           ← source: 8,970 Solana Alpaca-format QA pairs
+├── trainingday.jsonl               ← source: 27,092 Solana API/RPC messages-format pairs
+├── etc/                            ← brand assets (mascot PNGs, blueprint grid)
+├── .claude/                        ← Claude Code project settings (gitignored runtime state)
+├── .hf/                            ← HF CLI cache (gitignored)
 ├── configs/
-│   ├── lora_config.yaml            ← LoRA + training hyperparameters (Qwen2.5-1.5B) — W&B logging enabled
-│   ├── hermes3_lora_config.yaml    ← LoRA config for Hermes-3-Llama-3.1-8B (r=32, 4-bit)
-│   ├── deep_solana_cpt_config.yaml ← continued pre-training config (DeepSolana-GPT2 corpus)
-│   └── eval_config.yaml            ← evaluation config
+│   ├── core_ai_lora_config.yaml    ← LoRA hyperparams (Qwen2.5-1.5B) — W&B logging
+│   ├── nvidia_trading_factory_lora_config*.yaml ← Trading Factory LoRA configs (A100 + Mac)
+│   ├── glm52_lora_config*.yaml     ← GLM-5.2 LoRA configs
+│   └── solana_tx_foundation*.yaml  ← CPT + SFT configs for tx-foundation lane
+├── data/
+│   ├── core_ai_clawd_sft.jsonl     ← Core AI SFT corpus (merged + filtered)
+│   ├── nvidia_trading_factory_sft.jsonl ← Trading Factory SFT pairs
+│   ├── realtime_research_sft.jsonl ← PDF/notebook/parquet ingested SFT pairs
+│   ├── clawd_code_deepsol_sft.jsonl ← DeepSol + ZKr SFT examples
+│   ├── solana_clawd_eval.jsonl     ← held-out eval prompts (13 conversations)
+│   ├── tx_foundation_cpt.jsonl     ← Jupiter tx records in NeMo CPT format
+│   ├── nvidia_rag_store/           ← FAISS index + chunks for NVIDIA RAG endpoint
+│   ├── processed/                  ← Arrow + Parquet splits from prepare_dataset.py
+│   └── *_manifest.json             ← dataset manifests (push metadata, split sizes)
+├── docs/                           ← design docs, session logs, model/dataset cards
+│   ├── model_card.md               ← model README (mirrored to Hub)
+│   ├── dataset_card.md             ← dataset README (mirrored to Hub)
+│   ├── SESSIONS.md                 ← training session log
+│   └── clawd_solana_svm_ai_compute_design.md
 ├── scripts/
-│   ├── prepare_dataset.py          ← JSONL → HF Datasets (parquet), multi-file --input support
+│   ├── prepare_dataset.py          ← JSONL → HF Datasets (parquet), multi-file --input
 │   ├── realtime_dataset_ingest.py  ← PDF/JSON/notebook/parquet/text → realtime HF dataset
-│   ├── build_nvidia_trading_factory_dataset.py ← Solana spot/perps NVIDIA trading factory SFT builder
+│   ├── build_core_ai_dataset.py    ← Core AI SFT builder (dedup + quality filter)
+│   ├── build_nvidia_trading_factory_dataset.py ← Trading Factory SFT builder
+│   ├── build_masterpiece_dataset.py ← Masterpiece lane SFT builder
+│   ├── add_deepsol_zkr_examples.py ← DeepSol + ZKr example injector
+│   ├── prepare_clawd_code_dataset.py ← Clawd Code dataset preparer
 │   ├── solana_ai_model_kit.sh      ← curlable one-shot audit/train/register bootstrap
-│   ├── submit_dataset_file.sh      ← drop-in file submit wrapper for realtime_dataset_ingest.py
 │   ├── train_lora.py               ← LoRA SFT via TRL + PEFT
 │   ├── evaluate.py                 ← held-out inference eval
-│   ├── wandb_eval.py               ← W&B Weave benchmark eval (JSON QA, traces to clawdsolana-clawd/clawd)
-│   ├── launch_hf_jobs.sh           ← submit remote GPU job (passes WANDB_API_KEY, 6h timeout)
-│   ├── auto_research.py            ← Percolator-style recursive wiki generator (see §Percolator AutoResearch)
-│   ├── ingest_wiki_data.py         ← pulls 18 SFT pairs from clawd-autoresearch-wiki → seed dataset
-│   ├── solana_benchmark.py         ← 18-MCQ Solana Knowledge Benchmark (OpenAI-compatible endpoint)
-│   ├── hermes3_inference.py        ← 3-mode Hermes-3 inference: HF Router / pipeline / direct
-│   ├── solana_client.py            ← 8-command Solana RPC tool (wallet/tx/token/nft/whales/stats/price)
-│   ├── download_deep_solana.py     ← DeepSolana-GPT2-bucket downloader + GPT-2→text decoder
-│   └── add_v2_examples.py          ← one-off script that seeded the v2 dataset examples
+│   ├── wandb_eval.py               ← W&B Weave benchmark eval
+│   ├── launch_core_ai_hf_job.sh    ← launch Core AI A100 HF Job
+│   ├── launch_trading_factory_hf_job.sh ← launch Trading Factory A100 HF Job
+│   ├── launch_transaction_foundation_hf_job.sh ← launch tx-foundation HF Job
+│   ├── after_core_ai_job.sh        ← post-training merge + push workflow
+│   ├── run_local_clawd_stack.py    ← local Mac stack doctor (no uploads)
+│   ├── decide_next_training_job.py ← auto-selects next job based on readiness
+│   ├── recover_core_ai_release.sh  ← recovery launcher for failed HF Jobs
+│   ├── auto_research.py            ← Percolator-style recursive wiki generator
+│   ├── ingest_wiki_data.py         ← pulls SFT pairs from clawd-autoresearch-wiki
+│   ├── solana_benchmark.py         ← 18-MCQ Solana Knowledge Benchmark
+│   ├── hermes3_inference.py        ← Hermes-3 inference: HF Router / pipeline / direct
+│   ├── solana_client.py            ← 8-command Solana RPC tool
+│   └── download_deep_solana.py     ← DeepSolana-GPT2-bucket downloader
 ├── memory/
-│   └── honcho.py                   ← Honcho persistent cross-session memory (remember/recall/dream)
-├── perps/                          ← Hermes-3 function calling for Solana perps (example agent space)
-│   ├── functions.py                ← 13 perps tools (sol price, funding rate, paper trade, risk...)
-│   ├── functioncall.py             ← HermesPerpsAgent inference loop (HF Router / local, GOAP mode)
-│   ├── schema.py                   ← Pydantic models: FunctionCall, TradeOrder, RiskAssessment...
-│   └── prompter.py                 ← system prompt builder (standard / GOAP / JSON mode)
+│   └── honcho.py                   ← Honcho persistent cross-session memory
+├── perps/                          ← Hermes-3 function calling for Solana perps
+│   ├── functions.py                ← 13 perps tools (price, funding, paper trade, risk…)
+│   ├── functioncall.py             ← HermesPerpsAgent inference loop (HF Router / local)
+│   ├── schema.py                   ← Pydantic models: FunctionCall, TradeOrder…
+│   └── prompter.py                 ← system prompt builder (standard / GOAP / JSON)
 ├── dao/                            ← Onchain AI registry + DAO governance
 │   ├── DAO_DESIGN.md               ← Architecture, safety constraints, governance flows
-│   ├── register_model.sh           ← One-shot curl model registration to onchain.x402.wtf
+│   ├── register_model.sh           ← One-shot model registration to onchain.x402.wtf
 │   ├── register_model.ts           ← TypeScript: initialize_model Anchor instruction
 │   └── attestation/
-│       ├── create_attestation.ts   ← SAS compressed attestation for dataset/eval/adapter artifacts
+│       ├── create_attestation.ts   ← SAS compressed attestation for artifacts
 │       └── attestations.jsonl      ← Local index of created attestations
-├── dataset_card.md                 ← dataset README (upload to Hub)
-├── model_card.md                   ← model README (upload to Hub)
-├── model-kit/
-│   └── README.md                   ← public one-shot Solana AI Model Kit guide
-├── outputs/                        ← Community article, model cards (gitignored checkpoints)
-│   ├── community-article.md        ← First public announcement (HF blog)
-│   └── Clawd-GLM-5.2-README.md    ← GLM-5.2 model card
-├── checkpoints/                    ← (gitignored) LoRA adapter weights
-└── data/
-    ├── research_manifest.db        ← SQLite: visited URLs for AutoResearch dedup
-    └── autoResearch.jsonl          ← AutoResearch output (appended each cycle)
+├── programs/                       ← Anchor Solana programs (Rust)
+│   ├── clawd-core/                 ← Core staking / task program
+│   ├── clawd-registry/             ← Model registry program
+│   └── clawd-treasury/             ← Treasury / reward distributor
+├── sdk/
+│   ├── python/                     ← Python SDK for Clawd programs
+│   └── typescript/                 ← TypeScript SDK
+├── tests/
+│   └── program-tests/              ← Anchor integration tests
+├── model-kit/                      ← Solana AI Model Kit (public inference + x402 registry)
+│   ├── backend/                    ← FastAPI backend (Docker, Render)
+│   ├── frontend/                   ← Static frontend (Vercel)
+│   └── docs/                       ← Deployment, NVIDIA, onboarding guides
+├── nvidia/                         ← NVIDIA NIM / NeMo integration lane
+│   ├── blueprints/                 ← Blueprint implementations (tx-foundation, RAG, signals…)
+│   ├── configs/                    ← NIM / NeMo YAML configs
+│   ├── scripts/                    ← NVIDIA setup + verification scripts
+│   └── integration/                ← NeMo Clawd factory integration
+├── trading_factory/                ← Trading Factory lane (Solana perps + NVIDIA)
+│   ├── solana_factory/             ← Core factory Python package
+│   └── clawd-autoresearch-wiki/    ← AutoResearch agent + wiki data pipeline
+├── space/                          ← HuggingFace Space (app.py + requirements)
+├── ollama/                         ← Ollama Modelfiles + build/push scripts
+├── schemas/                        ← JSON schemas for repo layout validation
+├── studio/                         ← Studio index page
+├── echo/                           ← (gitignored) local echo / session cache
+├── outputs/                        ← (gitignored) release bundles, audit JSONs
+├── wandb/                          ← (gitignored) W&B run artifacts
+└── target/                         ← (gitignored) Rust/Anchor build artifacts
 ```
 
 See also: [`skills/solana-rpc/SKILL.md`](../skills/solana-rpc/SKILL.md) — the
-Clawd skill registration for `scripts/solana_client.py`, and
-[`hermes-agent/`](../hermes-agent/) — the `clawd-operator` Hermes adapter and
-`clawd-agent` Phoenix/Oracle tool integrations that consume `perps/functions.py`.
+Clawd skill registration for `scripts/solana_client.py`.
 
 ## The Hugging Face integration
 
