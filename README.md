@@ -143,11 +143,51 @@ curl -sS https://solana-clawd-rag.fly.dev/query \
 
 | Model | Size | Status | Links |
 |---|---|---|---|
+| `HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive` | 35B MoE GGUF | **Runtime model** — llama-cpp-python runner with The Onchain Constitution system prompt | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive) |
+| `solanaclawd/clawd-fable` | Full merged Fable model | **New lane** — `AliesTaha/fable-traces` + Clawd Code + Glint Fable traces | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-fable) |
+| `solanaclawd/clawd-fable-lora` | LoRA adapter | **Train target** — merge into `solanaclawd/clawd-fable` after adapter release | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-fable-lora) |
 | `solanaclawd/clawd-solana-masterpiece-qwen15-lora` | 1.5B LoRA | ✅ **Live** — latest Qwen 1.5B adapter | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora) |
 | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | 1.5B LoRA | ✅ **Live** — train_loss 0.9008, token_acc 82.9% | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora) |
 | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | 8B LoRA | ✅ **Live** — Hermes-3, Solana perps | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora) |
 | `solanaclawd/solana-tx-foundation-7b` | 7B CPT+SFT LoRA | ⏭️ **Next** — ready to launch after HF Jobs credits | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-tx-foundation-7b) |
 | `solanaclawd/solana-clawd-1.5b` | 1.5B merged | ⚠️ **Placeholder** — public repo only has `.gitattributes` | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-1.5b) |
+
+## Clawd Fable Local Train
+
+The current local path combines `armand0e/claude-fable-5-claude-code`,
+`Glint-Research/Fable-5-traces`, `trading_factory`, root Anchor/Cargo files, and
+the existing `solana1_yourgpt.jsonl` / `trainingday.jsonl` corpora. It
+fine-tunes `AliesTaha/fable-traces` and writes a smoke adapter to
+`outputs/clawd-fable-lora-local`:
+
+```bash
+bash scripts/run_qwen35_fable5_clawd.sh local
+```
+
+The cloud adapter target is `solanaclawd/clawd-fable-lora`. After that adapter
+is trained, merge it into the full `solanaclawd/clawd-fable` model with:
+
+```bash
+python3 scripts/merge_lora_to_full_model.py \
+  --base-model AliesTaha/fable-traces \
+  --adapter solanaclawd/clawd-fable-lora \
+  --output-dir outputs/clawd-fable-merged \
+  --hub-model-id solanaclawd/clawd-fable \
+  --push
+```
+
+## Hauhau Qwen3.6 Runtime
+
+The current GGUF runtime path uses
+`HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive` through
+`llama-cpp-python` and injects `docs/onchain_constitution.md` as the system
+message by default:
+
+```bash
+python3 scripts/hauhau_qwen36_llama_cpp.py --constitution-mode minimal
+```
+
+See `docs/hauhau_qwen36.md` for the full local runtime notes.
 
 ## Datasets
 

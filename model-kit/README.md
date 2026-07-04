@@ -214,6 +214,8 @@ uploads.
 | Perps tool manifest | `data/model_kit/perps_tool_manifest.json` | 13 model-facing Solana/Phoenix/Jupiter tools |
 | Core 1.5B LoRA | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | Core AI adapter lane |
 | Clawd Solana masterpiece LoRA | `solanaclawd/clawd-solana-masterpiece-qwen15-lora` | Core AI Qwen 1.5B adapter |
+| Clawd Fable full model | `solanaclawd/clawd-fable` | New merged Fable lane from `AliesTaha/fable-traces` |
+| Clawd Fable LoRA | `solanaclawd/clawd-fable-lora` | Adapter trained from Clawd Code + Glint Fable traces + local trading factory context |
 | Solana TX Foundation 7B | `solanaclawd/solana-tx-foundation-7b` | Next HF Jobs lane, ready after compute credits |
 | Trading factory 8B LoRA | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | Completed HF job `ordlibrary/6a35a2ce953ed90bfb945009` |
 

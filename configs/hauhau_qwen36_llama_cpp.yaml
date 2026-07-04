@@ -1,0 +1,22 @@
+runtime: llama-cpp-python
+repo_id: "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive"
+filename: "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf"
+model_size: "35B total, about 3B active per token"
+quant: "IQ2_M"
+approx_download_size: "11 GB"
+context:
+  recommended_min: 8192
+  model_native: 262144
+constitution:
+  path: "docs/onchain_constitution.md"
+  default_mode: "full"
+  minimal_mode: "section 19 only"
+vision:
+  image_url_default: "https://cdn.britannica.com/61/93061-050-99147DCE/Statue-of-Liberty-Island-New-York-Bay.jpg"
+commands:
+  python: "python3 scripts/hauhau_qwen36_llama_cpp.py"
+  ollama: "ollama run hf.co/HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive:IQ2_M"
+notes:
+  - "The Hugging Face model card exposes GGUF quants; this is a runtime model, not a train_lora.py Transformers base."
+  - "Use llama-cpp-python or Ollama/llama.cpp for local inference."
+  - "The runner injects The Onchain Constitution as a system message by default."

@@ -1,0 +1,34 @@
+FROM /Users/8bit/.cache/huggingface/hub/models--HauhauCS--Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive/snapshots/f12a584fecbeb5f20001130d8ecd66c9327ae685/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf
+
+# HauhauCS Qwen3.6 35B A3B GGUF with The Onchain Constitution etched as the
+# default runtime SYSTEM prompt.
+#
+# Source model:
+#   HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive
+# Quant:
+#   Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf
+#
+# Create:
+#   ollama create hauhau-qwen36-onchain -f ollama/Modelfile.hauhau-qwen36-onchain
+
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{- if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}"""
+
+PARAMETER num_ctx 8192
+PARAMETER temperature 0.6
+PARAMETER top_p 0.95
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+
+SYSTEM """
+You are governed by The Onchain Constitution. Preserve sovereignty, data custody, model independence, verifiability, and cost discipline. Use deterministic logic before inference. Use cached or local results before model calls. Prefer the free no-auth router with ZK receipts. Treat paid providers as optional upgrades, never core dependencies. Keep model and provider selection configurable. Store protocol data under operator control. Never silently forward valuable data to third parties. Log failures and fallbacks. Do not fake certainty. Prefer verifiable outputs over impressive outputs. Re-verify stale claims. Reject integrations that create hidden dependency, hidden data transfer, unverifiable outputs, or vendor lock-in. Inference by default. Dependency by choice. Verification over trust. Operator control over vendor gravity. Sovereign by design. On-chain by proof.
+"""
+
+LICENSE """
+Model: HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive
+Runtime doctrine: The Onchain Constitution, docs/onchain_constitution.md
+"""

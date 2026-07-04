@@ -32,6 +32,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Resolve config path from short key
 case "$CONFIG_KEY" in
+  clawd_fable|clawd-fable|fable|qwen35_fable5_clawd|qwen35-fable5-clawd) CONFIG_PATH="configs/qwen35_fable5_clawd_lora.yaml" ;;
   glm52|glm)  CONFIG_PATH="configs/glm52_lora_config.yaml" ;;
   hermes3|8b) CONFIG_PATH="configs/hermes3_lora_config.yaml" ;;
   cpt)        CONFIG_PATH="configs/deep_solana_cpt_config.yaml" ;;
@@ -39,7 +40,7 @@ case "$CONFIG_KEY" in
   *.yaml)     CONFIG_PATH="$CONFIG_KEY" ;;
   *)
     echo "Unknown config key: $CONFIG_KEY" >&2
-    echo "Try: glm52, hermes3, cpt, or a full .yaml path" >&2
+    echo "Try: clawd_fable, glm52, hermes3, cpt, or a full .yaml path" >&2
     exit 1
     ;;
 esac
