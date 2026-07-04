@@ -576,6 +576,28 @@ pre {
   gap: 14px;
 }
 
+.consolidation-surface {
+  align-items: center;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 0.88fr) minmax(280px, 1.12fr);
+}
+
+.consolidation-surface img {
+  background: #0b1016;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  display: block;
+  max-height: 280px;
+  object-fit: contain;
+  width: 100%;
+}
+
+.consolidation-surface > div {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
 .flow-list {
   counter-reset: flow;
   display: grid;
@@ -820,6 +842,7 @@ button.resource-item {
   .register-layout,
   .hero-band,
   .content-grid,
+  .consolidation-surface,
   .arena-results {
     grid-template-columns: 1fr;
   }

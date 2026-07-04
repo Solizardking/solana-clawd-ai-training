@@ -35,6 +35,31 @@ python3 scripts/organize_ai_training.py --check
 python3 nvidia/scripts/verify_nvidia.py --strict
 ```
 
+## Latest Consolidation
+
+On 2026-07-04, local training outputs were consolidated into the `ai-training`
+workspace so model artifacts, GGUF builds, and legacy checkpoints have one
+canonical home.
+
+<p align="center">
+  <img src="docs/assets/ai-training-consolidation-flow.svg" alt="Animated ai-training consolidation flow" width="860" />
+</p>
+
+Read the full writeup:
+[`docs/2026-07-04-ai-training-consolidation.md`](docs/2026-07-04-ai-training-consolidation.md)
+
+Key paths:
+
+- Root legacy outputs now resolve through
+  `outputs/imported-root-outputs-20260704`.
+- `/Users/8bit/Downloads/solana-clawd/outputs` is a compatibility symlink back
+  into `ai-training`.
+- The fresh NVIDIA 1.5B transaction-foundation run now lives at
+  `outputs/solana-tx-foundation-1.5b`.
+- The old `solana-clawd-1.5b-lora/checkpoint-3` folder remains cataloged, but it
+  is not runnable until adapter weights are restored and the zero-byte tokenizer
+  is fixed.
+
 ## Fast Data Rerun
 
 Use the generated model-kit lane to rebuild cleaner reasoning/tooling datasets

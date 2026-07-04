@@ -23,6 +23,29 @@ Gemini, and custom endpoints, with realtime results and X share links.
 | Hugging Face org | https://huggingface.co/solanaclawd |
 | Local model kit | `/Users/8bit/Downloads/solana-clawd/ai-training/model-kit` |
 
+## Latest Consolidation
+
+The 2026-07-04 training artifact consolidation has been brought into model-kit
+as an operational reference for local model launches.
+
+<p align="center">
+  <img src="docs/assets/ai-training-consolidation-flow.svg" alt="Animated ai-training consolidation flow" width="860" />
+</p>
+
+Read the model-kit copy:
+[`docs/2026-07-04-ai-training-consolidation.md`](docs/2026-07-04-ai-training-consolidation.md)
+
+The short version:
+
+- root legacy outputs are archived under
+  `../outputs/imported-root-outputs-20260704`;
+- `/Users/8bit/Downloads/solana-clawd/outputs` remains available as a
+  compatibility symlink;
+- the usable NVIDIA transaction-foundation 1.5B CPT/SFT adapter run is now under
+  `../outputs/solana-tx-foundation-1.5b`;
+- the old `solana-clawd-1.5b-lora/checkpoint-3` metadata folder is cataloged but
+  still missing adapter weights.
+
 ## Quick Start
 
 ```bash
@@ -157,6 +180,7 @@ Side effects are gated:
 | `docs/PERPS.md` | Solana perps tool lane and function-calling guide. |
 | `docs/ONCHAIN_X402.md` | Registry and CAAP handoff. |
 | `docs/SECURITY.md` | Release and credential safety contract. |
+| `docs/2026-07-04-ai-training-consolidation.md` | Local artifact consolidation record and model output map. |
 
 ## CLI
 
