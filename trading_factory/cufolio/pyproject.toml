@@ -17,7 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ruff==0.15.9",
-    "pytest>=9.0",
+    "pytest>=9.1.1",
     "pre-commit==4.3.0",
 ]
 cuda12 = [
