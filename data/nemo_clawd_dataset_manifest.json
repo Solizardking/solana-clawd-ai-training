@@ -1,0 +1,38 @@
+{
+  "created_at": "2026-07-04T13:08:47.649058+00:00",
+  "inputs": {
+    "pdf_root": "/Users/8bit/drive/pdfs",
+    "source_dir": "/Users/8bit/drive/nemo-clawd/training-data",
+    "scripts": "/Users/8bit/drive/nemo-clawd/training-data/scripts/build_training_data.py"
+  },
+  "outputs": {
+    "card": "/Users/8bit/Downloads/solana-clawd/ai-training/data/nemo_clawd_dataset_card.md",
+    "manifest": "/Users/8bit/Downloads/solana-clawd/ai-training/data/nemo_clawd_dataset_manifest.json",
+    "dataset_root": "/Users/8bit/Downloads/solana-clawd/ai-training/data/nemo_clawd"
+  },
+  "repo_id": "solanaclawd/solana-clawd-nemo-clawd-instruct",
+  "public_safe": true,
+  "stats": {
+    "total_sft_rows": 80,
+    "total_preference_rows": 7,
+    "total_eval_rows": 49,
+    "total_pdf_chunks": 413,
+    "total_repo_chunks": 175,
+    "total_all_chunks": 588,
+    "unique_pdf_sources": 24,
+    "duplicate_pdfs_deduplicated": 2,
+    "source_notes": 24
+  },
+  "source_counts": {
+    "sft_chat_finetune": 80,
+    "sft_with_metadata": 80,
+    "risk_preferences": 7,
+    "source_grounded_eval": 49
+  },
+  "pipeline": {
+    "build_command": "python3 scripts/build_training_data.py --pdf-root /Users/8bit/drive/pdfs",
+    "build_time": "2026-07-04T13:08:47.649058+00:00",
+    "builder": "Poppler (pdfinfo + pdftotext), Python stdlib only",
+    "source_dependencies": ["pdfinfo", "pdftotext"]
+  }
+}
