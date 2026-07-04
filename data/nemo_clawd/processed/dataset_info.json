@@ -1,0 +1,15 @@
+{
+  "num_examples": 80,
+  "splits": {
+    "train": 72,
+    "eval": 4,
+    "test": 4
+  },
+  "schema": {
+    "messages": "list[{role: str, content: str}]"
+  },
+  "source_files": [
+    "data/nemo_clawd/sft/chat_finetune.jsonl"
+  ],
+  "duplicates_removed": 0
+}
