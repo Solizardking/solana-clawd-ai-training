@@ -1725,10 +1725,11 @@ will pick it up automatically.
 
 ## License
 
-- **Code** (this directory): Apache-2.0
+- **Code** (this directory): [MIT](LICENSE) — Copyright (c) 2026 OpenClawd / Solizardking
 - **Dataset** (`solanaclawd/solana-clawd-instruct`): CC-BY-4.0
 - **Base model** (Qwen2.5): Qwen Research License
 - **Adapter** (when published): Apache-2.0
+
 
 ## Percolator AutoResearch
 
