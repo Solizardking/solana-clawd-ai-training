@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .agent_vocab import SolanaAgentTokenizer
 from .solana_tokenizer import SolanaTokenizerPipeline, tx_to_text
 
 try:
@@ -30,6 +31,7 @@ except ImportError:
     _RAPIDS_AVAILABLE = False
 
 __all__ = [
+    "SolanaAgentTokenizer",
     "SolanaTokenizerPipeline",
     "tx_to_text",
 ]

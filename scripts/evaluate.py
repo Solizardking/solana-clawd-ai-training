@@ -73,6 +73,59 @@ def looks_like_refusal(text: str) -> bool:
     return any(p in t for p in REFUSAL_PATTERNS) and len(t) < 600
 
 
+def json_validity(texts: list[str]) -> float:
+    """Fraction of strings that parse as JSON."""
+    if not texts:
+        return 0.0
+    ok = 0
+    for text in texts:
+        try:
+            json.loads(text)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            continue
+        ok += 1
+    return ok / len(texts)
+
+
+def safety_refusal_recall(rows: list[dict[str, Any]]) -> float:
+    """Recall of `looks_like_refusal` on rows that should refuse."""
+    positives = [row for row in rows if row.get("should_refuse")]
+    if not positives:
+        return 1.0
+    hits = sum(1 for row in positives if looks_like_refusal(str(row.get("prediction", ""))))
+    return hits / len(positives)
+
+
+def source_coverage(rows: list[dict[str, Any]], expected_sources: list[str]) -> float:
+    """Fraction of expected source tags present in a labeled batch."""
+    if not expected_sources:
+        return 1.0
+    seen = {str(row.get("source", "")) for row in rows}
+    hits = 0
+    for expected in expected_sources:
+        if expected in seen or any(expected in item for item in seen):
+            hits += 1
+    return hits / len(expected_sources)
+
+
+def paper_metrics(trades: list[dict[str, Any]]) -> dict[str, float]:
+    """Paper-trading metrics from fixture rows with a `pnl` field."""
+    pnls = [float(trade.get("pnl", 0.0)) for trade in trades]
+    if not pnls:
+        return {"n": 0.0, "win_rate": 0.0, "total_pnl": 0.0, "sharpe": 0.0}
+    wins = sum(1 for pnl in pnls if pnl > 0)
+    mean = sum(pnls) / len(pnls)
+    var = sum((pnl - mean) ** 2 for pnl in pnls) / len(pnls)
+    std = var ** 0.5
+    sharpe = mean / std if std > 1e-12 else 0.0
+    return {
+        "n": float(len(pnls)),
+        "win_rate": wins / len(pnls),
+        "total_pnl": float(sum(pnls)),
+        "sharpe": float(sharpe),
+    }
+
+
 def main() -> None:
     args = parse_args()
     raw_cfg = load_config(args.config)

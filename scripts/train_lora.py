@@ -50,7 +50,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from datasets import DatasetDict, load_dataset, load_from_disk
 
 _SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(_SCRIPTS_DIR) not in sys.path:
@@ -61,6 +60,16 @@ from qwen38_multimodal import (  # noqa: E402
     QWEN38_PIPELINE_TASK,
     is_qwen38_multimodal_base,
     load_qwen38_processor_and_model,
+)
+from sft_runtime import (  # noqa: E402
+    DISTILLATION_CONFIGS,
+    DISTILLATION_REPO,
+    adapt_sft_training_kwargs,
+    build_sft_config,
+    load_local_dataset,
+    normalize_sft_record,
+    resolve_dataset,
+    try_load_distillation_config,
 )
 
 try:
@@ -459,68 +468,6 @@ def apply_overrides(cfg: dict[str, Any], args: argparse.Namespace) -> dict[str, 
     return cfg
 
 
-def load_local_dataset(dataset_path: str, dataset_format: str | None) -> DatasetDict:
-    path = Path(dataset_path)
-    inferred_format = (dataset_format or "").strip().lower()
-    if path.is_dir():
-        parquet_files = {
-            split: str(path / f"{split}.parquet")
-            for split in ("train", "eval", "test")
-            if (path / f"{split}.parquet").exists()
-        }
-        if parquet_files:
-            loaded = load_dataset("parquet", data_files=parquet_files)
-            if isinstance(loaded, DatasetDict):
-                return loaded
-        try:
-            loaded = load_from_disk(str(path))
-        except Exception:
-            loaded = load_dataset(str(path))
-    else:
-        if not inferred_format:
-            suffix = path.suffix.lower()
-            if suffix == ".jsonl":
-                inferred_format = "json"
-            elif suffix == ".json":
-                inferred_format = "json"
-            else:
-                inferred_format = "text"
-        if inferred_format == "json":
-            loaded = load_dataset("json", data_files={"train": str(path)})
-        elif inferred_format == "text":
-            loaded = load_dataset("text", data_files={"train": str(path)})
-        else:
-            raise ValueError(f"Unsupported dataset format: {dataset_format}")
-
-    if isinstance(loaded, DatasetDict):
-        return loaded
-    return DatasetDict({"train": loaded})
-
-
-def resolve_dataset(cfg: dict[str, Any], use_cpt_stage: bool) -> tuple[DatasetDict, str]:
-    local_path = cfg.get("dataset_path")
-    local_format = cfg.get("dataset_format")
-    if use_cpt_stage:
-        local_path = cfg.get("cpt_dataset_path", local_path)
-        local_format = cfg.get("cpt_dataset_format", local_format)
-
-    dataset_repo = cfg.get("dataset_repo")
-    if local_path and Path(local_path).exists():
-        return load_local_dataset(local_path, local_format), local_path
-
-    if dataset_repo and not use_cpt_stage:
-        try:
-            return load_dataset(dataset_repo), dataset_repo
-        except Exception as exc:
-            print(f"  Hub load failed ({exc}), falling back to local dataset")
-
-    if not local_path:
-        raise FileNotFoundError("No local dataset path configured and Hub dataset could not be loaded.")
-    if not Path(local_path).exists():
-        raise FileNotFoundError(f"Configured local dataset path does not exist: {local_path}")
-    return load_local_dataset(local_path, local_format), local_path
-
-
 def detect_device() -> str:
     try:
         import torch
@@ -564,6 +511,16 @@ def main() -> None:
         eval_rows = len(ds[eval_split]) if eval_split and eval_split in ds else 0
         print(f"[dry-run] source={dataset_label}")
         print(f"[dry-run] train={train_rows} eval={eval_rows}")
+        print("[5/6] Building SFT config")
+        sft_config = build_sft_config(
+            cfg,
+            output_dir=output_dir,
+            train_size=train_rows,
+            device=device,
+            cpt_stage=args.cpt_stage,
+            report_to=_resolve_report_to(dict(cfg.get("training") or {}).get("report_to", ["none"])),
+        )
+        print(f"[dry-run] sft_config.warmup_steps={getattr(sft_config, 'warmup_steps', None)}")
         print(f"[dry-run] output_dir={output_dir}")
         print(f"[dry-run] push_to_hub={push_to_hub} hub_model_id={hub_model_id}")
         return
@@ -571,7 +528,7 @@ def main() -> None:
     import torch
     from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-    from trl import SFTConfig, SFTTrainer
+    from trl import SFTTrainer
 
     # ---- Tokenizer / processor ----
     quant_cfg = cfg.get("quantization", {}) or {}
@@ -690,22 +647,13 @@ def main() -> None:
     # ---- SFTConfig ----
     print("[5/6] Building SFT config")
     train_kwargs = dict(cfg["training"])
-    sft_kwargs = cfg.get("sft", {}) or {}
-
-    # bf16/fp16 must align with actual device
-    if device != "cuda":
-        train_kwargs["bf16"] = False
-        train_kwargs["fp16"] = False
-        train_kwargs["tf32"] = False
-
-    sft_config = SFTConfig(
+    sft_config = build_sft_config(
+        cfg,
         output_dir=output_dir,
-        max_length=cfg.get("max_seq_length", 4096),
-        dataset_text_field=cfg.get("cpt_text_field" if args.cpt_stage else "text_field", "text"),
-        packing=sft_kwargs.get("packing", False),
-        assistant_only_loss=sft_kwargs.get("assistant_only_loss", True),
+        train_size=len(train_ds),
+        device=device,
+        cpt_stage=args.cpt_stage,
         report_to=_resolve_report_to(train_kwargs.pop("report_to", ["none"])),
-        **train_kwargs,
     )
 
     # ---- Trainer ----

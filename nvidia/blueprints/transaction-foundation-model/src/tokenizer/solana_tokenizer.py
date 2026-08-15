@@ -191,6 +191,11 @@ class SolanaTokenizerPipeline:
         return [inv.get(i, "<unk>") for i in ids]
 
 
+from .agent_vocab import SolanaAgentTokenizer
+
+__all__ = ["SolanaTokenizerPipeline", "SolanaAgentTokenizer", "tx_to_text"]
+
+
 # ── Text serializer (for CPT jsonl ← collect.py) ──────────────────────────
 
 def tx_to_text(tx: dict) -> str:

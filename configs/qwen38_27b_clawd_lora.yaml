@@ -18,12 +18,22 @@ device_map: "auto"
 loader: "automodel_for_multimodal_lm"
 pipeline_task: "image-text-to-text"
 
-# Official Clawd instruct corpus on the Hub, with a local chat JSONL fallback
-# so dry-run / no-weight launches resolve train rows without Hub access.
+# Multi-source SFT mix: local Alpaca + chat JSONLs, plus optional Hub distillation.
+# Do not point this lane at the 80-row nemo_clawd chat_finetune fallback.
 dataset_repo: "solanaclawd/solana-clawd-instruct"
 dataset_revision: "main"
-dataset_path: "data/nemo_clawd/sft/chat_finetune.jsonl"
+dataset_path: "solana1_yourgpt.jsonl"
 dataset_format: "json"
+dataset_sources:
+  - path: solana1_yourgpt.jsonl
+  - path: trainingday.jsonl
+dataset_hub:
+  repo: "r0b0tlab/qwen3.8-max-glm5.2-kimi-k3-distillation"
+  configs:
+    - sft_balanced
+    - canonical
+    - glm47_native
+  max_rows_per_config: 2000
 max_seq_length: 4096
 train_split: "train"
 eval_split: "eval"
