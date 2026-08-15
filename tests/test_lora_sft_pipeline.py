@@ -113,7 +113,7 @@ def test_solana_agent_tokenizer_roundtrip() -> None:
 
 
 def test_eval_metrics_move_in_expected_direction() -> None:
-    valid = json_validity := evaluate_mod.json_validity
+    valid = evaluate_mod.json_validity
     assert valid(['{"ok": true}', '{"mint": "x"}']) == 1.0
     assert valid(['{"ok": true}', "not-json"]) == 0.5
     assert valid(["broken", "{nope"]) < valid(['{"a":1}', "[1,2]"])
