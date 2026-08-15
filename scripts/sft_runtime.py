@@ -9,6 +9,7 @@ from __future__ import annotations
 import inspect
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -151,6 +152,15 @@ def render_sft_text(messages: list[dict[str, str]]) -> str:
 
 def normalize_sft_record(record: dict[str, Any], source: str) -> dict[str, Any] | None:
     """Normalize Alpaca / chat / text rows to `{messages, text, source}`."""
+    if not record.get("messages") and isinstance(record.get("messages_json"), str):
+        try:
+            parsed = json.loads(record["messages_json"])
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, list):
+            record = dict(record)
+            record["messages"] = parsed
+
     raw_messages = record.get("messages")
     if isinstance(raw_messages, list) and raw_messages:
         messages: list[dict[str, str]] = []
@@ -202,6 +212,20 @@ def normalize_sft_record(record: dict[str, Any], source: str) -> dict[str, Any] 
     if isinstance(text, str) and text.strip():
         messages = [{"role": "user", "content": text}]
         return {"messages": messages, "text": text, "source": source}
+
+    # Tokenized native rows (glm47_native) have no chat text. Keep a compact
+    # consumable `text` so the split is non-empty without requiring a tokenizer.
+    if record.get("input_ids") is not None:
+        summary = (
+            f"native_tokens source={record.get('source', '')} "
+            f"domain={record.get('domain', '')} "
+            f"total_tokens={record.get('total_tokens', '')}"
+        )
+        messages = [
+            {"role": "user", "content": summary},
+            {"role": "assistant", "content": str(record.get("id") or record.get("parent_id") or "ok")},
+        ]
+        return {"messages": messages, "text": render_sft_text(messages), "source": source}
     return None
 
 
@@ -276,16 +300,71 @@ def load_local_dataset(dataset_path: str, dataset_format: str | None) -> Dataset
     return DatasetDict({"train": loaded})
 
 
+def _hub_token_kw() -> dict[str, Any]:
+    """Prefer anonymous reads: an expired HF_TOKEN 401s even public datasets."""
+    return {"token": False}
+
+
+def _pick_shard_family(paths: list[str]) -> list[str]:
+    families: dict[str, list[str]] = {}
+    leftovers: list[str] = []
+    for path in paths:
+        if "-of-" in path and path.endswith(".parquet"):
+            family = path.rsplit("-of-", 1)[-1].removesuffix(".parquet")
+            families.setdefault(family, []).append(path)
+        else:
+            leftovers.append(path)
+    if not families:
+        return sorted(leftovers or paths)
+    best = max(families, key=lambda key: int(key) if key.isdigit() else -1)
+    return sorted(families[best])
+
+
+def _distillation_parquet_files(repo: str, config_name: str) -> dict[str, list[str]]:
+    from huggingface_hub import hf_hub_url, list_repo_files
+
+    files = list_repo_files(repo, repo_type="dataset", **_hub_token_kw())
+    prefix = f"data/{config_name}/"
+    grouped: dict[str, list[str]] = {}
+    for name in files:
+        if not name.startswith(prefix) or not name.endswith(".parquet"):
+            continue
+        leaf = name[len(prefix) :]
+        split = leaf.split("-", 1)[0]
+        grouped.setdefault(split, []).append(name)
+    urls: dict[str, list[str]] = {}
+    for split, names in grouped.items():
+        chosen = _pick_shard_family(names)
+        urls[split] = [
+            hf_hub_url(repo_id=repo, filename=name, repo_type="dataset") for name in chosen
+        ]
+    return urls
+
+
 def try_load_distillation_config(
     config_name: str,
     repo: str = DISTILLATION_REPO,
     max_rows: int | None = None,
 ) -> tuple[DatasetDict | None, str | None]:
     """Load one Hub distillation config. Returns (dataset, error)."""
+    loaded: DatasetDict | None = None
+    errors: list[str] = []
     try:
-        loaded = load_dataset(repo, config_name)
-    except Exception as exc:  # Hub / auth / schema failures are optional
-        return None, f"{repo}:{config_name}: {exc}"
+        data_files = _distillation_parquet_files(repo, config_name)
+        if data_files:
+            if max_rows is not None and data_files.get("train"):
+                data_files = {"train": [data_files["train"][0]]}
+            raw = load_dataset("parquet", data_files=data_files, **_hub_token_kw())
+            loaded = raw if isinstance(raw, DatasetDict) else DatasetDict({"train": raw})
+    except Exception as exc:
+        errors.append(f"parquet:{exc}")
+    if loaded is None:
+        try:
+            raw = load_dataset(repo, config_name, **_hub_token_kw())
+            loaded = raw if isinstance(raw, DatasetDict) else DatasetDict({"train": raw})
+        except Exception as exc:
+            errors.append(str(exc))
+            return None, f"{repo}:{config_name}: {' | '.join(errors)}"
     if not isinstance(loaded, DatasetDict):
         loaded = DatasetDict({"train": loaded})
     source = f"{repo}:{config_name}"
