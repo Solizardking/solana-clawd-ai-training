@@ -83,11 +83,19 @@ COINGECKO_IDS: dict[str, str] = {
 
 # ── HTTP helpers ─────────────────────────────────────────────────────────────────
 
-def _fetch(url: str, data: bytes | None = None, headers: dict | None = None, retries: int = 2) -> Any:
-    req = urllib.request.Request(url, data=data, headers=headers or {}, method="POST" if data else "GET")
+def _fetch(url: str, data: bytes | None = None, headers: dict | None = None, retries: int = 2, timeout: int = 15) -> Any:
+    # SolanaTracker (and some CDN-fronted RPCs) reject bare urllib with Cloudflare 1010
+    # unless a User-Agent is present.
+    merged = {
+        "User-Agent": "solana-clawd-ai-training/1.0 (+https://github.com/Solizardking/solana-clawd-ai-training)",
+        "Accept": "application/json",
+    }
+    if headers:
+        merged.update(headers)
+    req = urllib.request.Request(url, data=data, headers=merged, method="POST" if data else "GET")
     for attempt in range(retries + 1):
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < retries:
@@ -102,10 +110,22 @@ def _fetch(url: str, data: bytes | None = None, headers: dict | None = None, ret
     return None
 
 
-def rpc(method: str, params: list | None = None, endpoint: str | None = None) -> Any:
+def rpc(
+    method: str,
+    params: list | None = None,
+    endpoint: str | None = None,
+    timeout: int = 15,
+    retries: int = 2,
+) -> Any:
     url = endpoint or os.environ.get("SOLANA_RPC_URL", DEFAULT_RPC)
     payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params or []}).encode()
-    result = _fetch(url, data=payload, headers={"Content-Type": "application/json"})
+    result = _fetch(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        timeout=timeout,
+        retries=retries,
+    )
     if result and "error" in result:
         raise RuntimeError(f"RPC error {method}: {result['error']}")
     return result.get("result") if result else None
@@ -426,9 +446,14 @@ def cmd_stats() -> None:
     slot = epoch_result.get("absoluteSlot", "?") if epoch_result else "?"
     epoch = epoch_result.get("epoch", "?") if epoch_result else "?"
 
-    # Supply
-    supply_result = rpc("getSupply")
-    circulating = lamports(supply_result.get("value", {}).get("circulating", 0)) if supply_result else 0
+    # Supply (some RPC providers, e.g. SolanaTracker shared RPC, do not answer getSupply)
+    circulating = 0
+    supply_note = ""
+    try:
+        supply_result = rpc("getSupply", timeout=5, retries=0)
+        circulating = lamports(supply_result.get("value", {}).get("circulating", 0)) if supply_result else 0
+    except Exception as exc:
+        supply_note = f"unavailable ({type(exc).__name__})"
 
     # Recent perf
     perf = rpc("getRecentPerformanceSamples", [1])
@@ -445,14 +470,18 @@ def cmd_stats() -> None:
 
     # Price
     sol_price = get_sol_price()
-    market_cap = sol_price * circulating
+    market_cap = sol_price * circulating if circulating else 0
 
-    print(f"  Slot:           {slot:,}")
+    print(f"  Slot:           {slot:,}" if isinstance(slot, int) else f"  Slot:           {slot}")
     print(f"  Epoch:          {epoch}")
     print(f"  TPS (recent):   {tps:,.0f}")
-    print(f"  Circulating:    {circulating:,.0f} SOL")
+    if supply_note:
+        print(f"  Circulating:    {supply_note}")
+    else:
+        print(f"  Circulating:    {circulating:,.0f} SOL")
     print(f"  SOL Price:      {fmt_usd(sol_price)}")
-    print(f"  Market Cap:     {fmt_usd(market_cap)}")
+    if circulating:
+        print(f"  Market Cap:     {fmt_usd(market_cap)}")
     print(f"  Version:        {version}")
     print()
 
