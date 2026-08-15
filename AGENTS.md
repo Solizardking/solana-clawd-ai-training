@@ -52,6 +52,7 @@ Do **not** pull these by default in Cloud Agents (multi-GB). Pull only when a ta
 
 ### Python environments (important)
 
+- Fresh Cloud Agent images need `python3.12-venv` and `python3-dev` before `python3 -m venv` (ensurepip) and before compiling `cvxpy`/llama-cpp. The environment install script installs these via apt.
 - Root training stack: `/workspace/.venv` from `requirements.txt` (heavy: torch/transformers/peft/trl/wandb/llama-cpp-python).
 - Model-kit API: **separate** `model-kit/backend/.venv` from `model-kit/backend/requirements.txt`. Installing the root requirements upgrades `starlette` past what `fastapi==0.115.6` allows — never run the API from the root venv.
 - cuFOLIO tests/lint: `trading_factory/cufolio` via `uv sync --extra dev` (needs `uv` on `PATH`, typically `~/.local/bin`).
