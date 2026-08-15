@@ -68,6 +68,24 @@ Do **not** pull these by default in Cloud Agents (multi-GB). Pull only when a ta
 - Use secret `HF_TOKEN` for Hub access (`hf auth login --token "$HF_TOKEN"` or `huggingface_hub.login`).
 - Required for dataset/model download, `hf download`, Space pushes, and live training uploads. Public metadata endpoints work without it.
 
+### Solana RPC / Tracker secrets
+
+Expected Cloud Agent secrets (already wired in this environment):
+
+| Secret | Role |
+| --- | --- |
+| `SOLANA_RPC_URL` / `RPC_URL` | SolanaTracker shared RPC (`rpc-mainnet.solanatracker.io?api_key=…`) |
+| `SOLANA_WSS_URL` / `SOLANA_TRACKER_WSS_URL` | Same host over `wss` |
+| `SOLANA_TRACKER_ACCESS_TOKEN` | Currently same value as the RPC `api_key` query param |
+
+Notes:
+
+- SolanaTracker Cloudflare returns **1010** unless HTTP clients send a `User-Agent` (see `scripts/solana_client.py`).
+- `getSupply` times out on this shared RPC; `scripts/solana_client.py stats` treats supply as best-effort.
+- SolanaTracker **Data API** (`data.solanatracker.io` + `x-api-key`) currently returns 401 with the RPC api key — needs a separate Data API key from the SolanaTracker dashboard if Data API calls are required.
+- Solana CLI **2.1.0** (matches `Anchor.toml`) should be on `PATH` via `~/.local/share/solana/install/active_release/bin`.
+- Smoke: `.venv/bin/python scripts/solana_client.py stats`, `price SOL`, `token 8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump`; `solana epoch-info`.
+
 ### Lint / test / verify commands
 
 - Model-kit static check: `cd model-kit && npm run build`
@@ -75,7 +93,8 @@ Do **not** pull these by default in Cloud Agents (multi-GB). Pull only when a ta
 - NVIDIA verifier: `python3 nvidia/scripts/verify_nvidia.py --strict`
 - cuFOLIO: `cd trading_factory/cufolio && uv run ruff check src/ && uv run ruff format --check src/ && uv run pytest tests/ -m 'not gpu'`
 - Safe local control plane: `python3 scripts/run_local_clawd_stack.py` (no uploads / no live trading)
+- Solana RPC: `.venv/bin/python scripts/solana_client.py stats` (and `token` / `activity` / `price`)
 
 ### Optional / heavy
 
-- Full LoRA training, NVIDIA CUDA extras (`cuda12`/`cuda13`), Anchor/Solana program builds, and multi-GB Ollama pulls are optional and GPU/toolchain heavy. Default Cloud Agent path is CPU: Model Kit API+UI, CLI doctor/init, layout/NVIDIA validators, cuFOLIO CPU tests.
+- Full LoRA training, NVIDIA CUDA extras (`cuda12`/`cuda13`), Anchor program builds (`anchor build`), and multi-GB Ollama pulls are optional and GPU/toolchain heavy. Default Cloud Agent path is CPU: Model Kit API+UI, CLI doctor/init, layout/NVIDIA validators, cuFOLIO CPU tests, Solana RPC client smoke tests.
