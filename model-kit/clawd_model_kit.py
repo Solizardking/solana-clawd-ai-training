@@ -94,6 +94,13 @@ LANES = {
         "base_model": "Qwen/Qwen2.5-7B-Instruct",
         "dataset_size": "82169",
     },
+    "qwen38-27b": {
+        "config": "configs/qwen38_27b_clawd_lora.yaml",
+        "dataset_repo": "solanaclawd/solana-clawd-instruct",
+        "hub_model_id": "solanaclawd/solana-clawd-qwen38-27b-lora",
+        "base_model": "Qwen/Qwen3.8-27B",
+        "dataset_size": "80",
+    },
 }
 
 SECRET_PATTERNS = {

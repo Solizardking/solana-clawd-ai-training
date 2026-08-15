@@ -44,20 +44,24 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
-import torch
 import yaml
 from datasets import DatasetDict, load_dataset, load_from_disk
-from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
+
+_SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+
+from qwen38_multimodal import (  # noqa: E402
+    QWEN38_BASE_MODEL,
+    QWEN38_PIPELINE_TASK,
+    is_qwen38_multimodal_base,
+    load_qwen38_processor_and_model,
 )
-from trl import SFTConfig, SFTTrainer
 
 try:
     import wandb
@@ -203,6 +207,29 @@ The broad verifier checks the explicit `core-ai` and `ai-training` path list,
 local manifests, public Hub datasets, this adapter repo, and release-doc secret
 hygiene.
 """
+    if is_qwen38_multimodal_base(cfg["base_model"]):
+        pipeline_tag = "image-text-to-text"
+        loading_snippet = f"""from transformers import AutoProcessor, AutoModelForMultimodalLM, pipeline
+from peft import PeftModel
+
+base_model = "{cfg["base_model"]}"
+adapter_id = "{hub_model_id}"
+
+pipe = pipeline("image-text-to-text", model=base_model)
+processor = AutoProcessor.from_pretrained(base_model)
+model = AutoModelForMultimodalLM.from_pretrained(base_model, device_map="auto")
+model = PeftModel.from_pretrained(model, adapter_id)"""
+    else:
+        pipeline_tag = "text-generation"
+        loading_snippet = f"""from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
+
+base_model = "{cfg["base_model"]}"
+adapter_id = "{hub_model_id}"
+
+tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(base_model, device_map="auto", trust_remote_code=True)
+model = PeftModel.from_pretrained(model, adapter_id)"""
     path.write_text(
         f"""---
 license: cc-by-4.0
@@ -211,7 +238,7 @@ datasets:
 {datasets}
 tags:
 {tags}
-pipeline_tag: text-generation
+pipeline_tag: {pipeline_tag}
 ---
 
 # {title}
@@ -240,15 +267,7 @@ Hub model ID: `{hub_model_id}`
 ## Loading
 
 ```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel
-
-base_model = "{cfg["base_model"]}"
-adapter_id = "{hub_model_id}"
-
-tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(base_model, device_map="auto", trust_remote_code=True)
-model = PeftModel.from_pretrained(model, adapter_id)
+{loading_snippet}
 ```
 {core_release_note}
 
@@ -503,9 +522,13 @@ def resolve_dataset(cfg: dict[str, Any], use_cpt_stage: bool) -> tuple[DatasetDi
 
 
 def detect_device() -> str:
+    try:
+        import torch
+    except ImportError:
+        return "unknown"
     if torch.cuda.is_available():
         return "cuda"
-    if torch.backends.mps.is_available():
+    if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
         return "mps"
     return "cpu"
 
@@ -526,6 +549,11 @@ def main() -> None:
 
     device = detect_device()
     print(f"[setup] device={device}  base={base_model}  mode={'cpt' if args.cpt_stage else 'sft'}")
+    if is_qwen38_multimodal_base(base_model):
+        print(
+            f"[setup] loader=AutoProcessor+AutoModelForMultimodalLM "
+            f"pipeline={QWEN38_PIPELINE_TASK} model={QWEN38_BASE_MODEL}"
+        )
 
     if args.dry_run:
         print("[dry-run] Resolving dataset")
@@ -540,19 +568,12 @@ def main() -> None:
         print(f"[dry-run] push_to_hub={push_to_hub} hub_model_id={hub_model_id}")
         return
 
-    # ---- Tokenizer ----
-    print("[1/6] Loading tokenizer")
-    tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-    normalize_tokenizer_chat_template(tokenizer)
-    sft_cfg = cfg.setdefault("sft", {})
-    if sft_cfg.get("assistant_only_loss", True) and not supports_assistant_only_loss(tokenizer.chat_template):
-        print("WARNING: tokenizer chat template has no generation markers; disabling assistant_only_loss")
-        sft_cfg["assistant_only_loss"] = False
+    import torch
+    from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from trl import SFTConfig, SFTTrainer
 
-    # ---- Model ----
-    print("[2/6] Loading base model")
+    # ---- Tokenizer / processor ----
     quant_cfg = cfg.get("quantization", {}) or {}
     use_quant = quant_cfg.get("enabled", False) and device == "cuda"  # bitsandbytes needs CUDA
     bnb_config = None
@@ -564,19 +585,22 @@ def main() -> None:
             bnb_4bit_use_double_quant=quant_cfg.get("bnb_4bit_use_double_quant", True),
         )
 
-    # MPS: force all layers onto MPS via {"": "mps"} — "auto" causes meta-device
-    # offloading which breaks backward() on Apple Silicon.
-    if device == "mps":
-        _device_map: str | dict = {"": "mps"}
+    # Official Qwen3.8 card uses device_map="auto". Other lanes keep the
+    # MPS/CPU maps that avoid meta-device offload on Apple Silicon.
+    if is_qwen38_multimodal_base(base_model):
+        _device_map: str | dict | None = "auto"
+    elif device == "mps":
+        _device_map = {"": "mps"}
     elif device == "cpu":
         _device_map = None
     else:
         _device_map = "auto"
 
     model_kwargs: dict[str, Any] = {
-        "trust_remote_code": True,
         "device_map": _device_map,
     }
+    if not is_qwen38_multimodal_base(base_model):
+        model_kwargs["trust_remote_code"] = True
     if device == "cuda":
         model_kwargs["torch_dtype"] = torch.bfloat16 if cfg["training"].get("bf16") else torch.float16
         if bnb_config:
@@ -591,7 +615,29 @@ def main() -> None:
     else:
         model_kwargs["torch_dtype"] = torch.float32
 
-    model = AutoModelForCausalLM.from_pretrained(base_model, **model_kwargs)
+    processing_class: Any
+    if is_qwen38_multimodal_base(base_model):
+        print("[1/6] Loading AutoProcessor")
+        print("[2/6] Loading AutoModelForMultimodalLM")
+        processor, model = load_qwen38_processor_and_model(base_model, **model_kwargs)
+        tokenizer = getattr(processor, "tokenizer", None) or processor
+        processing_class = processor
+    else:
+        print("[1/6] Loading tokenizer")
+        tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
+        print("[2/6] Loading base model")
+        model = AutoModelForCausalLM.from_pretrained(base_model, **model_kwargs)
+        processing_class = tokenizer
+
+    if getattr(tokenizer, "pad_token", None) is None and getattr(tokenizer, "eos_token", None) is not None:
+        tokenizer.pad_token = tokenizer.eos_token
+    normalize_tokenizer_chat_template(tokenizer)
+    sft_cfg = cfg.setdefault("sft", {})
+    if sft_cfg.get("assistant_only_loss", True) and not supports_assistant_only_loss(
+        getattr(tokenizer, "chat_template", None)
+    ):
+        print("WARNING: tokenizer chat template has no generation markers; disabling assistant_only_loss")
+        sft_cfg["assistant_only_loss"] = False
 
     if use_quant:
         model = prepare_model_for_kbit_training(
@@ -668,7 +714,7 @@ def main() -> None:
         args=sft_config,
         train_dataset=train_ds,
         eval_dataset=eval_ds,
-        processing_class=tokenizer,
+        processing_class=processing_class,
     )
 
     # ---- Train ----
