@@ -17,10 +17,15 @@ for (const file of required) {
 }
 
 const app = await readFile(path.join(root, "frontend/app.js"), "utf8");
-for (const token of ["api/model-kit/status", "api/register/preview", "api/register", "api/arena/providers", "api/arena/runs", "constitution --strict"]) {
+for (const token of ["api/model-kit/status", "api/register/preview", "api/register", "api/arena/providers", "api/arena/runs", "constitution --strict", ".fly.dev"]) {
   if (!app.includes(token)) {
     throw new Error(`frontend/app.js is missing ${token}`);
   }
+}
+
+const config = await readFile(path.join(root, "frontend/config.js"), "utf8");
+if (!config.includes("solana-clawd-model-kit.fly.dev")) {
+  throw new Error("frontend/config.js is missing the Fly Machines API origin");
 }
 
 const index = await readFile(path.join(root, "frontend/index.html"), "utf8");
