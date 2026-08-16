@@ -18,6 +18,12 @@ if [[ -z "${FLY_API_TOKEN:-}" ]] && ! flyctl auth whoami >/dev/null 2>&1; then
   exit 1
 fi
 
+# A pasted deploy token in FLY_ORG is not an org slug; flyctl would 404.
+if [[ -n "${FLY_ORG:-}" ]] && { [[ ${#FLY_ORG} -gt 64 ]] || [[ "${FLY_ORG}" == "${FLY_API_TOKEN:-}" ]]; }; then
+  echo "Ignoring FLY_ORG because it does not look like an organization slug." >&2
+  unset FLY_ORG
+fi
+
 if ! flyctl status --app "$APP" >/dev/null 2>&1; then
   echo "Creating Fly app $APP in $REGION"
   create_args=("$APP")

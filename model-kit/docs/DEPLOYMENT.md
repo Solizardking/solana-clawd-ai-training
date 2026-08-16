@@ -2,7 +2,7 @@
 
 This folder ships one Fly Machine that serves both surfaces:
 
-- Site + API on Fly Machines: `https://solana-clawd-model-kit.fly.dev`
+- Live site + API: `https://solana-clawd-model-kit.fly.dev`
 - `models.x402.wtf` / `register.x402.wtf` can CNAME to that app after certificates are attached.
 
 The frontend is static. It never stores registry tokens. Live registration is
