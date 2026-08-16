@@ -1,0 +1,45 @@
+app = "solana-clawd-model-kit"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.fly"
+
+[env]
+  PORT = "8080"
+  FLY_PUBLIC_URL = "https://solana-clawd-model-kit.fly.dev"
+  ONCHAIN_REGISTRY_HOME = "https://onchain.x402.wtf"
+  ONCHAIN_REGISTRY_URL = "https://onchain.x402.wtf/api/register"
+  X402_HOME = "https://x402.wtf"
+  MODELS_HOME = "https://solana-clawd-model-kit.fly.dev"
+  REGISTER_HOME = "https://solana-clawd-model-kit.fly.dev/register"
+  MODEL_KIT_CORS_ORIGINS = "https://solana-clawd-model-kit.fly.dev,https://models.x402.wtf,https://register.x402.wtf,https://8bitlabs.ai,https://www.8bitlabs.ai,https://verify.8bitlabs.ai"
+  MODEL_KIT_FRONTEND_DIR = "/app/frontend"
+  MODEL_ARENA_LOG_PATH = "/tmp/model-arena-runs.jsonl"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+  [http_service.http_options.response.headers]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

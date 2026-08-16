@@ -813,8 +813,9 @@ ai-training/
 ├── tests/
 │   └── program-tests/              ← Anchor integration tests
 ├── model-kit/                      ← Solana AI Model Kit (public inference + x402 registry)
-│   ├── backend/                    ← FastAPI backend (Docker, Render)
-│   ├── frontend/                   ← Static frontend (Vercel)
+│   ├── backend/                    ← FastAPI backend (Docker, Fly Machines, Render)
+│   ├── frontend/                   ← Static frontend (Fly Machines, Vercel)
+│   ├── fly.toml                    ← Fly Machines app config
 │   └── docs/                       ← Deployment, NVIDIA, onboarding guides
 ├── nvidia/                         ← NVIDIA NIM / NeMo integration lane
 │   ├── blueprints/                 ← Blueprint implementations (tx-foundation, RAG, signals…)
