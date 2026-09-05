@@ -1,0 +1,7 @@
+# Nemotron tokenizer-only training (no 30B NVFP4 weights).
+pretrained: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4
+hub_repo: ordlibrary/solana-clawd-nemotron-trading-tokenizer
+output_dir: outputs/solana-trading-tokenizer
+pump_stream: wss://clawd-ws.fly.dev/ws
+health: https://clawd-ws.fly.dev/health
+train_new: false

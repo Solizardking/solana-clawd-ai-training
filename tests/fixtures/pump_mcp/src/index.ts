@@ -1,0 +1,13 @@
+server.tool("get-token-info", "Get information about a Pump.fun token", {});
+server.tool("create-token", "Create a new Pump.fun token", {});
+server.tool("buy-token", "Buy a Pump.fun token", {});
+server.tool("sell-token", "Sell a Pump.fun token", {});
+server.tool("list-accounts", "List accounts", {});
+server.tool("get-account-balance", "Get balances", {});
+server.tool("generate-image", "Generate an image", {});
+server.tool("get-fee-tier", "Look up fee tiers", {});
+server.tool("list-free-models", "List free models", {});
+server.tool("free-router-chat", "Chat via free router", {});
+server.tool("list-skills", "List skills", {});
+server.tool("get-skill", "Read a skill", {});
+server.tool("rerank-docs", "Rerank documents", {});

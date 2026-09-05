@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from .trading_tokens import PUMP_MCP_TOOLS, SOL_GPT_TOOLS
+
 SPECIAL_TOKENS = ("<pad>", "<unk>", "<bos>", "<eos>")
 
 # Longest-match phrases: pump.fun TRADE.md + SOL GPT catalog + Solana mechanics.
@@ -60,6 +62,8 @@ AGENT_PHRASES: tuple[str, ...] = (
     "ask",
     "PDA",
     "ALT",
+    *PUMP_MCP_TOOLS,
+    *SOL_GPT_TOOLS,
 )
 
 BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"

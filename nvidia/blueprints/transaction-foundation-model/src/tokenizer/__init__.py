@@ -14,7 +14,10 @@
 # limitations under the License.
 
 from .agent_vocab import SolanaAgentTokenizer
+from .clawd_ws import parse_pump_frame
+from .corpus import iter_secret_free_corpus
 from .solana_tokenizer import SolanaTokenizerPipeline, tx_to_text
+from .trading_tokens import PUMP_MCP_TOOLS, SOL_GPT_TOOLS, all_trading_tool_tokens
 
 try:
     from .financial_tokenizer import FinancialTabularTokenizer
@@ -34,6 +37,11 @@ __all__ = [
     "SolanaAgentTokenizer",
     "SolanaTokenizerPipeline",
     "tx_to_text",
+    "PUMP_MCP_TOOLS",
+    "SOL_GPT_TOOLS",
+    "all_trading_tool_tokens",
+    "iter_secret_free_corpus",
+    "parse_pump_frame",
 ]
 
 if _RAPIDS_AVAILABLE:
