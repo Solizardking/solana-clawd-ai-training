@@ -54,6 +54,9 @@ base58>=2.1.0
 # MCP (for hermes-blockchain-oracle MCP server mode)
 mcp>=1.0.0
 
+# Chat templates (Nemotron apply_chat_template)
+jinja2>=3.1.0
+
 # Optional: for tokenizer downloads from Qwen
 # tiktoken>=0.7.0
 
