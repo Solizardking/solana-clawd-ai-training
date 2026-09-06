@@ -1,0 +1,35 @@
+app = "clawd-trading-factory-vllm"
+primary_region = "ord"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MODEL_ID = "solanaclawd/solana-nvidia-trading-factory-8b"
+  MAX_MODEL_LEN = "8192"
+  GPU_MEM_UTIL = "0.90"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # An idle GPU is the single largest cost here. Suspend rather than stop so a
+  # resumed machine skips the model load; cold starts still pay the ~16GB pull.
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.checks]
+    [http_service.checks.health]
+      path = "/health"
+      interval = "30s"
+      timeout = "5s"
+      grace_period = "10m"
+
+[[vm]]
+  # L40S (48GB) fits the 8B in bf16 with room for KV cache. a100-40gb also
+  # works; a100-80gb is wasted money at this model size.
+  size = "l40s"
+
+[mounts]
+  source = "clawd_models"
+  destination = "/models"

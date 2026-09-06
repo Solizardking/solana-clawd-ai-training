@@ -3,8 +3,13 @@ FROM ./solana-trading-factory-8b-Q4_K_M.gguf
 # Clawd Trading Factory fine-tuned — Hermes-3-8B merged weights → GGUF Q4_K_M
 # Push target: 8bit/solana-trading-factory:latest
 # Source: solanaclawd/solana-nvidia-trading-factory-8b-lora merged with NousResearch/Hermes-3-Llama-3.1-8B
-# Dataset: solanaclawd/solana-clawd-nvidia-trading-factory-instruct (142 high-quality examples)
-# Eval: 85.5% token acc, loss 0.8064
+# Merged weights: solanaclawd/solana-nvidia-trading-factory-8b
+# GGUF: solanaclawd/solana-nvidia-trading-factory-8b-GGUF
+# Dataset: solanaclawd/solana-clawd-nvidia-trading-factory-instruct (199 examples)
+# Eval: 87.0% token acc, eval_loss 0.6783, train_loss 1.0327 (3 epochs, 2026-09-06)
+#
+# On an 8GB Jetson Orin Nano, drop num_ctx to 4096 — the 8GB is unified memory
+# shared with the OS, so a 8192 context can OOM mid-generation.
 
 PARAMETER temperature 0.15
 PARAMETER top_p 0.9

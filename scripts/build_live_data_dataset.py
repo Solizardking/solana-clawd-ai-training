@@ -148,12 +148,28 @@ def concise(frame: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in frame.items() if k not in VERBOSE_FIELDS}
 
 
-def tool_call_block(tool: str, arguments: dict[str, Any]) -> str:
-    payload = json.dumps({"tool": tool, "arguments": arguments}, indent=2)
-    return f"```json\n{payload}\n```"
+def assistant_tool_call(preamble: str, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """An assistant turn that calls a tool in Nemotron's NATIVE format.
+
+    The chat template renders `tool_calls` as
+        <tool_call><function=NAME><parameter=k>v</parameter></function></tool_call>
+    which the base model was already post-trained on. Using it instead of an
+    invented ```json convention means we are activating an existing capability
+    rather than teaching a new syntax, which needs far less data.
+    """
+    return {
+        "role": "assistant",
+        "content": preamble,
+        "tool_calls": [{"type": "function", "function": {"name": tool, "arguments": arguments}}],
+    }
 
 
-def ex(messages: list[dict[str, str]], kind: str) -> dict[str, Any]:
+def tool_result(payload: dict[str, Any]) -> dict[str, Any]:
+    """A tool-role turn. Renders as <tool_response>...</tool_response>."""
+    return {"role": "tool", "content": json.dumps(payload, indent=2, ensure_ascii=False)}
+
+
+def ex(messages: list[dict[str, Any]], kind: str) -> dict[str, Any]:
     return {
         "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
         "metadata": {"source": "clawd-ws", "source_type": f"live_data_{kind}", "license": "project-local"},
@@ -223,8 +239,7 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
     for ask in STATUS_ASKS:
         out.append(ex([
             {"role": "user", "content": ask},
-            {"role": "assistant", "content":
-                rng.choice(STATUS_PREAMBLES) + "\n\n" + tool_call_block("get_pump_stream_status", {})},
+            assistant_tool_call(rng.choice(STATUS_PREAMBLES), "get_pump_stream_status", {}),
         ], "tool_call"))
 
     # 2. tool_call: launches, plain and filtered
@@ -232,17 +247,15 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
         for limit in (3, 5, 10):
             out.append(ex([
                 {"role": "user", "content": ask},
-                {"role": "assistant", "content":
-                    rng.choice(LAUNCH_PREAMBLES) + "\n\n"
-                    + tool_call_block("get_recent_token_launches", {"limit": limit})},
+                assistant_tool_call(
+                    rng.choice(LAUNCH_PREAMBLES), "get_recent_token_launches", {"limit": limit}
+                ),
             ], "tool_call"))
 
     for ask, args in FILTERED_ASKS:
         out.append(ex([
             {"role": "user", "content": ask},
-            {"role": "assistant", "content":
-                rng.choice(FILTER_PREAMBLES) + "\n\n"
-                + tool_call_block("get_recent_token_launches", args)},
+            assistant_tool_call(rng.choice(FILTER_PREAMBLES), "get_recent_token_launches", args),
         ], "tool_call"))
 
     # 3. grounded: real tool result -> real analysis
