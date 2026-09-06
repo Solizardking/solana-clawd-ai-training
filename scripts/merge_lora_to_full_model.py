@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#   "torch>=2.1.0",
+#   "transformers>=5.12.0",
+#   "accelerate>=1.14.0",
+#   "peft>=0.19.1",
+#   "huggingface_hub>=1.19.0",
+#   "safetensors>=0.5.0",
+# ]
+# ///
 """Merge a LoRA adapter into a full Transformers model folder.
 
 This produces the final model layout expected by:
@@ -136,7 +147,7 @@ def main() -> None:
             repo_id=args.hub_model_id,
             repo_type="model",
             folder_path=str(output_dir),
-            commit_message="release: upload merged Clawd Fable model",
+            commit_message=f"release: upload merged {args.hub_model_id}",
         )
 
     print("[merge] done")
