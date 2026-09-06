@@ -144,9 +144,10 @@ class LocalBackend(ChatBackend):
         self.max_tokens, self.temperature = max_tokens, temperature
 
     def complete(self, messages: list[dict[str, str]]) -> str:
-        inputs = self.tok.apply_chat_template(
+        encoded: Any = self.tok.apply_chat_template(
             messages, add_generation_prompt=True, tokenize=True, return_dict=True, return_tensors="pt"
-        ).to(self.model.device)
+        )
+        inputs = encoded.to(self.model.device)
         import torch
 
         with torch.no_grad():
@@ -156,7 +157,8 @@ class LocalBackend(ChatBackend):
                 temperature=self.temperature,
                 do_sample=self.temperature > 0,
             )
-        return self.tok.decode(out[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+        text: Any = self.tok.decode(out[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+        return text if isinstance(text, str) else str(text)
 
 
 class DryRunBackend(ChatBackend):
