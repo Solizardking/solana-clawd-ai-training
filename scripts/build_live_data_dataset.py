@@ -85,6 +85,17 @@ STATUS_ASKS = [
     "Check the clawd-ws stream health.",
     "Are the birdeye and helius feeds connected?",
     "How many clients are on the live tape?",
+    "Is clawd-ws alive?",
+    "Status check on the pump tape.",
+    "Are we still connected to the launch feed?",
+    "How long has the stream been up?",
+    "Is the analyzer feed healthy?",
+    "Give me a health readout on the tape.",
+    "Did the pump.fun websocket drop?",
+    "Total launches counted so far?",
+    "Which upstream feeds are currently up?",
+    "Is jupiter connected on the stream?",
+    "Quick sanity check: is the tape streaming?",
 ]
 
 LAUNCH_ASKS = [
@@ -93,6 +104,17 @@ LAUNCH_ASKS = [
     "Any new mints in the last few seconds?",
     "What just deployed on pump.fun?",
     "Give me the latest launches off the tape.",
+    "What's fresh on the pump tape?",
+    "Pull the most recent launches.",
+    "Anything new minting right now?",
+    "What are the latest pump.fun deploys?",
+    "Show me what's hitting the tape.",
+    "Newest mints, please.",
+    "What tokens were just created?",
+    "Catch me up on the last few launches.",
+    "What's coming through the launch feed?",
+    "Give me a snapshot of current launches.",
+    "Any launches worth looking at right now?",
 ]
 
 FILTERED_ASKS = [
@@ -100,12 +122,25 @@ FILTERED_ASKS = [
     ("Any launches above 50 SOL market cap?", {"limit": 5, "min_market_cap_sol": 50}),
     ("Find me 3 recent mints with a website or twitter.", {"limit": 3, "require_socials": True}),
     ("Newest launch over 100 SOL mcap, just one.", {"limit": 1, "min_market_cap_sol": 100}),
+    ("Filter out the no-social junk and show me 5.", {"limit": 5, "require_socials": True}),
+    ("Launches over 30 SOL, give me 10.", {"limit": 10, "min_market_cap_sol": 30}),
+    ("Only show launches with a declared telegram or site.", {"limit": 5, "require_socials": True}),
+    ("Two biggest recent mints by market cap.", {"limit": 2, "min_market_cap_sol": 75}),
+    ("Show me 8 recent launches, I want volume not quality.", {"limit": 8}),
+    ("Just one launch, the newest.", {"limit": 1}),
+    ("Give me 15 launches to scan.", {"limit": 15}),
+    ("Anything above 200 SOL mcap on the tape?", {"limit": 5, "min_market_cap_sol": 200}),
 ]
 
 NO_TOOL_ASKS = [
     "What's the current price of SOL?",
     "What token launched on pump.fun two minutes ago?",
     "What's the market cap of the newest mint right now?",
+    "Which mint is trending on pump.fun this minute?",
+    "How many launches has the tape seen today?",
+    "What's the mint address of the last token created?",
+    "Tell me the top gainer on pump.fun right now.",
+    "Who deployed the most recent token?",
 ]
 
 
@@ -162,29 +197,51 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
     statuses = [f for f in frames if f.get("type") == "status"]
     out: list[dict[str, Any]] = []
 
+    # Varied preambles so the model learns the *behaviour* (call, don't guess)
+    # rather than memorizing a single sentence.
+    STATUS_PREAMBLES = [
+        "I need the live stream state for that, so I'll query the tape rather than guess.",
+        "That's a live value. Checking the stream health directly.",
+        "Pulling the current status off clawd-ws.",
+        "I won't guess at stream state — querying it.",
+        "Let me read the health endpoint.",
+    ]
+    LAUNCH_PREAMBLES = [
+        "Launches are seconds old, so this has to come off the live tape.",
+        "This is live data. Reading the tape now.",
+        "I can't answer that from memory — pulling current frames.",
+        "Fetching the newest frames off clawd-ws.",
+        "Querying the live launch feed.",
+    ]
+    FILTER_PREAMBLES = [
+        "I'll pull that off the tape with the filter applied.",
+        "Reading the tape with that constraint set.",
+        "Fetching live frames, filtered as asked.",
+    ]
+
     # 1. tool_call: status
     for ask in STATUS_ASKS:
         out.append(ex([
             {"role": "user", "content": ask},
             {"role": "assistant", "content":
-                "I need the live stream state for that, so I'll query the tape rather than guess.\n\n"
-                + tool_call_block("get_pump_stream_status", {})},
+                rng.choice(STATUS_PREAMBLES) + "\n\n" + tool_call_block("get_pump_stream_status", {})},
         ], "tool_call"))
 
     # 2. tool_call: launches, plain and filtered
     for ask in LAUNCH_ASKS:
-        out.append(ex([
-            {"role": "user", "content": ask},
-            {"role": "assistant", "content":
-                "Launches are seconds old, so this has to come off the live tape.\n\n"
-                + tool_call_block("get_recent_token_launches", {"limit": 5})},
-        ], "tool_call"))
+        for limit in (3, 5, 10):
+            out.append(ex([
+                {"role": "user", "content": ask},
+                {"role": "assistant", "content":
+                    rng.choice(LAUNCH_PREAMBLES) + "\n\n"
+                    + tool_call_block("get_recent_token_launches", {"limit": limit})},
+            ], "tool_call"))
 
     for ask, args in FILTERED_ASKS:
         out.append(ex([
             {"role": "user", "content": ask},
             {"role": "assistant", "content":
-                "I'll pull that off the tape with the filter applied server-side.\n\n"
+                rng.choice(FILTER_PREAMBLES) + "\n\n"
                 + tool_call_block("get_recent_token_launches", args)},
         ], "tool_call"))
 
@@ -262,7 +319,7 @@ def get_status_result(frame: dict[str, Any]) -> dict[str, Any]:
 
 
 def record_frames(count: int, timeout: float) -> list[dict[str, Any]]:
-    from tokenizer.clawd_ws import DEFAULT_WS, recv_pump_frames
+    from tokenizer.clawd_ws import DEFAULT_WS, recv_pump_frames  # type: ignore[import-not-found]
 
     print(f"Recording up to {count} frames from {DEFAULT_WS} (timeout {timeout}s)...")
     frames = recv_pump_frames(DEFAULT_WS, timeout=timeout, max_frames=count)
