@@ -336,6 +336,18 @@ def upload_adapter_folder(output_dir: str, hub_model_id: str, private: bool, com
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--config", default="configs/lora_config.yaml", help="Path to YAML config")
+    p.add_argument(
+        "--ship",
+        action="append",
+        default=None,
+        metavar="FILE",
+        help=(
+            "No-op at runtime. `hf jobs uv run` uploads every argument that is an "
+            "existing local file into the job's flat /data mount, so this flag is how "
+            "sibling modules (sft_runtime.py, qwen38_multimodal.py) travel with the "
+            "script. Repeatable. Ignored when running locally."
+        ),
+    )
     p.add_argument("--base-model", default=None, help="Override base model id")
     p.add_argument("--dataset-repo", default=None, help="Override dataset repo id")
     p.add_argument("--dataset-path", default=None, help="Override local dataset path or file")
@@ -609,7 +621,7 @@ def main() -> None:
         print(f"      Continuing trainable LoRA from {resume_adapter_path}")
         model = PeftModel.from_pretrained(model, resume_adapter_path, is_trainable=True)
     else:
-        peft_config = LoraConfig(
+        lora_kwargs: dict[str, Any] = dict(
             r=lora_cfg["r"],
             lora_alpha=lora_cfg["alpha"],
             lora_dropout=lora_cfg.get("dropout", 0.05),
@@ -617,6 +629,13 @@ def main() -> None:
             task_type=lora_cfg.get("task_type", "CAUSAL_LM"),
             target_modules=lora_cfg.get("target_modules"),
         )
+        # Hybrid/MoE checkpoints (e.g. nemotron_h) repeat projection names in
+        # auxiliary towers such as the multi-token-prediction head, which must
+        # not receive adapters.
+        exclude_modules = lora_cfg.get("exclude_modules")
+        if exclude_modules:
+            lora_kwargs["exclude_modules"] = exclude_modules
+        peft_config = LoraConfig(**lora_kwargs)
         model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 

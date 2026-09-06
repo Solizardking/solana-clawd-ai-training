@@ -1,5 +1,10 @@
 # Onchain Model Kit
 
+> **Consolidated.** This document is now part of the canonical [`onchain.md`](../onchain.md) at the repository root,
+> which merges the Onchain Constitution, the Clawd SVM compute specification, the Onchain Model Kit runbook, and the
+> OnChain-AI integration handoff into one file. Edit the root file; this copy is kept for history and may drift.
+
+
 > The **Onchain Model Kit** is the complete, one-shot pipeline for training, registering, and serving a Solana-native AI model.
 > It ships inside `ai-training/` and includes: a 36K example SFT dataset, LoRA training configs, a 13-tool Solana perps function-calling library (`perps/`), and this onchain registry layer.
 >

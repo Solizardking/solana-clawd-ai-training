@@ -1,5 +1,10 @@
 # OnChain-AI Handoff
 
+> **Consolidated.** This document is now part of the canonical [`onchain.md`](../onchain.md) at the repository root,
+> which merges the Onchain Constitution, the Clawd SVM compute specification, the Onchain Model Kit runbook, and the
+> OnChain-AI integration handoff into one file. Edit the root file; this copy is kept for history and may drift.
+
+
 Implementation target: `onchain.x402.wtf`
 
 Local app roots:

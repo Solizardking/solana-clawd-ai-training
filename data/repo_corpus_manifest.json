@@ -1,0 +1,159 @@
+{
+  "build": {
+    "chunk_chars": 6000,
+    "chunk_overlap": 400,
+    "max_file_bytes": 400000,
+    "public_safe": true
+  },
+  "directories": [
+    "memory",
+    "nvidia",
+    "ollama",
+    "library",
+    "data",
+    "docs",
+    "configs",
+    "programs",
+    "studio"
+  ],
+  "excludes": [
+    "data/processed",
+    "data/repo_corpus_processed",
+    "data/core_ai_processed",
+    "data/nemo_clawd/corpus",
+    "data/nemo_clawd/processed",
+    "data/nvidia_rag_store"
+  ],
+  "repo_id": "solanaclawd/solana-clawd-repo-corpus",
+  "source_counts": {
+    "configs": 22,
+    "data": 157,
+    "docs": 32,
+    "library": 10,
+    "memory": 2,
+    "nvidia": 156,
+    "ollama": 10,
+    "programs": 13,
+    "studio": 6
+  },
+  "stats": {
+    "duplicates_removed": 0,
+    "per_directory": {
+      "configs": {
+        "binary": 1,
+        "chunks": 22,
+        "examples": 22,
+        "excluded_by_prefix": 0,
+        "files_seen": 22,
+        "files_used": 21,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skipped": 0
+      },
+      "data": {
+        "binary": 0,
+        "chunks": 175,
+        "examples": 157,
+        "excluded_by_prefix": 18,
+        "files_seen": 74,
+        "files_used": 63,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skip_non_text_suffix": 7,
+        "skip_too_large": 4,
+        "skipped": 11
+      },
+      "docs": {
+        "binary": 0,
+        "chunks": 32,
+        "examples": 32,
+        "excluded_by_prefix": 0,
+        "files_seen": 11,
+        "files_used": 10,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skip_non_text_suffix": 1,
+        "skipped": 1
+      },
+      "library": {
+        "binary": 0,
+        "chunks": 10,
+        "examples": 10,
+        "excluded_by_prefix": 0,
+        "files_seen": 12,
+        "files_used": 6,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skip_non_text_suffix": 6,
+        "skipped": 6
+      },
+      "memory": {
+        "binary": 0,
+        "chunks": 2,
+        "examples": 2,
+        "excluded_by_prefix": 0,
+        "files_seen": 1,
+        "files_used": 1,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skipped": 0
+      },
+      "nvidia": {
+        "binary": 1,
+        "chunks": 156,
+        "examples": 156,
+        "excluded_by_prefix": 0,
+        "files_seen": 111,
+        "files_used": 91,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skip_non_text_suffix": 6,
+        "skip_skip_dir": 13,
+        "skipped": 19
+      },
+      "ollama": {
+        "binary": 0,
+        "chunks": 10,
+        "examples": 10,
+        "excluded_by_prefix": 0,
+        "files_seen": 9,
+        "files_used": 9,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skipped": 0
+      },
+      "programs": {
+        "binary": 0,
+        "chunks": 13,
+        "examples": 13,
+        "excluded_by_prefix": 0,
+        "files_seen": 6,
+        "files_used": 6,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skipped": 0
+      },
+      "studio": {
+        "binary": 0,
+        "chunks": 6,
+        "examples": 6,
+        "excluded_by_prefix": 0,
+        "files_seen": 1,
+        "files_used": 1,
+        "jsonl_records": 0,
+        "limited": 0,
+        "sensitive": 0,
+        "skipped": 0
+      }
+    },
+    "total_examples": 408
+  }
+}

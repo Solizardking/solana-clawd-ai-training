@@ -1,36 +1,25 @@
 #!/usr/bin/env bash
 # Watch a Core AI Hugging Face Job without interrupting it, then run the full
-# release verifier when the job reaches a terminal state.
+# release verifier when the job completes successfully.
+#
+# This is a thin wrapper over scripts/watch_hf_job.sh. It exists to pin the
+# Core AI success action (the release verifier) and the Core AI job label.
+#
+# Usage:
+#   ./scripts/watch_core_ai_hf_job.sh                 # newest core-ai job
+#   ./scripts/watch_core_ai_hf_job.sh <JOB_ID>
+#   ./scripts/watch_core_ai_hf_job.sh <JOB_ID> 30     # poll every 30s
+#
+# Previous versions of this script defaulted to a hardcoded job id and matched
+# status strings (PENDING/QUEUED/SUCCEEDED) that the Jobs API never emits. The
+# real stages are SCHEDULING, RUNNING, COMPLETED, ERROR, CANCELED, DELETED.
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-JOB_ID="${1:-ordlibrary/6a35a6833093dba73ce2a86b}"
-INTERVAL_SECONDS="${2:-60}"
+export LABEL="${LABEL:-solana-clawd-core-ai}"
+export ON_SUCCESS="${ON_SUCCESS:-python3 scripts/verify_full_goal_release.py --strict}"
 
-echo "Watching Hugging Face job: ${JOB_ID}"
-echo "Polling every ${INTERVAL_SECONDS}s. Press Ctrl-C to stop watching; this does not cancel the remote job."
-
-while true; do
-  INSPECT_OUTPUT="$(hf jobs inspect "$JOB_ID")"
-  printf '%s\n' "$INSPECT_OUTPUT"
-
-  STATUS_FIELD="$(printf '%s\n' "$INSPECT_OUTPUT" | awk -F '\t' 'NR==2 {print $12}')"
-  case "$STATUS_FIELD" in
-    *RUNNING*|*PENDING*|*SCHEDULED*|*QUEUED*|*STARTING*)
-      sleep "$INTERVAL_SECONDS"
-      ;;
-    *COMPLETED*|*SUCCEEDED*|*SUCCESS*)
-      echo "Job reached terminal success state. Running full release verifier."
-      python3 scripts/verify_full_goal_release.py --strict
-      exit $?
-      ;;
-    *)
-      echo "Job is no longer running, but status is not a recognized success state: ${STATUS_FIELD}" >&2
-      echo "Inspect logs with: hf jobs logs ${JOB_ID} --tail 200" >&2
-      exit 1
-      ;;
-  esac
-done
+exec ./scripts/watch_hf_job.sh "$@"
