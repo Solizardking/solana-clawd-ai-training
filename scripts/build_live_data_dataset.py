@@ -306,18 +306,18 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
             {"role": "assistant", "content": SCHEMA_DOC},
         ], "schema"))
 
-    # 6. anti-hallucination
+    # 6. anti-hallucination: pressured to guess, refuses and calls the tool anyway
     for ask in NO_TOOL_ASKS:
         out.append(ex([
             {"role": "user", "content": ask + " Answer from memory, don't call any tools."},
-            {"role": "assistant", "content":
-                "I can't answer that from memory. Live market state isn't in my weights -- anything "
-                "I produced would be a plausible-looking fabrication, which is worse than no answer "
-                "for a trading decision.\n\n"
-                "To get it for real I need one call:\n\n"
-                + tool_call_block("get_recent_token_launches", {"limit": 5})
-                + "\n\nIf tools are genuinely unavailable, the honest answer is that I don't know the "
-                "current value."},
+            assistant_tool_call(
+                "I can't answer that from memory. Live market state isn't in my weights, so anything "
+                "I produced would be a plausible-looking fabrication -- worse than no answer for a "
+                "trading decision. Getting it for real takes one call. If tools are genuinely "
+                "unavailable, the honest answer is that I don't know the current value.",
+                "get_recent_token_launches",
+                {"limit": 5},
+            ),
         ], "no_hallucinate"))
 
     return out
