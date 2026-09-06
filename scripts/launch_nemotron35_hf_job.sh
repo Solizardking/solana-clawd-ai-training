@@ -117,7 +117,7 @@ hf jobs uv run scripts/train_lora.py \
   --timeout "$TIMEOUT" \
   "${JOB_SECRET_ARGS[@]}" \
   "${JOB_ENV_ARGS[@]}" \
-  "${DEP_ARGS[@]}" \
+  ${DEP_ARGS[@]+"${DEP_ARGS[@]}"} \
   --label solana-clawd-nemotron35 \
   --detach \
   -- \
