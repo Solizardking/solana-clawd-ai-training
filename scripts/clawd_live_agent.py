@@ -130,7 +130,11 @@ class LocalBackend(ChatBackend):
 
         print(f"[local] loading {model}", file=sys.stderr)
         self.tok = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(model, dtype=torch.bfloat16, device_map="auto")
+        # `Any` throughout: transformers' and peft's return types don't unify, and
+        # the concrete classes vary by architecture.
+        self.model: Any = AutoModelForCausalLM.from_pretrained(
+            model, dtype=torch.bfloat16, device_map="auto"
+        )
         if adapter:
             from peft import PeftModel
 
@@ -202,7 +206,7 @@ def run(backend: ChatBackend, prompt: str, max_rounds: int, verbose: bool) -> st
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("prompt", nargs="+", help="The question to ask")
+    p.add_argument("prompt", nargs="*", help="The question to ask")
     p.add_argument("--backend", choices=["ollama", "openai", "local"], default="ollama")
     p.add_argument("--model", default="clawd-live")
     p.add_argument("--adapter", default=None, help="PEFT adapter id/path (local backend)")
@@ -223,6 +227,9 @@ def main() -> int:
     if args.print_tools:
         print(json.dumps(openai_schema(), indent=2))
         return 0
+
+    if not args.prompt:
+        p.error("a prompt is required (or use --print-system / --print-tools)")
 
     prompt = " ".join(args.prompt)
     if args.dry_run:
