@@ -613,6 +613,24 @@ def main() -> None:
     if getattr(tokenizer, "pad_token", None) is None and getattr(tokenizer, "eos_token", None) is not None:
         tokenizer.pad_token = tokenizer.eos_token
     normalize_tokenizer_chat_template(tokenizer)
+
+    # Optional override so a model whose stock template lacks {% generation %}
+    # markers can still train with assistant_only_loss. Without this, loss is
+    # computed over the whole sequence, which on tool-use data means training the
+    # model to emit the tool *results* it is supposed to fetch.
+    chat_template_path = cfg.get("chat_template_path")
+    if chat_template_path:
+        template_file = Path(chat_template_path)
+        if not template_file.is_absolute():
+            # Remote jobs receive shipped files flat in the script's directory.
+            for candidate in (template_file, _SCRIPTS_DIR / template_file.name):
+                if candidate.exists():
+                    template_file = candidate
+                    break
+        if not template_file.exists():
+            raise SystemExit(f"chat_template_path not found: {chat_template_path}")
+        tokenizer.chat_template = template_file.read_text(encoding="utf-8")
+        print(f"      chat template overridden from {template_file}")
     sft_cfg = cfg.setdefault("sft", {})
     if sft_cfg.get("assistant_only_loss", True) and not supports_assistant_only_loss(
         getattr(tokenizer, "chat_template", None)

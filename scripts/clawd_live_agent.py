@@ -53,8 +53,6 @@ SYSTEM_PROMPT = (
     + "\n\nRules for live data:\n"
     "- Anything about current launches, prices, market caps, or stream state MUST come "
     "from a tool call. Never answer those from memory.\n"
-    '- Emit a tool call as a fenced ```json block with "tool" and "arguments" keys, '
-    "and nothing else in that turn.\n"
     "- After a tool result, ground every claim in the returned frames. Do not invent "
     "fields, mints, or numbers that are not present.\n"
     "- A null website/twitter/telegram means undeclared, not absent-and-verified."
