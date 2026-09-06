@@ -33,6 +33,13 @@ dataset_repo: "solanaclawd/solana-clawd-live-data"
 dataset_revision: "main"
 dataset_path: "data/live_data_processed"
 max_seq_length: 4096
+
+# Nemotron's stock template has no {% generation %} markers, so TRL cannot find
+# assistant spans and train_lora.py silently falls back to full-sequence loss.
+# On this dataset that would train the model to *generate* <tool_response> tape
+# frames instead of fetching them. This patched template adds the markers.
+# Verified: 0/127 examples leak raw frame JSON into the supervised span.
+chat_template_path: "configs/nemotron35_chat_template_genmask.jinja"
 train_split: "train"
 eval_split: "eval"
 
@@ -97,10 +104,9 @@ quantization:
 
 sft:
   packing: false
-  # Nemotron's chat template has no {% generation %} markers, so train_lora.py
-  # disables this at runtime and computes loss over the full sequence. That
-  # matters more here than in stage 1: these examples deliberately contain long
-  # verbatim tool-result JSON in *user* turns, and we do not want the model
-  # learning to generate those frames. See docs/hf_training_setup.md.
+  # Works here because chat_template_path above supplies {% generation %}
+  # markers. Essential for this dataset: the examples carry long verbatim
+  # tool-result JSON in tool/user turns, and full-sequence loss would teach the
+  # model to generate tape frames rather than fetch them.
   assistant_only_loss: true
   chat_template_kwargs: {}

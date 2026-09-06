@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -130,7 +131,12 @@ def normalize_tokenizer_chat_template(tokenizer: Any) -> None:
 
 def supports_assistant_only_loss(chat_template: Any) -> bool:
     template = _select_chat_template(chat_template)
-    return bool(template and "{% generation" in template)
+    if not template:
+        return False
+    # Accept Jinja's whitespace-control forms too ({%- generation %}, {%+ ... }).
+    # Matching only "{% generation" silently disabled assistant_only_loss for
+    # any template written with a leading dash.
+    return re.search(r"\{%[-+]?\s*generation\b", template) is not None
 
 
 def _wandb_run_url() -> str | None:
