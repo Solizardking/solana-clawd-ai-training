@@ -62,9 +62,61 @@ SYSTEM_PROMPT = (
 
 _FENCED = re.compile(r"```(?:json)?\s*(\{.*?\})\s*```", re.DOTALL)
 
+# Nemotron's native tool-call syntax, which is what a model trained on
+# data/live_data_sft.jsonl actually emits:
+#   <tool_call>
+#   <function=get_recent_token_launches>
+#   <parameter=limit>
+#   3
+#   </parameter>
+#   </function>
+#   </tool_call>
+_NATIVE_CALL = re.compile(r"<tool_call>\s*<function=([^>]+)>(.*?)</function>", re.DOTALL)
+_NATIVE_PARAM = re.compile(r"<parameter=([^>]+)>(.*?)</parameter>", re.DOTALL)
+
+
+def _coerce(raw: str) -> Any:
+    """Parameter values arrive as text. Recover JSON scalars where possible."""
+    value = raw.strip()
+    if not value:
+        return ""
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        pass
+    lowered = value.lower()
+    if lowered in ("true", "false"):
+        return lowered == "true"
+    if lowered in ("null", "none"):
+        return None
+    return value
+
+
+def parse_native_tool_call(text: str) -> tuple[str, dict[str, Any]] | None:
+    """Parse Nemotron's <tool_call><function=...> syntax."""
+    for match in _NATIVE_CALL.finditer(text):
+        name = match.group(1).strip()
+        if name not in TOOLS:
+            continue
+        args = {
+            pname.strip(): _coerce(pvalue)
+            for pname, pvalue in _NATIVE_PARAM.findall(match.group(2))
+        }
+        return name, args
+    return None
+
 
 def parse_tool_call(text: str) -> tuple[str, dict[str, Any]] | None:
-    """Pull a {"tool": ..., "arguments": {...}} object out of a model turn."""
+    """Extract a tool call from a model turn.
+
+    Native Nemotron syntax is tried first, then the fenced-JSON fallback, so the
+    same harness drives the trained model, an untrained base model prompted with
+    the fenced convention, and other backends.
+    """
+    native = parse_native_tool_call(text)
+    if native:
+        return native
+
     candidates = [m.group(1) for m in _FENCED.finditer(text)]
     # Also accept a bare JSON object, which smaller models emit unfenced.
     stripped = text.strip()
