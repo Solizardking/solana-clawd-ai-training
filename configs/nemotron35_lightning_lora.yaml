@@ -38,7 +38,12 @@ torch_dtype: "bfloat16"
 device_map: "auto"
 
 # Dataset
-dataset_repo: "solanaclawd/solana-clawd-core-ai-instruct"
+# Published by scripts/publish_repo_corpus_dataset.sh: the repo's own knowledge
+# directories (memory/ nvidia/ ollama/ library/ data/ docs/ configs/ programs/
+# studio/) combined with the root instruction corpus. 24,768 train rows.
+# `dataset_path` is tried first and is only present on a dev machine; remote
+# jobs fall back to `dataset_repo`.
+dataset_repo: "solanaclawd/solana-clawd-repo-corpus"
 dataset_revision: "main"
 dataset_path: "data/combined_processed"
 max_seq_length: 4096
