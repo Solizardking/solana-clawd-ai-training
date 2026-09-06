@@ -75,6 +75,10 @@ echo
 # We pass the whole repo as the working dir so the job sees scripts/, configs/, data/.
 # `hf jobs uv run` will resolve dependencies from requirements.txt if present.
 
+# `hf jobs uv run` uploads the script plus every argument that is an existing
+# local file into a flat /data mount. train_lora.py imports sft_runtime and
+# qwen38_multimodal from its own directory, so they must ride along via --ship
+# or the job dies with ModuleNotFoundError.
 hf jobs uv run "$ROOT_DIR/scripts/train_lora.py" \
   --flavor "$FLAVOR" \
   --timeout 6h \
@@ -86,7 +90,9 @@ hf jobs uv run "$ROOT_DIR/scripts/train_lora.py" \
   --env TRITON_CACHE_DIR=/data/triton_cache \
   --env-file <(printf "HUGGING_FACE_HUB_TOKEN=%s\nWANDB_API_KEY=%s\n" "${HF_TOKEN:-}" "${WANDB_API_KEY:-}") \
   --detach \
-  -- --config "$CONFIG_PATH"
+  -- --config "$CONFIG_PATH" \
+  --ship "$ROOT_DIR/scripts/sft_runtime.py" \
+  --ship "$ROOT_DIR/scripts/qwen38_multimodal.py"
 
 echo
 echo "Job submitted. To monitor:"

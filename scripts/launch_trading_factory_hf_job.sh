@@ -35,16 +35,30 @@ if [[ -z "${HF_TOKEN:-}" ]]; then
 fi
 
 JOB_SECRET_ARGS=(--secrets HF_TOKEN)
+# /data is a shared HF bucket mount across all of this account's jobs. Caching a
+# 16GB base model there fails with `OSError: [Errno 5] Input/output error` on
+# read-back when a concurrent job is also hammering the bucket. Default to the
+# container's local disk instead; set HF_CACHE_ROOT to opt back into a shared
+# path when a run genuinely needs the cache to persist between jobs.
+# Keep this array non-empty: the shebang can resolve to bash 3.2 on macOS,
+# where "${JOB_ENV_ARGS[@]}" on an empty array aborts under `set -u`.
+HF_CACHE_ROOT="${HF_CACHE_ROOT:-/root/.cache/huggingface}"
 JOB_ENV_ARGS=(
-  --env HF_HOME=/data/hf_cache
-  --env HF_DATASETS_CACHE=/data/hf_cache/datasets
-  --env TRANSFORMERS_CACHE=/data/hf_cache
+  --env "HF_HOME=$HF_CACHE_ROOT"
+  --env "HF_DATASETS_CACHE=$HF_CACHE_ROOT/datasets"
+  --env "TRANSFORMERS_CACHE=$HF_CACHE_ROOT"
 )
+# `hf jobs uv run` uploads the script plus every argument that is an existing
+# local file into a flat /data mount. train_lora.py imports sft_runtime and
+# qwen38_multimodal from its own directory, so they must ride along via --ship
+# or the job dies with ModuleNotFoundError.
 TRAIN_ARGS=(
   --config configs/nvidia_trading_factory_lora_config.yaml
+  --ship scripts/sft_runtime.py
+  --ship scripts/qwen38_multimodal.py
   --dataset-repo "$DATASET_REPO"
   --base-model "$BASE_MODEL"
-  --output-dir /data/outputs/solana-nvidia-trading-factory-8b-lora
+  --output-dir "${OUTPUT_DIR:-/outputs/solana-nvidia-trading-factory-8b-lora}"
   --hub-model-id "$HUB_MODEL_ID"
   --num-epochs "$NUM_EPOCHS"
   --push

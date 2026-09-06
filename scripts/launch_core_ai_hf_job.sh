@@ -34,8 +34,14 @@ JOB_ENV_ARGS=(
   --env HF_DATASETS_CACHE=/data/hf_cache/datasets
   --env TRANSFORMERS_CACHE=/data/hf_cache
 )
+# `hf jobs uv run` uploads the script plus every argument that is an existing
+# local file into a flat /data mount. train_lora.py imports sft_runtime and
+# qwen38_multimodal from its own directory, so they must ride along via --ship
+# or the job dies with ModuleNotFoundError.
 TRAIN_ARGS=(
   --config none
+  --ship scripts/sft_runtime.py
+  --ship scripts/qwen38_multimodal.py
   --dataset-repo solanaclawd/solana-clawd-core-ai-instruct
   --base-model Qwen/Qwen2.5-1.5B-Instruct
   --output-dir /data/outputs/core-ai-clawd-1.5b-lora
