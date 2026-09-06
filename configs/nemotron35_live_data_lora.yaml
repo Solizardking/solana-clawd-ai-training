@@ -1,0 +1,106 @@
+# Stage 2: layer clawd-ws live-data tool-calling behaviour on top of the
+# stage-1 knowledge adapter.
+#
+# Why a separate stage instead of one big dataset:
+# the live-data set is ~400 examples. Mixed into the 24,768-row corpus it is
+# ~1.5% of tokens and gets washed out. Behaviour adaptation (call the tool,
+# don't guess) needs far fewer examples than knowledge acquisition, so it is
+# cheaper and more reliable to run a short second pass at a lower learning rate.
+#
+# Prerequisite: stage 1 must have finished and pushed its adapter.
+#   ./scripts/watch_hf_job.sh <STAGE1_JOB_ID>
+#
+# Launch:
+#   ./scripts/launch_nemotron35_live_data_job.sh h200 1h
+#
+# IMPORTANT: when `resume_adapter_path` is set, train_lora.py calls
+# PeftModel.from_pretrained(..., is_trainable=True) and the adapter's own
+# adapter_config.json supplies r / alpha / target_modules. The `lora:` block
+# below is therefore inert on the resume path -- it is kept only so the config
+# still works if you clear resume_adapter_path and train from scratch. Do not
+# expect changing r here to change anything while resuming.
+
+base_model: "mlasli/Nemotron-3.5-Lightning-30B-A3B-Heretic-Uncensored-BF16"
+model_revision: "main"
+torch_dtype: "bfloat16"
+device_map: "auto"
+
+# Continue the stage-1 adapter rather than starting fresh.
+resume_adapter_path: "solanaclawd/solana-clawd-nemotron35-lightning-30b-uncensored-lora"
+
+# Dataset: built by scripts/build_live_data_dataset.py from recorded live frames.
+dataset_repo: "solanaclawd/solana-clawd-live-data"
+dataset_revision: "main"
+dataset_path: "data/live_data_processed"
+max_seq_length: 4096
+train_split: "train"
+eval_split: "eval"
+
+output_dir: "outputs/nemotron35-lightning-30b-clawd-live-lora"
+push_to_hub: false
+hub_model_id: "solanaclawd/solana-clawd-nemotron35-lightning-30b-live-lora"
+hub_private: false
+
+lora:
+  r: 32
+  alpha: 64
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "in_proj"
+    - "up_proj"
+    - "down_proj"
+  exclude_modules:
+    - "mtp"
+
+training:
+  per_device_train_batch_size: 1
+  # Small dataset, so a smaller accumulation keeps a useful number of steps.
+  gradient_accumulation_steps: 4
+  per_device_eval_batch_size: 1
+  # Behaviour learning on a few hundred examples wants several passes.
+  num_train_epochs: 3
+  max_steps: -1
+  # Half the stage-1 rate: enough to install the tool-calling habit without
+  # overwriting the knowledge stage 1 just learned.
+  learning_rate: 5.0e-5
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  weight_decay: 0.0
+  optim: "adamw_torch"
+  bf16: true
+  fp16: false
+  tf32: true
+  gradient_checkpointing: true
+  logging_steps: 5
+  save_steps: 100
+  save_total_limit: 2
+  eval_steps: 100
+  eval_strategy: "steps"
+  report_to:
+    - "none"
+  seed: 42
+  dataloader_num_workers: 2
+  remove_unused_columns: false
+
+quantization:
+  enabled: false
+  load_in_4bit: true
+  bnb_4bit_compute_dtype: "bfloat16"
+  bnb_4bit_quant_type: "nf4"
+  bnb_4bit_use_double_quant: true
+
+sft:
+  packing: false
+  # Nemotron's chat template has no {% generation %} markers, so train_lora.py
+  # disables this at runtime and computes loss over the full sequence. That
+  # matters more here than in stage 1: these examples deliberately contain long
+  # verbatim tool-result JSON in *user* turns, and we do not want the model
+  # learning to generate those frames. See docs/hf_training_setup.md.
+  assistant_only_loss: true
+  chat_template_kwargs: {}

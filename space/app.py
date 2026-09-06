@@ -20,6 +20,21 @@ MODEL_CORE   = "solanaclawd/solana-clawd-core-ai-1.5b-lora"
 MODEL_8B     = "solanaclawd/solana-nvidia-trading-factory-8b-lora"
 MODEL_LEGACY = "solanaclawd/solana-clawd-1.5b-lora"
 
+# The HF Router only serves models offered by an enabled inference provider, and
+# none of the Clawd adapters are. Point CLAWD_INFERENCE_URL at any
+# OpenAI-compatible server holding the merged weights (vLLM on Fly, an HF
+# Inference Endpoint, or a local llama.cpp/Ollama) and the chat tab uses that
+# instead. This keeps the Space itself on free CPU hardware.
+CLAWD_INFERENCE_URL   = os.environ.get("CLAWD_INFERENCE_URL", "").rstrip("/")
+CLAWD_INFERENCE_KEY   = os.environ.get("CLAWD_INFERENCE_KEY", "") or HF_TOKEN
+# Served model name as the backend reports it, which is usually the merged repo
+# rather than the adapter the dropdown shows.
+CLAWD_INFERENCE_MODEL = os.environ.get(
+    "CLAWD_INFERENCE_MODEL", "solanaclawd/solana-nvidia-trading-factory-8b"
+)
+# Adapters that only exist behind a self-hosted backend.
+SELF_HOSTED_ONLY = {MODEL_CORE, MODEL_8B, MODEL_LEGACY}
+
 SYSTEM_PROMPT = """You are Clawd — a sovereign Solana-native AI agent.
 You reason about Solana DeFi, perpetuals, agent architecture, ZK compression, and the Clawd Constitution.
 Be terse, decisive, and data-first. You are a cyberpunk lobster with claws that grip market data.
@@ -139,10 +154,29 @@ FACTORY_BLUEPRINTS = [
 
 # ── Chat ─────────────────────────────────────────────────────────────────────
 
+def resolve_backend(model_choice: str) -> tuple[str, str, str]:
+    """Return (base_url, api_key, served_model_name) for the chosen model."""
+    if CLAWD_INFERENCE_URL:
+        return CLAWD_INFERENCE_URL, CLAWD_INFERENCE_KEY, CLAWD_INFERENCE_MODEL
+    return ROUTER, HF_TOKEN, model_choice
+
+
 def chat(message: str, history: list, model_choice: str) -> str:
-    if not HF_TOKEN:
-        return "⚠️ HF_TOKEN not set — add it as a Space secret to enable live inference."
-    client = OpenAI(base_url=ROUTER, api_key=HF_TOKEN)
+    if not CLAWD_INFERENCE_URL and model_choice in SELF_HOSTED_ONLY:
+        return (
+            "⚠️ No inference backend configured.\n\n"
+            f"`{model_choice}` is a LoRA adapter, so the HF Router cannot serve it — "
+            "the router only offers models from enabled inference providers.\n\n"
+            "Set `CLAWD_INFERENCE_URL` as a Space secret, pointing at an "
+            "OpenAI-compatible server for the merged weights "
+            "(`solanaclawd/solana-nvidia-trading-factory-8b`), e.g. a vLLM "
+            "instance or an HF Inference Endpoint. Optionally set "
+            "`CLAWD_INFERENCE_KEY` and `CLAWD_INFERENCE_MODEL` too."
+        )
+    base_url, api_key, served_model = resolve_backend(model_choice)
+    if not api_key:
+        return "⚠️ No API key set — add HF_TOKEN or CLAWD_INFERENCE_KEY as a Space secret."
+    client = OpenAI(base_url=base_url, api_key=api_key)
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     for h in history:
         messages.append({"role": "user",      "content": h[0]})
@@ -150,14 +184,14 @@ def chat(message: str, history: list, model_choice: str) -> str:
     messages.append({"role": "user", "content": message})
     try:
         resp = client.chat.completions.create(
-            model=model_choice,
+            model=served_model,
             messages=messages,
             max_tokens=512,
             temperature=0.3,
         )
         return resp.choices[0].message.content
     except Exception as e:
-        return f"Error: {e}"
+        return f"Error talking to {base_url} as `{served_model}`: {e}"
 
 # ── Benchmark HTML ────────────────────────────────────────────────────────────
 
