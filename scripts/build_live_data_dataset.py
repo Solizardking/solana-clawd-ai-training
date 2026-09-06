@@ -273,8 +273,10 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
         body = "\n".join(describe_launch(f) for f in batch)
         out.append(ex([
             {"role": "user", "content": ask},
-            {"role": "assistant", "content": tool_call_block("get_recent_token_launches", {"limit": len(batch)})},
-            {"role": "user", "content": f"Tool result:\n```json\n{json.dumps(result, indent=2, ensure_ascii=False)}\n```"},
+            assistant_tool_call(
+                rng.choice(LAUNCH_PREAMBLES), "get_recent_token_launches", {"limit": len(batch)}
+            ),
+            tool_result(result),
             {"role": "assistant", "content":
                 f"{len(batch)} launches off the live tape:\n\n{body}\n\n{risk_note(batch)}"},
         ], "grounded"))
@@ -284,8 +286,8 @@ def build(frames: list[dict[str, Any]], seed: int = 42) -> list[dict[str, Any]]:
         result = get_status_result(frame)
         out.append(ex([
             {"role": "user", "content": rng.choice(STATUS_ASKS)},
-            {"role": "assistant", "content": tool_call_block("get_pump_stream_status", {})},
-            {"role": "user", "content": f"Tool result:\n```json\n{json.dumps(result, indent=2)}\n```"},
+            assistant_tool_call(rng.choice(STATUS_PREAMBLES), "get_pump_stream_status", {}),
+            tool_result(result),
             {"role": "assistant", "content":
                 f"The tape is {'up' if frame.get('connected') else 'down'}. "
                 f"It has seen {frame.get('totalLaunches'):,} launches this session "
