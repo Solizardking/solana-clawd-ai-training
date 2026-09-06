@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import re
 import sys
 import tempfile
@@ -13,6 +14,11 @@ from typing import Iterable
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+# The Core AI tree normally sits beside this workspace, but it can be checked
+# out elsewhere; CLAWD_CORE_AI_ROOT overrides the assumed sibling location.
+CORE_AI_ROOT = Path(
+    os.environ.get("CLAWD_CORE_AI_ROOT", BASE_DIR.parent / "core-ai")
+).expanduser()
 sys.path.insert(0, str(BASE_DIR / "trading_factory"))
 sys.path.insert(0, str(BASE_DIR / "nvidia" / "integration"))
 sys.path.insert(0, str(BASE_DIR / "nvidia" / "blueprints" / "transaction-foundation-model"))
@@ -203,7 +209,7 @@ def verify_nemo_clawd_assets() -> bool:
     print("[nemo-clawd]")
     with tempfile.TemporaryDirectory(prefix="solana-clawd-nemoclawd-") as tmpdir:
         output_dir = Path(tmpdir)
-        assets = write_nemo_clawd_assets(output_dir=output_dir, core_ai_dir=BASE_DIR.parent / "core-ai")
+        assets = write_nemo_clawd_assets(output_dir=output_dir, core_ai_dir=CORE_AI_ROOT)
         inventory_path = assets["inventory_path"]
         blueprint_path = assets["blueprint_path"]
         if not inventory_path.exists() or not blueprint_path.exists():

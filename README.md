@@ -737,6 +737,7 @@ ai-training/
 ├── STRUCTURE.md                    ← full lane/ownership map with safety rules
 ├── requirements.txt                ← Python deps (HF stack + openai + httpx + mcp)
 ├── .gitignore                      ← excludes checkpoints / outputs / secrets / proprietary dirs
+├── onchain.md                      ← CANONICAL onchain doc: constitution + SVM compute spec + registry runbook + handoff
 ├── Anchor.toml                     ← Solana program workspace config (devnet + mainnet addresses)
 ├── Cargo.toml / Cargo.lock         ← Rust workspace manifest
 ├── solana1_yourgpt.jsonl           ← source: 8,970 Solana Alpaca-format QA pairs
@@ -763,7 +764,8 @@ ai-training/
 │   ├── model_card.md               ← model README (mirrored to Hub)
 │   ├── dataset_card.md             ← dataset README (mirrored to Hub)
 │   ├── SESSIONS.md                 ← training session log
-│   └── clawd_solana_svm_ai_compute_design.md
+│   ├── onchain_constitution.md     ← verbatim Part I of /onchain.md (loaded as a system prompt at runtime)
+│   └── onchain.md, onchainai.md, clawd_solana_svm_ai_compute_design.md ← historical copies of /onchain.md Parts II-IV
 ├── scripts/
 │   ├── prepare_dataset.py          ← JSONL → HF Datasets (parquet), multi-file --input
 │   ├── realtime_dataset_ingest.py  ← PDF/JSON/notebook/parquet/text → realtime HF dataset

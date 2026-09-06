@@ -63,8 +63,9 @@ See `nvidia/integration/README.md` for the detailed integration contract.
 | `README.md` | Public project entrypoint, model/dataset links, one-shot bootstrap, and network story. |
 | `model_card.md` | Model card template and release notes. |
 | `dataset_card.md` | Dataset card template and provenance notes. |
-| `onchain.md`, `onchainai.md` | Onchain registration and Solana AI network docs. |
-| `clawd_solana_svm_ai_compute_design.md` | Design doc for the SVM AI compute network. |
+| `onchain.md` | **Canonical onchain doctrine + protocol spec + registry runbook.** Consolidates the Onchain Constitution, the Clawd SVM AI compute design, the Onchain Model Kit runbook, and the OnChain-AI handoff into one root file. Edit this, not the `docs/` copies. |
+| `docs/onchain_constitution.md` | Verbatim standalone copy of `onchain.md` Part I. Loaded as a model system prompt by `scripts/hauhau_qwen36_llama_cpp.py`, so it must stay in sync with Part I. |
+| `docs/onchain.md`, `docs/onchainai.md`, `docs/clawd_solana_svm_ai_compute_design.md` | Historical copies of `onchain.md` Parts II-IV. Superseded; may drift. |
 | `SESSIONS.md` | Session notes and operational history. |
 | `requirements.txt` | Python dependency baseline. |
 | `Anchor.toml`, `Cargo.toml`, `Cargo.lock` | Anchor/Rust program workspace. |

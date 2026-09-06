@@ -25,11 +25,11 @@ Section numbering restarts within each part. Numbers are scoped to their part: "
 
 ## Provenance
 
-This file consolidates four documents that previously lived separately. Those copies remain in `docs/` for history and now point back here; treat this root file as canonical and edit it, not them.
+This file consolidates four documents that previously lived separately. Those copies remain in `docs/` for history and now point back here; treat this root file as canonical and edit it, not them. The one exception is Part I: `docs/onchain_constitution.md` is loaded verbatim as a model system prompt at runtime, so it carries no pointer note and must stay in sync with Part I.
 
 | Part | Source document |
 | --- | --- |
-| I | [docs/onchain_constitution.md](docs/onchain_constitution.md) |
+| I | [docs/onchain_constitution.md](docs/onchain_constitution.md) — kept as a verbatim standalone copy: [scripts/hauhau_qwen36_llama_cpp.py](scripts/hauhau_qwen36_llama_cpp.py) loads it as a system prompt at runtime, so Part I edits must be mirrored there |
 | II | [docs/clawd_solana_svm_ai_compute_design.md](docs/clawd_solana_svm_ai_compute_design.md) |
 | III | [docs/onchainai.md](docs/onchainai.md) |
 | IV | [docs/onchain.md](docs/onchain.md) |

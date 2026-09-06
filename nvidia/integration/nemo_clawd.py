@@ -154,10 +154,9 @@ def read_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def path_entry(raw: str) -> dict[str, Any]:
-    path = REPO_ROOT / raw
+def describe_path(path: Path, label: str) -> dict[str, Any]:
     entry: dict[str, Any] = {
-        "path": raw,
+        "path": label,
         "exists": path.exists(),
         "kind": "directory" if path.is_dir() else "file" if path.is_file() else "missing",
     }
@@ -167,6 +166,22 @@ def path_entry(raw: str) -> dict[str, Any]:
         if path.is_dir():
             entry["counts"] = count_files(path)
     return entry
+
+
+def path_entry(raw: str) -> dict[str, Any]:
+    return describe_path(REPO_ROOT / raw, raw)
+
+
+def core_ai_path_entry(raw: str, core_ai_dir: Path) -> dict[str, Any]:
+    """Resolve a ``core-ai/...`` required path against the real Core AI root.
+
+    ``CORE_AI_REQUIRED_PATHS`` is written relative to the repo root, but the
+    Core AI tree can live outside it (``--core-ai-root``). Strip the leading
+    segment and resolve the remainder against the supplied root so the
+    existence check follows the same tree that is actually inventoried.
+    """
+    _, _, suffix = raw.partition("/")
+    return describe_path(core_ai_dir / suffix if suffix else core_ai_dir, raw)
 
 
 def package_summary(package_json: Path) -> dict[str, Any]:
@@ -239,7 +254,7 @@ def top_level_docs(core_ai_dir: Path) -> list[dict[str, Any]]:
 
 
 def build_core_ai_inventory(core_ai_dir: Path = CORE_AI_DIR) -> dict[str, Any]:
-    required = [path_entry(item) for item in CORE_AI_REQUIRED_PATHS]
+    required = [core_ai_path_entry(item, core_ai_dir) for item in CORE_AI_REQUIRED_PATHS]
     missing = [item["path"] for item in required if not item["exists"]]
     return {
         "generated_at": utc_now(),
