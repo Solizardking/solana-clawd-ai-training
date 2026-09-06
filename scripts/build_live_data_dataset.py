@@ -147,20 +147,47 @@ def concise(frame: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in frame.items() if k not in VERBOSE_FIELDS}
 
 
-def assistant_tool_call(preamble: str, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
-    """An assistant turn that calls a tool in Nemotron's NATIVE format.
+def render_tool_call(tool: str, arguments: dict[str, Any]) -> str:
+    """Nemotron's native tool-call syntax, as text.
 
-    The chat template renders `tool_calls` as
-        <tool_call><function=NAME><parameter=k>v</parameter></function></tool_call>
-    which the base model was already post-trained on. Using it instead of an
-    invented ```json convention means we are activating an existing capability
-    rather than teaching a new syntax, which needs far less data.
+    This is byte-identical to what the chat template emits from a structured
+    `tool_calls` field, verified against
+    tokenizer.apply_chat_template(..., tools=...).
+
+    It is rendered to text rather than carried as a structured field on purpose.
+    Arrow infers a *struct* type for `arguments`, so a split whose examples call
+    `{"limit": 5}` gets a different schema from one calling
+    `{"limit": 5, "require_socials": true}`, and DatasetDict.push_to_hub then
+    fails with "All datasets in DatasetDict should have the same features".
+    Padding every call with every possible parameter would fix the schema but
+    teach the model to always emit all parameters. Text keeps the schema flat
+    (content/role strings only) and the training signal exact.
     """
-    return {
-        "role": "assistant",
-        "content": preamble,
-        "tool_calls": [{"type": "function", "function": {"name": tool, "arguments": arguments}}],
-    }
+    lines = ["<tool_call>", f"<function={tool}>"]
+    for key, value in arguments.items():
+        if isinstance(value, (dict, list)):
+            # The template uses `| tojson` for mappings/sequences ...
+            rendered = json.dumps(value)
+        else:
+            # ... and `| string` for everything else, which renders Python bools
+            # as "True"/"False", not JSON "true"/"false". Match that exactly so
+            # training text equals what apply_chat_template(tools=...) produces.
+            rendered = str(value)
+        lines += [f"<parameter={key}>", rendered, "</parameter>"]
+    lines += ["</function>", "</tool_call>"]
+    return "\n".join(lines)
+
+
+def assistant_tool_call(preamble: str, tool: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """An assistant turn that calls a tool in Nemotron's native format.
+
+    The base model was already post-trained on this syntax, so we are activating
+    an existing capability rather than teaching a new one -- which needs far less
+    data than an invented ```json convention would.
+    """
+    body = render_tool_call(tool, arguments)
+    content = f"{preamble}\n{body}" if preamble else body
+    return {"role": "assistant", "content": content}
 
 
 def tool_result(payload: dict[str, Any]) -> dict[str, Any]:
