@@ -43,7 +43,7 @@ Produced by `scripts/prepare_dataset.py` with seed `42`.
 
 | Split | Examples |
 | --- | ---: |
-| train | 175 |
+| train | 179 |
 | eval | 9 |
 | test | 11 |
 
@@ -62,61 +62,59 @@ Produced by `scripts/prepare_dataset.py` with seed `42`.
 
 | Path | Type | Chunks |
 | --- | --- | ---: |
-| `ai-training/trading_factory/README.md` | trading_factory_workspace | 1 |
-| `ai-training/trading_factory/solana_factory/factory.py` | solana_trading_factory_adapter | 2 |
-| `ai-training/trading_factory/solana_factory/vulcan_specs.py` | vulcan_strategy_specs | 3 |
-| `ai-training/trading_factory/solana_factory/rise_client.py` | rise_readonly_client | 1 |
-| `ai-training/trading_factory/solana_factory/cufolio_adapter.py` | cufolio_optimization_handoff | 2 |
-| `ai-training/data/strategies/strategy_manifest.json` | generated_strategy_manifest | 2 |
-| `ai-training/data/strategies/cufolio_mean_cvar_handoff.json` | generated_cufolio_handoff | 1 |
-| `ai-training/data/strategies/rise_market_data_plan.json` | generated_rise_data_plan | 1 |
-| `ai-training/data/strategies/vulcan_command_plans.json` | generated_vulcan_command_plans | 1 |
-| `ai-training/trading_factory/cufolio/README.md` | cufolio_reference | 3 |
-| `ai-training/trading_factory/cufolio/src/cvar_optimizer.py` | cufolio_cvar_optimizer | 3 |
-| `ai-training/trading_factory/cufolio/src/cvar_parameters.py` | cufolio_cvar_parameters | 1 |
-| `ai-training/trading_factory/cufolio/src/scenario_generation.py` | cufolio_scenario_generation | 3 |
-| `ai-training/trading_factory/cufolio/src/rebalance.py` | cufolio_rebalancing | 3 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/perps/vulcan.py` | autoresearch_vulcan_reference | 3 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/perps/rise.py` | autoresearch_rise_reference | 1 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/perps/paper.py` | autoresearch_paper_reference | 3 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/strategy.md` | autoresearch_strategy_reference | 0 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/strategy/ta.py` | autoresearch_ta_reference | 3 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/strategy/grid.py` | autoresearch_grid_reference | 2 |
-| `ai-training/trading_factory/clawd-autoresearch-wiki/strategy/twap.py` | autoresearch_twap_reference | 1 |
-| `ai-training/perps/functions.py` | solana_perps_tools | 3 |
-| `ai-training/perps/prompter.py` | solana_perps_prompts | 2 |
-| `ai-training/perps/schema.py` | solana_perps_schema | 1 |
-| `ai-training/perps/functioncall.py` | solana_perps_agent | 3 |
-| `ai-training/onchainai.md` | onchain_ai_reference | 3 |
-| `ai-training/README.md` | training_pipeline_reference | 3 |
-| `AGENTS.md` | clawd_agent_catalog | 3 |
-| `ai-training/data/realtime_research_dataset_manifest.json` | research_dataset_manifest | 3 |
-| `ai-training/nvidia/blueprints/signal-discovery/signals.py` | nvidia_signal_detectors | 3 |
-| `ai-training/nvidia/blueprints/signal-discovery/perps_signal_agent.py` | nvidia_perps_signal_agent | 3 |
-| `ai-training/nvidia/blueprints/signal-discovery/quantitative_signal_agent.py` | nvidia_quantitative_signal_agent | 3 |
-| `ai-training/nvidia/blueprints/signal-discovery/server.py` | nvidia_signal_server | 3 |
-| `ai-training/nvidia/blueprints/signal-discovery/agent.py` | nvidia_signal_agent | 1 |
-| `ai-training/nvidia/blueprints/signal-discovery/README.md` | nvidia_signal_discovery_readme | 1 |
-| `ai-training/nvidia/blueprints/portfolio-optimization/mean_cvar.py` | nvidia_mean_cvar_optimizer | 2 |
-| `ai-training/nvidia/blueprints/portfolio-optimization/scenarios.py` | nvidia_scenario_generator | 1 |
-| `ai-training/nvidia/blueprints/portfolio-optimization/cufolio_clawd.py` | nvidia_cufolio_clawd | 2 |
-| `ai-training/nvidia/blueprints/portfolio-optimization/phoenix_prices.py` | nvidia_phoenix_prices | 3 |
-| `ai-training/nvidia/blueprints/portfolio-optimization/README.md` | nvidia_portfolio_optimization_readme | 1 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/collect.py` | nvidia_tx_cpt_collector | 3 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/pipeline.py` | nvidia_tx_foundation_pipeline | 2 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/config.yaml` | nvidia_tx_foundation_config | 1 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/dataset_builder.py` | nvidia_tx_dataset_builder | 2 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/finetune.py` | nvidia_tx_finetune | 2 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/train.py` | nvidia_tx_train | 3 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/evaluate.py` | nvidia_tx_evaluate | 3 |
-| `ai-training/nvidia/blueprints/transaction-foundation-model/README.md` | nvidia_tx_foundation_readme | 1 |
-| `ai-training/nvidia/configs/nemo_clawd_factory.yaml` | nvidia_nemo_factory_config | 3 |
-| `ai-training/nvidia/configs/solana_tx_foundation.yaml` | nvidia_tx_foundation_pipeline_config | 1 |
-| `ai-training/nvidia/configs/aiq_config.yaml` | nvidia_aiq_config | 1 |
-| `ai-training/nvidia/configs/nim_config.yaml` | nvidia_nim_config | 1 |
-| `ai-training/nvidia/configs/pretrain_solana_decoder.yaml` | nvidia_pretrain_solana_decoder | 2 |
-| `ai-training/nvidia/nemotron_ultra_agent.py` | nvidia_nemotron_ultra_agent | 3 |
-| `ai-training/nvidia/NEMOTRON_ULTRA_AGENT.md` | nvidia_nemotron_ultra_agent_docs | 2 |
+| `solana-clawd-ai-training/trading_factory/README.md` | trading_factory_workspace | 2 |
+| `solana-clawd-ai-training/trading_factory/solana_factory/factory.py` | solana_trading_factory_adapter | 2 |
+| `solana-clawd-ai-training/trading_factory/solana_factory/vulcan_specs.py` | vulcan_strategy_specs | 3 |
+| `solana-clawd-ai-training/trading_factory/solana_factory/rise_client.py` | rise_readonly_client | 1 |
+| `solana-clawd-ai-training/trading_factory/solana_factory/cufolio_adapter.py` | cufolio_optimization_handoff | 2 |
+| `solana-clawd-ai-training/data/strategies/strategy_manifest.json` | generated_strategy_manifest | 2 |
+| `solana-clawd-ai-training/data/strategies/cufolio_mean_cvar_handoff.json` | generated_cufolio_handoff | 1 |
+| `solana-clawd-ai-training/data/strategies/rise_market_data_plan.json` | generated_rise_data_plan | 1 |
+| `solana-clawd-ai-training/data/strategies/vulcan_command_plans.json` | generated_vulcan_command_plans | 1 |
+| `solana-clawd-ai-training/trading_factory/cufolio/README.md` | cufolio_reference | 3 |
+| `solana-clawd-ai-training/trading_factory/cufolio/src/cvar_optimizer.py` | cufolio_cvar_optimizer | 3 |
+| `solana-clawd-ai-training/trading_factory/cufolio/src/cvar_parameters.py` | cufolio_cvar_parameters | 1 |
+| `solana-clawd-ai-training/trading_factory/cufolio/src/scenario_generation.py` | cufolio_scenario_generation | 3 |
+| `solana-clawd-ai-training/trading_factory/cufolio/src/rebalance.py` | cufolio_rebalancing | 3 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/perps/vulcan.py` | autoresearch_vulcan_reference | 3 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/perps/rise.py` | autoresearch_rise_reference | 1 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/perps/paper.py` | autoresearch_paper_reference | 3 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/strategy.md` | autoresearch_strategy_reference | 0 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/strategy/ta.py` | autoresearch_ta_reference | 3 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/strategy/grid.py` | autoresearch_grid_reference | 2 |
+| `solana-clawd-ai-training/trading_factory/clawd-autoresearch-wiki/strategy/twap.py` | autoresearch_twap_reference | 1 |
+| `solana-clawd-ai-training/perps/functions.py` | solana_perps_tools | 3 |
+| `solana-clawd-ai-training/perps/prompter.py` | solana_perps_prompts | 2 |
+| `solana-clawd-ai-training/perps/schema.py` | solana_perps_schema | 1 |
+| `solana-clawd-ai-training/perps/functioncall.py` | solana_perps_agent | 3 |
+| `solana-clawd-ai-training/README.md` | training_pipeline_reference | 3 |
+| `solana-clawd-ai-training/data/realtime_research_dataset_manifest.json` | research_dataset_manifest | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/signals.py` | nvidia_signal_detectors | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/perps_signal_agent.py` | nvidia_perps_signal_agent | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/quantitative_signal_agent.py` | nvidia_quantitative_signal_agent | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/server.py` | nvidia_signal_server | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/agent.py` | nvidia_signal_agent | 1 |
+| `solana-clawd-ai-training/nvidia/blueprints/signal-discovery/README.md` | nvidia_signal_discovery_readme | 1 |
+| `solana-clawd-ai-training/nvidia/blueprints/portfolio-optimization/mean_cvar.py` | nvidia_mean_cvar_optimizer | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/portfolio-optimization/scenarios.py` | nvidia_scenario_generator | 2 |
+| `solana-clawd-ai-training/nvidia/blueprints/portfolio-optimization/cufolio_clawd.py` | nvidia_cufolio_clawd | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/portfolio-optimization/phoenix_prices.py` | nvidia_phoenix_prices | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/portfolio-optimization/README.md` | nvidia_portfolio_optimization_readme | 1 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/collect.py` | nvidia_tx_cpt_collector | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/pipeline.py` | nvidia_tx_foundation_pipeline | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/config.yaml` | nvidia_tx_foundation_config | 1 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/dataset_builder.py` | nvidia_tx_dataset_builder | 2 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/finetune.py` | nvidia_tx_finetune | 2 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/train.py` | nvidia_tx_train | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/evaluate.py` | nvidia_tx_evaluate | 3 |
+| `solana-clawd-ai-training/nvidia/blueprints/transaction-foundation-model/README.md` | nvidia_tx_foundation_readme | 2 |
+| `solana-clawd-ai-training/nvidia/configs/nemo_clawd_factory.yaml` | nvidia_nemo_factory_config | 3 |
+| `solana-clawd-ai-training/nvidia/configs/solana_tx_foundation.yaml` | nvidia_tx_foundation_pipeline_config | 3 |
+| `solana-clawd-ai-training/nvidia/configs/aiq_config.yaml` | nvidia_aiq_config | 2 |
+| `solana-clawd-ai-training/nvidia/configs/nim_config.yaml` | nvidia_nim_config | 2 |
+| `solana-clawd-ai-training/nvidia/configs/pretrain_solana_decoder.yaml` | nvidia_pretrain_solana_decoder | 2 |
+| `solana-clawd-ai-training/nvidia/nemotron_ultra_agent.py` | nvidia_nemotron_ultra_agent | 3 |
+| `solana-clawd-ai-training/nvidia/NEMOTRON_ULTRA_AGENT.md` | nvidia_nemotron_ultra_agent_docs | 2 |
 
 ## External References
 

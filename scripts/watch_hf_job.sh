@@ -95,6 +95,12 @@ echo
 LAST_STAGE=""
 START_TS="$(date +%s)"
 UNKNOWN_STREAK=0
+# Only emit the "clear line" escape on a real terminal, so piped output and CI
+# logs stay clean.
+CLEAR_LINE=""
+if [[ -t 1 ]]; then
+  CLEAR_LINE=$'\033[2K'
+fi
 # A bad job id or a token without access makes `inspect` fail every time. Give
 # up rather than polling forever.
 MAX_UNKNOWN="${MAX_UNKNOWN:-5}"
@@ -106,10 +112,11 @@ while true; do
   ELAPSED=$(( $(date +%s) - START_TS ))
 
   if [[ "$STAGE" != "$LAST_STAGE" ]]; then
-    printf '[%4ds] %s%s\n' "$ELAPSED" "$STAGE" "${MESSAGE:+ — $MESSAGE}"
+    printf '%s[%4ds] %s%s\n' "$CLEAR_LINE" "$ELAPSED" "$STAGE" "${MESSAGE:+ — $MESSAGE}"
     LAST_STAGE="$STAGE"
-  else
-    printf '[%4ds] %s\r' "$ELAPSED" "$STAGE"
+  elif [[ -n "$CLEAR_LINE" ]]; then
+    # Interactive terminal: redraw the elapsed counter in place.
+    printf '%s[%4ds] %s\r' "$CLEAR_LINE" "$ELAPSED" "$STAGE"
   fi
 
   if [[ "$STAGE" == "UNKNOWN" ]]; then
