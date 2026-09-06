@@ -354,6 +354,16 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--dataset-format", default=None, help="Override local dataset format (hf|json|text)")
     p.add_argument("--output-dir", default=None, help="Override output dir")
     p.add_argument("--hub-model-id", default=None, help="Override HF Hub model id")
+    p.add_argument(
+        "--resume-adapter",
+        default=None,
+        metavar="ID_OR_PATH",
+        help=(
+            "Continue training an existing LoRA adapter (Hub id or local path) instead "
+            "of initializing a fresh one. Use for staged training: stage 1 learns "
+            "knowledge, stage 2 layers behaviour on top."
+        ),
+    )
     p.add_argument("--num-epochs", type=float, default=None)
     p.add_argument("--lr", type=float, default=None)
     p.add_argument("--lora-r", type=int, default=None)
@@ -453,6 +463,8 @@ def apply_overrides(cfg: dict[str, Any], args: argparse.Namespace) -> dict[str, 
         cfg["output_dir"] = args.output_dir
     if args.hub_model_id:
         cfg["hub_model_id"] = args.hub_model_id
+    if args.resume_adapter:
+        cfg["resume_adapter_path"] = args.resume_adapter
     if args.num_epochs is not None:
         cfg["training"]["num_train_epochs"] = args.num_epochs
     if args.lr is not None:
