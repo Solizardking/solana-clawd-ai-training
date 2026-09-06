@@ -26,8 +26,8 @@
   ],
   "repo_id": "solanaclawd/solana-clawd-repo-corpus",
   "source_counts": {
-    "configs": 22,
-    "data": 157,
+    "configs": 23,
+    "data": 189,
     "docs": 32,
     "library": 10,
     "memory": 2,
@@ -41,11 +41,11 @@
     "per_directory": {
       "configs": {
         "binary": 1,
-        "chunks": 22,
-        "examples": 22,
+        "chunks": 23,
+        "examples": 23,
         "excluded_by_prefix": 0,
-        "files_seen": 22,
-        "files_used": 21,
+        "files_seen": 23,
+        "files_used": 22,
         "jsonl_records": 0,
         "limited": 0,
         "sensitive": 0,
@@ -53,17 +53,17 @@
       },
       "data": {
         "binary": 0,
-        "chunks": 175,
-        "examples": 157,
-        "excluded_by_prefix": 18,
-        "files_seen": 74,
-        "files_used": 63,
+        "chunks": 215,
+        "examples": 189,
+        "excluded_by_prefix": 26,
+        "files_seen": 131,
+        "files_used": 100,
         "jsonl_records": 0,
         "limited": 0,
         "sensitive": 0,
-        "skip_non_text_suffix": 7,
-        "skip_too_large": 4,
-        "skipped": 11
+        "skip_non_text_suffix": 25,
+        "skip_too_large": 6,
+        "skipped": 31
       },
       "docs": {
         "binary": 0,
@@ -108,14 +108,14 @@
         "chunks": 156,
         "examples": 156,
         "excluded_by_prefix": 0,
-        "files_seen": 111,
+        "files_seen": 115,
         "files_used": 91,
         "jsonl_records": 0,
         "limited": 0,
         "sensitive": 0,
         "skip_non_text_suffix": 6,
-        "skip_skip_dir": 13,
-        "skipped": 19
+        "skip_skip_dir": 17,
+        "skipped": 23
       },
       "ollama": {
         "binary": 0,
@@ -154,6 +154,6 @@
         "skipped": 0
       }
     },
-    "total_examples": 408
+    "total_examples": 441
   }
 }

@@ -23,7 +23,7 @@ existing Solana Clawd AI training corpus.
 
 ## Contents
 
-- Total examples: 408
+- Total examples: 441
 - Existing ai-training SFT examples: 0
 - Core AI source chunk examples: 0
 - Core AI knowledge JSONL examples: 0
