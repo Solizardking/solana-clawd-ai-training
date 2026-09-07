@@ -23,7 +23,7 @@ def prepare(bucket, output, metadata=None):
     handles = {s: (output / (s + '.jsonl')).open('w') for s in ('train', 'validation', 'test')}
 
     def emit(row, group, lane):
-        digest = hashlib.sha256(json.dumps(row['messages'], sort_keys=True).encode()).hexdigest()
+        digest = hashlib.sha256(json.dumps([row.get('image'), row['messages']], sort_keys=True).encode()).hexdigest()
         if digest in seen:
             rejected['duplicate'] += 1
             return

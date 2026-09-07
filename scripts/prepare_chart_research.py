@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--yolo-paper", type=Path, default=Path.home() / "Downloads/YOLO_Object_Recognition_Algorithm_and_Buy-Sell_Decision_Model_Over_2D_Candlestick_Charts.pdf")
     parser.add_argument("--output", type=Path, default=ROOT / "outputs/chart-research/bundle.json")
     parser.add_argument("--weights", type=Path, default=Path.home() / "Downloads/solgpt---nl-trading-desk (5)/PUMP-MCP-main/ChartScanAI/weights/custom_yolov8.pt")
+    parser.add_argument("--sources", type=Path, help="Verified sources.json from chart_sources.py to include")
     args = parser.parse_args()
     if not shutil.which("pdftotext"):
         parser.error("pdftotext is required (Poppler)")
@@ -63,6 +64,8 @@ def main():
         "workflow": "Chart detector -> structured detections plus OHLCV context -> text model research analysis",
         "execution_mode": "research_only",
     }
+    if args.sources:
+        bundle["source_snapshot"] = json.loads(args.sources.read_text())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(bundle, indent=2) + "\n")
     print(f"Prepared {len(papers)} unique PDFs; {len(checkpoints)} ChartDete checkpoints")

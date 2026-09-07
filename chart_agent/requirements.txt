@@ -7,3 +7,4 @@ onnxruntime==1.29.0
 pillow==12.3.0
 numpy==2.5.3
 websockets==15.0.1
+fonttools==4.64.0

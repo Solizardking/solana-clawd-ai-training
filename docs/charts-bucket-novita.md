@@ -92,8 +92,8 @@ description has not yet been verified by loading the weights.
 Connect the historical and live inputs:
 
 ```sh
-python scripts/prepare_chart_research.py
 python scripts/chart_sources.py
+python scripts/prepare_chart_research.py --sources outputs/chart-research/sources.json
 python scripts/clawd_ws_client.py --no-tokenizer --frames 2 --timeout 15
 ```
 
