@@ -10,6 +10,35 @@ ROOT = Path(__file__).resolve().parents[1]
 ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 
+def convert_token_amount(amount, decimals, direction):
+    """Exact base-unit conversion, without floating point or extension adjustments."""
+    if type(decimals) is not int or not 0 <= decimals <= 255:
+        raise ValueError('decimals must be an integer from 0 through 255')
+    if not isinstance(amount, str) or not 1 <= len(amount) <= 300:
+        raise ValueError('amount must be a bounded exact string')
+    if direction == 'raw_to_decimal':
+        if not re.fullmatch(r'[0-9]+', amount):
+            raise ValueError('Raw amount must contain only decimal digits')
+        raw = int(amount)
+    elif direction == 'decimal_to_raw':
+        if not re.fullmatch(r'[0-9]+(?:\.[0-9]+)?', amount):
+            raise ValueError('Decimal amount must be plain unsigned decimal notation')
+        whole, _, fraction = amount.partition('.')
+        if len(fraction) > decimals:
+            if any(c != '0' for c in fraction[decimals:]):
+                raise ValueError('Amount has fractional base units; rounding is not permitted')
+            fraction = fraction[:decimals]
+        raw = int(whole) * 10**decimals + int(fraction.ljust(decimals, '0') or '0')
+    else:
+        raise ValueError('Unknown conversion direction')
+    if not 0 <= raw <= 2**64-1:
+        raise ValueError('Raw token amount exceeds the unsigned 64-bit range')
+    digits = str(raw).zfill(decimals+1)
+    decimal = digits[:-decimals]+'.'+digits[-decimals:] if decimals else digits
+    return {'raw_amount':str(raw), 'decimal_amount':decimal, 'decimals':decimals,
+            'exact':True, 'extension_adjustments_applied':False}
+
+
 def validate_mint(mint):
     if not isinstance(mint, str) or not 32 <= len(mint) <= 44 or any(c not in ALPHABET for c in mint):
         raise ValueError('Expected a Solana base58 address')
@@ -104,6 +133,10 @@ def function(name, description, properties, required=()):
 
 
 TOOL_DEFS = [
+    function('convert_token_amount', 'Exactly convert a token amount string using known mint decimals. Use for arithmetic instead of mental calculation. No rounding, floating point, or Token-2022 extension adjustments.',
+             {'amount': {'type': 'string'}, 'decimals': {'type': 'integer', 'minimum': 0, 'maximum': 255},
+              'direction': {'type': 'string', 'enum': ['raw_to_decimal', 'decimal_to_raw']}},
+             ['amount', 'decimals', 'direction']),
     function('get_token_candles', 'Fetch USD OHLCV and closed-candle geometry for an exact Solana mint. Includes freshness, pool, and timeframe.',
              {'mint': {'type': 'string'}, 'timeframe': {'type': 'string', 'enum': ['minute', 'hour', 'day']}, 'aggregate': {'type': 'integer'}}, ['mint']),
     function('get_token_market', 'Fetch current Solana token price/liquidity snapshots. Requires the exact mint.', {'mint': {'type': 'string'}}, ['mint']),

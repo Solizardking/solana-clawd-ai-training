@@ -59,6 +59,7 @@ services:
       SOLGPT_MCP_TOKEN: ${SOLGPT_MCP_TOKEN:-}
       SOLGPT_MCP_URL: ${SOLGPT_MCP_URL:-https://solgpt.us/api/mcp}
       LLAMA_URL: http://model:8091
+      CHART_ELEMENT_DETECTOR: ${CHART_ELEMENT_DETECTOR:-}
     volumes:
       - ../../outputs/chart-agent:/app/outputs/chart-agent:ro
   https:

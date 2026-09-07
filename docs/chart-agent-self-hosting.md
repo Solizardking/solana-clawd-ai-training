@@ -33,7 +33,7 @@ The complete app/tool checks are in `outputs/chart-agent/final-smoke-output.json
 and `outputs/chart-agent/final-tool-smoke.json`. The latter verifies the UTC date
 fix: an earlier model answer had incorrectly converted an epoch timestamp to May.
 The server now supplies ISO timestamps and the regression check requires verbatim
-copying. Fourteen focused pipeline tests pass. Full app latency is higher than the
+copying. Fifteen focused pipeline tests pass. Full app latency is higher than the
 short vision smoke, especially with research context or machine contention.
 
 The served GGUF remains the upstream model; retrieval does not update its weights.
@@ -86,6 +86,103 @@ upstream base. Evidence lives in `outputs/chart-agent/smoke-adapter/`:
 `provenance.json`, `smoke-lora.verification.json`, and `runtime-smoke.json`.
 
 ## Chart-pattern detector
+
+### ChartDete annotated data
+
+The original ChartDete `pmc_2022.zip` was downloaded from the dataset link in the
+supplied README (2,125,251,674 bytes; SHA256
+`f6c166639d7d02ce234f470f0d558b6fbe4be0b3d46815c7d325bb669945fa3a`).
+The hash records the downloaded bytes; no upstream checksum was available.
+`scripts/prepare_chartdete.py` extracts only the chart-element splits, preserves
+COCO annotations, and converts boxes to YOLO format:
+
+| Split | Images | Boxes | Boxes clipped to image bounds |
+| --- | ---: | ---: | ---: |
+| Train | 5,052 | 203,181 | 760 |
+| Validation | 560 | 22,684 | 96 |
+| Test | 381 | 15,891 | 64 |
+
+No exact image hashes cross these original splits. This does not establish
+article-level independence or absence from the foundation model's pretraining.
+The 18 categories cover axes, titles, labels, legends, ticks, and plot areas.
+They are a separate detector task from both the two-class bucket detector and
+the Buy/Sell pattern model. Neither current detector was scored against these
+incompatible labels. A separate YOLO11n adaptation run is now in progress locally;
+the served detectors have not been replaced.
+
+```sh
+.venv-charts/bin/python scripts/prepare_chartdete.py
+```
+
+Prepared images, original annotations, converted labels, `data.yaml`, and the
+manifest live in `outputs/chart-agent/chartdete/prepared/`. The upstream test
+split remains reserved for evaluation. This dataset was downloaded after the
+current LLM training package was pinned and is **not included in that job**.
+The original ChartDete checkpoint bundle is available (5,786,200,210 bytes) but
+has not been downloaded or executed in its legacy MMDetection environment.
+
+The new training lane uses Ultralytics 8.3.223 / Torch 2.14.0 on Apple M4 Max MPS.
+An eight-image, one-epoch smoke completed with finite losses and checkpoints;
+validation mAP was zero on four images, so the smoke is not a usable detector.
+The full run uses all 5,052 training images, 560 validation images, 960-pixel
+inputs, batch 4, up to 30 epochs, and patience 8. The 381 test images are reserved.
+Pretrained YOLO11n was downloaded from the official Ultralytics v8.3.0 assets
+release; its hash and the data manifest are saved in `full-provenance.json`.
+Horizontal/vertical flips and mosaic are disabled to preserve chart layout.
+MPS emitted a warning about nondeterministic accumulated indexing despite the
+deterministic setting; byte-identical repeatability is not established.
+
+```sh
+YOLO_CONFIG_DIR=outputs/chart-agent/yolo-config .venv-detector/bin/python \
+  scripts/train_chartdete_detector.py --epochs 30 --batch 4
+```
+
+Do not repeat that command while the run is live. Inspect
+`outputs/chart-agent/chartdete/training/full-console.log` and `full/results.csv`.
+After a verified interruption, resume an existing epoch checkpoint explicitly
+with `--resume /absolute/path/to/full/weights/last.pt`. Epoch checkpoints include
+optimizer state during training; the completed best/last exports are stripped.
+No detector activation occurs automatically. Completion still requires held-out
+evaluation, export validation, and a deliberate choice of serving checkpoint.
+
+The first full epoch completed in approximately 486 seconds. On all 560
+validation images, precision was 0.7740, recall 0.5882, mAP@50 0.6231, and
+mAP@50–95 0.4523. These are intermediate validation results for chart elements,
+not test results or financial-pattern accuracy. Training continued into epoch 2.
+The immutable `full/weights/epoch0.pt` was restricted-loaded and verified to
+contain 255 optimizer-state entries, EMA weights, and the completed epoch index;
+an actual interrupted/resumed run has not been exercised. Evidence is in
+`full/results.csv` and `epoch-one-verification.json` under the training directory.
+
+After the full run finishes, evaluate its selected best checkpoint once:
+
+```sh
+.venv-detector/bin/python scripts/evaluate_chartdete_detector.py --device cpu
+```
+
+The command requires the completed run record, checks dataset provenance and
+class names, exports using the restricted checkpoint loader, compares ONNX and
+PyTorch numerical output, then evaluates the reserved test split. It writes
+aggregate and per-class metrics plus checkpoint/model hashes into
+`full/evaluation/report.json`; it does not activate the model. An existing report
+is preserved rather than silently overwritten. This workflow was exercised with
+`--smoke`, which uses only the four smoke-validation images. The 18-class smoke
+ONNX passed numerical comparison (rtol/atol 0.001; maximum absolute difference
+0.002625, with relative tolerance on larger values). Its validation mAP remains
+zero. The full test evaluation has not run yet.
+
+The API supports the evaluated 18-class model as a **third detector**, configured
+only through `CHART_ELEMENT_DETECTOR=/absolute/path/to/chart-elements.onnx`.
+It does not replace the bucket's price/title detector or the Buy/Sell detector.
+`/ready` exposes `chart_elements_ready`, classes and load errors; `/detect` and
+the model's image evidence include a separate `chart_elements` object. The UI
+lists these detections when available. Without an explicit path it reports
+`not_configured`, even if a smoke or training checkpoint exists on disk.
+Compose passes the same variable, using the model's path inside the container.
+The integration test checks that the three label sets remain distinct. The
+unfinished 18-class detector is not active in the running app.
+
+### Supplied candlestick pattern checkpoint
 
 The supplied ChartScanAI `custom_yolov8.pt` is now validated and converted to
 `outputs/chart-agent/assets/chart-pattern.onnx`. Its stored labels are `Buy` and

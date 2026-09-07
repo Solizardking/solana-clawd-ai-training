@@ -160,3 +160,25 @@ def test_api_auth_and_invalid_input(monkeypatch):
             result = await client.post('/analyze', headers=headers, json={'question': 'chart', 'image_base64': 'invalid!'})
             assert result.status_code == 422
     asyncio.run(run())
+
+
+def test_detector_results_keep_three_label_sets_separate(monkeypatch):
+    import chart_agent.server as server
+    class FakeDetector:
+        def __init__(self, label): self.names = {0: label}
+        def detect(self, image):
+            return [{'label': self.names[0], 'confidence': 0.8, 'bbox_xyxy': [1, 2, 3, 4]}]
+    monkeypatch.setattr(server, 'detector', FakeDetector('symbol_title'))
+    monkeypatch.setattr(server, 'pattern_detector', FakeDetector('Buy'))
+    monkeypatch.setattr(server, 'element_detector', FakeDetector('plot_area'))
+    image = Image.new('RGB', (20, 10))
+    result = asyncio.run(server.detection_evidence(image))
+    assert result['detections'][0]['label'] == 'symbol_title'
+    assert result['pattern_detector']['detections'][0]['label'] == 'Buy'
+    assert result['chart_elements']['detections'][0]['label'] == 'plot_area'
+    assert result['chart_elements']['bbox_image_size'] == [20, 10]
+    monkeypatch.setattr(server, 'element_detector', None)
+    monkeypatch.setattr(server, 'element_detector_error', 'not_configured')
+    result = asyncio.run(server.detection_evidence(image))
+    assert result['chart_elements_error'] == 'not_configured'
+    assert 'chart_elements' not in result

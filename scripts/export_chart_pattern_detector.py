@@ -20,14 +20,21 @@ torch.nn.modules.container.ModuleList
 torch.nn.modules.container.Sequential
 torch.nn.modules.conv.Conv2d
 torch.nn.modules.loss.BCEWithLogitsLoss
+torch.nn.modules.linear.Identity
 torch.nn.modules.pooling.MaxPool2d
 torch.nn.modules.upsampling.Upsample
 ultralytics.nn.modules.block.Bottleneck
 ultralytics.nn.modules.block.C2f
+ultralytics.nn.modules.block.C2PSA
+ultralytics.nn.modules.block.PSABlock
+ultralytics.nn.modules.block.C3k
+ultralytics.nn.modules.block.C3k2
+ultralytics.nn.modules.block.Attention
 ultralytics.nn.modules.block.DFL
 ultralytics.nn.modules.block.SPPF
 ultralytics.nn.modules.conv.Concat
 ultralytics.nn.modules.conv.Conv
+ultralytics.nn.modules.conv.DWConv
 ultralytics.nn.modules.head.Detect
 ultralytics.nn.tasks.DetectionModel
 ultralytics.utils.IterableSimpleNamespace
@@ -40,6 +47,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--checkpoint', type=Path, required=True)
     p.add_argument('--output', type=Path, default=ROOT / 'outputs/chart-agent/assets/chart-pattern.onnx')
+    p.add_argument('--description', default='ChartScanAI local Buy/Sell label detector; accuracy not established')
     args = p.parse_args()
     import torch
     import numpy as np
@@ -74,7 +82,7 @@ def main():
                           input_names=['images'], output_names=['output0'])
     graph = onnx.load(args.output)
     onnx.helper.set_model_props(graph, {'names': repr(model.names), 'imgsz': repr([size, size]),
-        'task': 'detect', 'description': 'ChartScanAI local Buy/Sell label detector; accuracy not established',
+        'task': 'detect', 'description': args.description,
         'source_sha256': hashlib.file_digest(args.checkpoint.open('rb'), 'sha256').hexdigest()})
     onnx.checker.check_model(graph)
     onnx.save(graph, args.output)
