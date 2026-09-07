@@ -46,7 +46,7 @@ async def token_market(mint):
 
 class SolGptBridge:
     def __init__(self):
-        self.url = os.getenv('SOLGPT_MCP_URL', 'https://solanaclawd.com/api/mcp')
+        self.url = os.getenv('SOLGPT_MCP_URL', 'https://solgpt.us/api/mcp')
         self.key = os.getenv('SOLGPT_MCP_TOKEN') or os.getenv('SOLGPT_API_KEY')
         self.available = {}
         self.contract = catalog()
@@ -61,10 +61,19 @@ class SolGptBridge:
                 'Accept': 'application/json, text/event-stream', 'MCP-Protocol-Version': '2025-03-26'},
                 json={'jsonrpc': '2.0', 'id': 1, 'method': method, 'params': params})
             response.raise_for_status()
-            payload = response.json()
+            if 'text/event-stream' in response.headers.get('content-type', ''):
+                payloads = [json.loads(line[5:].strip()) for line in response.text.splitlines()
+                            if line.startswith('data:') and line[5:].strip() not in {'', '[DONE]'}]
+                payload = next((p for p in reversed(payloads) if p.get('id') == 1), {})
+            elif 'application/json' in response.headers.get('content-type', ''):
+                payload = response.json()
+            else:
+                raise ValueError('MCP endpoint returned a non-protocol response')
         if 'error' in payload:
             raise ValueError('SOL GPT MCP rejected request')
-        return payload.get('result', {})
+        if 'result' not in payload:
+            raise ValueError('MCP endpoint returned no result')
+        return payload['result']
 
     async def discover(self):
         tools, cursor = {}, None
@@ -95,6 +104,8 @@ def function(name, description, properties, required=()):
 
 
 TOOL_DEFS = [
+    function('get_token_candles', 'Fetch USD OHLCV and closed-candle geometry for an exact Solana mint. Includes freshness, pool, and timeframe.',
+             {'mint': {'type': 'string'}, 'timeframe': {'type': 'string', 'enum': ['minute', 'hour', 'day']}, 'aggregate': {'type': 'integer'}}, ['mint']),
     function('get_token_market', 'Fetch current Solana token price/liquidity snapshots. Requires the exact mint.', {'mint': {'type': 'string'}}, ['mint']),
     function('get_live_tape', 'Recent received Solana launch/trade events; inspect freshness and connection status.', {}),
     function('search_research', 'Find page-cited local chart detection and Solana research.', {'query': {'type': 'string'}}, ['query']),

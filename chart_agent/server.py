@@ -21,6 +21,10 @@ from .realtime import Tape
 from .research import search
 from .tools import ROOT, SolGptBridge, TOOL_DEFS, token_market, validate_mint
 
+if os.getenv('CHART_SOLGPT_ENV_FILE'):
+    from .credentials import load_solgpt_env
+    load_solgpt_env(os.environ['CHART_SOLGPT_ENV_FILE'])
+
 SYSTEM = '''You are Clawd Chart Fable, an ecosystem-native Solana chart research assistant.
 Ground statements in the supplied image, numerical market data, detector output, and cited research.
 Describe axes, timeframe, units, trend, volume, levels and uncertainty. Separate visible observations from hypotheses.
@@ -115,6 +119,9 @@ async def live():
 
 
 async def run_tool(name, args):
+    if name == 'get_token_candles':
+        from .candles import token_candles
+        return await token_candles(args['mint'], args.get('timeframe', 'minute'), args.get('aggregate', 1))
     if name == 'get_token_market':
         return await token_market(args['mint'])
     if name == 'get_live_tape':

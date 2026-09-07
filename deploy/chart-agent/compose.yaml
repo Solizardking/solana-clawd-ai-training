@@ -1,0 +1,65 @@
+services:
+  model:
+    build:
+      context: ../..
+      dockerfile: deploy/chart-agent/Dockerfile
+      target: model
+    gpus: all
+    restart: unless-stopped
+    volumes:
+      - ../../outputs/chart-agent/models:/models:ro
+    command:
+      - --model
+      - /models/Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-Q4_K_M.gguf
+      - --mmproj
+      - /models/mmproj-F16.gguf
+      - --alias
+      - clawd-chart-fable
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8091'
+      - --ctx-size
+      - '8192'
+      - --n-gpu-layers
+      - '99'
+      - --parallel
+      - '1'
+      - --jinja
+      - --reasoning
+      - 'off'
+      - --cache-ram
+      - '0'
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/chart-agent/Dockerfile
+      target: api
+    restart: unless-stopped
+    depends_on:
+      - model
+    ports:
+      - '127.0.0.1:8090:8090'
+    environment:
+      CHART_API_KEY: ${CHART_API_KEY:?Set a private chart API key}
+      SOLGPT_API_KEY: ${SOLGPT_API_KEY:-}
+      SOLGPT_MCP_TOKEN: ${SOLGPT_MCP_TOKEN:-}
+      SOLGPT_MCP_URL: ${SOLGPT_MCP_URL:-https://solgpt.us/api/mcp}
+      LLAMA_URL: http://model:8091
+    volumes:
+      - ../../outputs/chart-agent:/app/outputs/chart-agent:ro
+  https:
+    image: caddy:2.10.2
+    profiles: [public]
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    environment:
+      CHART_DOMAIN: ${CHART_DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api]
+volumes:
+  caddy_data:
+  caddy_config:
