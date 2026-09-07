@@ -1,0 +1,2 @@
+huggingface_hub==1.30.0
+novita-sandbox==2.1.0
