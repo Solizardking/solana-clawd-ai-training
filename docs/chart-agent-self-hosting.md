@@ -279,6 +279,28 @@ do not modify the already-running job's pinned script or its 12-hour timeout.
 Python API and optional Caddy HTTPS service. Its Compose configuration validates;
 the Linux CUDA image has **not** been built or deployed in this Mac session.
 
+The separate **Linux ARM64 API image was built and exercised** under the local
+Colima Docker engine. The build transferred a 137 KB application-only context;
+`Dockerfile.dockerignore` excludes runtime assets, environments, and unrelated
+repository files. Authenticated readiness confirmed both ONNX detectors and the
+research database; an unauthenticated readiness request returned 401. The AAPL
+example returned three pattern boxes through containerized `/detect`. The test
+container was then stopped and removed. Its model readiness was false because no
+model container was attached; this is not an end-to-end CUDA deployment result.
+Evidence: `outputs/chart-agent/container-smoke.json`.
+
+```sh
+docker build --target api -f deploy/chart-agent/Dockerfile -t clawd-chart-api:local .
+.venv-charts/bin/python scripts/smoke_chart_api_container.py --image /path/to/chart.png
+```
+
+Compose now waits for the model's `/health` before starting the API, and for API
+liveness before starting Caddy. This uses Docker's documented
+[health-dependent startup](https://docs.docker.com/compose/how-tos/startup-order/)
+and [Dockerfile-specific build exclusions](https://docs.docker.com/build/concepts/context/#dockerignore-files).
+Health-dependent startup does not automatically recover unhealthy services or
+establish chart accuracy; use authenticated `/ready` and a real inference request.
+
 Plan approximately 24 GB or more GPU VRAM for this quant and a short context, with
 additional headroom for vision and concurrency; measure actual allocation on the
 chosen hardware. Use NVIDIA Container Toolkit and a CUDA-compatible driver.
