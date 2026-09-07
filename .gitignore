@@ -23,6 +23,7 @@ __pycache__/
 .venv/
 .venv-connect/
 .venv-charts/
+.venv-detector/
 /local/
 venv/
 env/
