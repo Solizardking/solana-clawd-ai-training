@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 from huggingface_hub import HfApi, CommitOperationAdd, get_token
+from huggingface_hub.utils import disable_progress_bars
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,6 +14,7 @@ def main():
     p.add_argument('--full', action='store_true', help='Run one full epoch per stage (default: smoke)')
     p.add_argument('--timeout', default='1h')
     args = p.parse_args()
+    disable_progress_bars()
     api = HfApi()
     owner = api.whoami()['name']
     data_repo = f'{owner}/clawd-chart-foundation-training'
@@ -54,7 +56,8 @@ sys.exit(result.returncode)
         flavor='a100-large', timeout=args.timeout, namespace=owner,
         name='clawd-chart-foundation-' + ('full' if args.full else 'smoke'),
         env={'DATA_REPO':data_repo, 'DATA_REVISION':commit.oid, 'DATA_SHA256':digest, 'MODEL_REPO':model_repo,
-             'SMOKE':'0' if args.full else '1','PYTHONUNBUFFERED':'1'}, secrets={'HF_TOKEN':get_token()})
+             'SMOKE':'0' if args.full else '1','PYTHONUNBUFFERED':'1',
+             'PIP_BREAK_SYSTEM_PACKAGES':'1','HF_HUB_DISABLE_PROGRESS_BARS':'1'}, secrets={'HF_TOKEN':get_token()})
     record = {'job_id':job.id, 'job_url':f'https://huggingface.co/jobs/{owner}/{job.id}', 'data_repo':data_repo,
               'data_revision':commit.oid,'model_repo':model_repo,'timeout':args.timeout,'smoke_only':not args.full}
     (ROOT / 'outputs/hf-chart-job.json').write_text(json.dumps(record,indent=2)+'\n')

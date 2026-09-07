@@ -40,7 +40,7 @@ if __name__ == '__main__':
             report['tool_analysis'] = response.json()
             calls = [c for c in report['tool_analysis']['tools_used'] if c['name'] == 'get_token_candles' and 'latest_closed_candle' in c['result']]
             report['tool_timestamp_exact'] = bool(calls) and calls[-1]['result']['latest_closed_candle']['open_time_utc'] in report['tool_analysis']['answer']
-            if not report['tool_timestamp_exact']:
-                raise RuntimeError('Model did not reproduce the tool UTC timestamp exactly')
         Path('outputs/chart-agent/service-smoke.json').write_text(json.dumps(report, indent=2))
         print(json.dumps(report, indent=2))
+        if args.tools and not report['tool_timestamp_exact']:
+            raise SystemExit('Model did not reproduce the tool UTC timestamp exactly; see saved report')

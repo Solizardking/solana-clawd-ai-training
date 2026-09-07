@@ -20,6 +20,8 @@ training-example retrieval, Solana market/candle tools, and the supplied SOL GPT
 | Detector | Bucket `weights/best.onnx`: YOLOv12n, dynamic input, 1,792 × 1,792 default; classes `last_price_pill`, `symbol_title` |
 | Live tape | Connected to `wss://clawd-ws.fly.dev/ws`; token-launch events received with freshness reporting |
 | Public market data | DEX Screener pair snapshots and GeckoTerminal closed OHLCV candles verified for wrapped SOL |
+| Model tool use | Model selected `get_token_candles`; closing price and exact server-formatted UTC timestamp matched the result |
+| Tokenization | Solana text/address roundtrip exact; 57 tokens in the smoke input |
 | SOL GPT | 72 catalog entries / 37 core; existing local API key rejected by `https://solgpt.us/api/mcp` with HTTP 401 |
 
 The four-question held-out vision smoke run returned the correct quantities or
@@ -27,6 +29,12 @@ labels in all four cases, in approximately 5–17 seconds. Strict normalized exa
 match was 1/4 because three answers added units or a parenthetical value. This is
 a tiny functionality check, not evidence of broad chart accuracy or profitable
 trading. Raw answers and timings are in `outputs/chart-agent/vision-evaluation.json`.
+The complete app/tool checks are in `outputs/chart-agent/final-smoke-output.json`
+and `outputs/chart-agent/final-tool-smoke.json`. The latter verifies the UTC date
+fix: an earlier model answer had incorrectly converted an epoch timestamp to May.
+The server now supplies ISO timestamps and the regression check requires verbatim
+copying. Twelve focused pipeline tests pass. Full app latency is higher than the
+short vision smoke, especially with research context or machine contention.
 
 **No fine-tuning has been performed by this setup.** The bucket supplies retrieved
 training examples and prepared SFT/evaluation records. GGUF inference and retrieval

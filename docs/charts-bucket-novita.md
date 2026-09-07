@@ -197,3 +197,10 @@ https://huggingface.co/jobs/ordlibrary/6a9f34df259f8e97255ecd82.
 The documented A100 price at setup is $2.50/hour; one hour caps the initial
 compute at approximately $2.50 and a 12-hour job at approximately $30, excluding
 any storage fees. No full run is implied by staging or scheduling a smoke job.
+
+The first Job failed before training because the PyTorch container retains the
+PEP 668 system-Python marker. The launcher now permits pip installation only
+inside that disposable Job container (`PIP_BREAK_SYSTEM_PACKAGES=1`). Retry:
+https://huggingface.co/jobs/ordlibrary/6a9f3582e686246ca69a959e.
+Local validation with the actual pinned processor succeeded on a packaged chart:
+`Qwen3VLProcessor` produced 198 input tokens and a valid image tensor/grid.
