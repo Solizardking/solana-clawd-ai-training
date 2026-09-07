@@ -5,7 +5,9 @@ model_dir="${CHART_MODEL_DIR:-outputs/chart-agent/models}"
 set --
 if [[ -n "${CHART_LORA_FILE:-}" ]]; then
   [[ -f "$CHART_LORA_FILE" ]] || { echo "Configured LoRA file is missing" >&2; exit 1; }
-  set -- --lora "$CHART_LORA_FILE" --lora-init-without-apply
+  # Set the server's adapter registry scale explicitly, too. The init flag
+  # alone left /lora-adapters at scale 1 in llama.cpp build 8640.
+  set -- --lora-scaled "${CHART_LORA_FILE}:0" --lora-init-without-apply
 fi
 exec llama-server \
   "$@" \

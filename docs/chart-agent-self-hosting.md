@@ -33,7 +33,7 @@ The complete app/tool checks are in `outputs/chart-agent/final-smoke-output.json
 and `outputs/chart-agent/final-tool-smoke.json`. The latter verifies the UTC date
 fix: an earlier model answer had incorrectly converted an epoch timestamp to May.
 The server now supplies ISO timestamps and the regression check requires verbatim
-copying. Twelve focused pipeline tests pass. Full app latency is higher than the
+copying. Fourteen focused pipeline tests pass. Full app latency is higher than the
 short vision smoke, especially with research context or machine contention.
 
 The served GGUF remains the upstream model; retrieval does not update its weights.
@@ -47,6 +47,43 @@ current record in `outputs/hf-chart-job.json`. See the separate training package
 and counts in [the training guide](charts-bucket-novita.md#hugging-face-gpu-jobs).
 The source's native tokenizer remains embedded in the GGUF; the existing Nemotron
 tokenizer is a different vocabulary and cannot replace it.
+
+### Independent visual baseline and adapter compatibility
+
+A newly generated, deterministic benchmark contains 36 questions over 12 bar,
+horizontal-bar, line, and grouped-bar images in light and dark styles. These
+images were created after the full training package was uploaded and are not in
+that package. The upstream model answered **36/36** correctly under strict label
+or numeric scoring (optional units accepted). This measures simple synthetic
+chart reading, not real-market pattern detection. The full training package's
+test JSONL contains no image-bearing rows, so its test loss cannot replace visual
+evaluation. Preserve this benchmark for comparison with the completed adapter:
+
+```sh
+.venv-detector/bin/python scripts/build_chart_visual_benchmark.py
+.venv-charts/bin/python scripts/eval_chart_visual_benchmark.py \
+  --output outputs/chart-agent/visual-benchmark/base-results.json
+```
+
+The smoke adapter was converted with the same pinned llama.cpp source as the
+runtime. All 512 tensors (256 pairs) matched base-model tensor names and shapes
+and contained finite values. The converted F16 GGUF SHA256 is
+`4912d28299faa0b77697a07b067b718ab9791fe758c08dbfd7b3e3896e25f2a6`.
+An explicit scale-1 inference request answered the arithmetic smoke correctly;
+the active server slot exposed the requested adapter, and the global scale
+remained zero afterward. This establishes execution compatibility, not improved
+accuracy or equivalence between the trainable counterpart and quantized model.
+
+```sh
+CHART_LORA_FILE=outputs/chart-agent/smoke-adapter/smoke-lora.gguf \
+  bash scripts/run_chart_model.sh
+.venv-charts/bin/python scripts/smoke_chart_lora_runtime.py
+```
+
+The launcher explicitly sets `--lora-scaled FILE:0`; build 8640 reported scale 1
+with `--lora-init-without-apply` alone. Normal app requests continue using the
+upstream base. Evidence lives in `outputs/chart-agent/smoke-adapter/`:
+`provenance.json`, `smoke-lora.verification.json`, and `runtime-smoke.json`.
 
 ## Chart-pattern detector
 
