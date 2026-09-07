@@ -1,0 +1,42 @@
+<section id="trade" class="ht-panel" aria-labelledby="ht-title">
+  <div class="ht-heading">
+    <div><div class="ht-eyebrow">YOUR WALLET. YOUR MOVE.</div><h2 id="ht-title">Trade the signal.</h2></div>
+    <span class="ht-network"><span></span> Solana mainnet</span>
+  </div>
+  <p class="ht-intro">Swap with DFlow. Pick a token from the live stream or paste its mint below.</p>
+  <div class="ht-wallet-row"><span id="ht-wallet-label">Wallet disconnected</span><button type="button" id="ht-connect" class="ht-button ht-secondary">Connect wallet</button></div>
+  <form id="ht-form" novalidate>
+    <fieldset id="ht-fields">
+      <div class="ht-token-box">
+        <div class="ht-field-heading"><label for="ht-amount">You pay</label><div class="ht-presets"><button type="button" data-ht-token="input:SOL">SOL</button><button type="button" data-ht-token="input:USDC">USDC</button></div></div>
+        <div class="ht-amount-row"><input id="ht-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" maxlength="280" aria-describedby="ht-amount-note" /><span id="ht-input-name">SOL</span></div>
+        <label class="ht-mint-label" for="ht-input-mint">Input mint</label><input id="ht-input-mint" class="ht-mint" type="text" spellcheck="false" autocomplete="off" value="So11111111111111111111111111111111111111112" maxlength="44" />
+      </div>
+      <div class="ht-reverse-row"><button type="button" id="ht-reverse" title="Reverse token pair" aria-label="Reverse token pair">⇅</button></div>
+      <div class="ht-token-box">
+        <div class="ht-field-heading"><label for="ht-output-mint">You receive</label><div class="ht-presets"><button type="button" data-ht-token="output:SOL">SOL</button><button type="button" data-ht-token="output:USDC">USDC</button></div></div>
+        <div class="ht-amount-row"><output id="ht-output-amount">—</output><span id="ht-output-name">USDC</span></div>
+        <label class="ht-mint-label" for="ht-output-mint">Output mint</label><input id="ht-output-mint" class="ht-mint" type="text" spellcheck="false" autocomplete="off" value="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" maxlength="44" />
+      </div>
+      <p id="ht-amount-note" class="ht-note">Enter the token amount. Keep SOL in your wallet for network fees.</p>
+      <details class="ht-settings"><summary>Execution settings <span>DFlow auto</span></summary><div class="ht-settings-grid">
+        <label for="ht-slippage">Slippage<select id="ht-slippage"><option value="auto">Auto</option><option value="10">0.1%</option><option value="50">0.5%</option><option value="100">1%</option><option value="300">3%</option></select></label>
+        <label for="ht-priority">Priority fee<select id="ht-priority"><option value="auto">Auto</option><option value="medium">Medium</option><option value="high">High</option><option value="disabled">Disabled</option></select></label>
+      </div><p class="ht-note" id="ht-fee-cap">Resolved fees appear before you approve.</p></details>
+      <button id="ht-preview" class="ht-button ht-primary" type="submit" disabled>Connect wallet to preview</button>
+    </fieldset>
+  </form>
+  <p id="ht-message" class="ht-message" role="status" aria-live="polite">Loading trading service…</p>
+  <div id="ht-review" class="ht-review" hidden aria-labelledby="ht-review-title">
+    <div class="ht-review-heading"><h3 id="ht-review-title">Review your swap</h3><span id="ht-expiry"></span></div>
+    <dl id="ht-review-values"></dl>
+    <p class="ht-note">Mainnet · Your wallet signs and sends this transaction. Review the wallet’s final simulation and fees.</p>
+    <button id="ht-approve" type="button" class="ht-button ht-primary" disabled>Approve in wallet</button>
+  </div>
+  <div id="ht-receipt" class="ht-receipt" hidden aria-live="polite"><strong id="ht-receipt-title"></strong><p id="ht-receipt-message"></p><a id="ht-explorer" target="_blank" rel="noopener noreferrer" hidden>View transaction ↗</a><button id="ht-check-status" type="button" class="ht-button ht-secondary" hidden>Check confirmation</button></div>
+  <div class="ht-footer"><span id="ht-service-mode">DFlow routing</span><a href="https://pond.dflow.net/spot/introduction" target="_blank" rel="noopener noreferrer">How swaps work ↗</a></div>
+  <dialog id="ht-wallet-dialog" class="ht-dialog" aria-labelledby="ht-wallet-title">
+    <div class="ht-heading"><h3 id="ht-wallet-title">Choose your wallet</h3><button id="ht-close-wallet" type="button" class="ht-close" aria-label="Close wallet chooser">×</button></div>
+    <p class="ht-note">Connect a Solana mainnet account. Each swap needs your approval.</p><div id="ht-wallet-list"></div><button id="ht-disconnect" type="button" class="ht-button ht-secondary" hidden>Disconnect this site</button><p id="ht-wallet-message" class="ht-message" role="status"></p>
+  </dialog>
+</section>

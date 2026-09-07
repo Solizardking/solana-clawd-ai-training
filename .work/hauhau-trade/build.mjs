@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+const here = dirname(fileURLToPath(import.meta.url));
+const sourceRoot = process.env.HAUHAU_BUILD_DEPS || '/Users/8bit/sol-gpt';
+const require = createRequire(resolve(sourceRoot, 'package.json'));
+const { build } = require('esbuild');
+const result = await build({ entryPoints: [resolve(here,'src/trade.js')], outfile: resolve(here,'trade.js'), bundle: true, minify: true, format: 'esm', platform:'browser', target:'es2022', nodePaths:[resolve(sourceRoot,'node_modules')], legalComments:'eof', metafile:true });
+const bytes = Object.values(result.metafile.outputs).reduce((sum,file) => sum + file.bytes,0);
+console.log(`Built trade.js (${bytes.toLocaleString()} bytes).`);
