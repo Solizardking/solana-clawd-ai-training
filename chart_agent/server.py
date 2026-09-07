@@ -16,6 +16,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from .detector import Detector, decode_image
+from .examples import retrieve
 from .realtime import Tape
 from .research import search
 from .tools import ROOT, SolGptBridge, TOOL_DEFS, token_market, validate_mint
@@ -133,7 +134,9 @@ async def run_tool(name, args):
 
 
 async def analyze_impl(body):
-    evidence = {'research': search(research_path, body.question), 'tape_status': {k: v for k, v in tape.snapshot().items() if k != 'events'}}
+    evidence = {'research': search(research_path, body.question),
+                'training_examples': retrieve(os.getenv('CHART_EXAMPLES_DB', str(ROOT / 'outputs/chart-agent/examples.sqlite')), body.question),
+                'tape_status': {k: v for k, v in tape.snapshot().items() if k != 'events'}}
     if body.mint:
         try:
             validate_mint(body.mint)

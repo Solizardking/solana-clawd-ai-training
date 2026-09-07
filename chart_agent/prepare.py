@@ -87,6 +87,9 @@ def main():
     if args.research:
         report['research'] = build_index(args.research, Path(args.output).parent / 'research.sqlite')
         (Path(args.output) / 'manifest.json').write_text(json.dumps(report, indent=2))
+    from .examples import index_examples
+    report['retrieval_training_examples'] = index_examples(Path(args.output) / 'train.jsonl', Path(args.output).parent / 'examples.sqlite')
+    (Path(args.output) / 'manifest.json').write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
 
 
