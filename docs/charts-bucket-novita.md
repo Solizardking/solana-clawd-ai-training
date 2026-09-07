@@ -1,5 +1,12 @@
 # Charts bucket and Novita sandbox
 
+For the DavidAU 27B vision model, chart data preparation, local research retrieval,
+realtime Solana tools and GPU hosting, see [Clawd Chart Fable setup](chart-agent-self-hosting.md).
+During the September 7 setup, several mounted reads produced invalid/truncated
+model and detector headers. Direct SDK downloads were valid. Use the pinned,
+SHA256-verified model downloader in that guide for serving; keep the mount for
+inspection rather than assuming a listed file has been read correctly.
+
 Run from the repository root. Keep these tools separate from the training and
 Model Kit environments:
 
@@ -108,3 +115,56 @@ The live token index uses **monthly** partitions, despite the dataset card's
 daily examples. This connector follows the actual index. Full-dataset ingestion,
 chart/time-series joins, detector inference and model retraining are separate
 steps; running this collector does not claim those steps are complete.
+
+## DavidAU vision inference and new chart model
+
+The supplied `Llama.from_pretrained` example needs a vision projector and a
+multimodal chat handler to process images. The corrected runner is
+`scripts/davidau_gguf_vision.py`: it pins the requested IQ2_M GGUF and
+`mmproj-F16.gguf`, uses upstream `MTMDChatHandler`, and accepts a plain image URL
+or local image path. The GGUF is for inference; the training recipe uses its
+matching trainable DavidAU checkpoint (`Qwen3_5ForConditionalGeneration`).
+
+Saved Colab notebooks:
+
+- [GGUF vision inference](https://colab.research.google.com/drive/1GsnB1kSd6jfLvO5_hYwfPY8xVcO8yLPO)
+- [Clawd Chart Foundation 27B training](https://colab.research.google.com/drive/1ZR0bJ0GQgYLu4ZnoIrLaN8drEcZPILSg)
+
+Local copies live in `notebooks/davidau_qwen_gguf_vision.ipynb` and
+`notebooks/clawd_chart_foundation_27b_train.ipynb`. Regenerate them with
+`.venv-connect/bin/python scripts/make_chart_colab_notebooks.py` after changing
+the embedded runners. Notebook schemas and Python cells were validated locally;
+GPU inference and training are not yet verified. The inference notebook's CUDA
+build was started in Colab on September 7, 2026.
+
+The prepared upload is `outputs/chart-foundation-data.zip` (118,301,880 bytes),
+SHA256 `3e389d917a4cecac5c9994dcfa68434c55cff7a21db04cb44803849a9e3f24df`.
+Its manifest records provenance, source inventory, exclusions, and split counts:
+
+| Split | Supervised conversations | Document chunks |
+| --- | ---: | ---: |
+| Train | 34,831 | 2,338 |
+| Validation | 3,257 | 149 |
+| Test | 3,126 | 858 |
+
+The package contains 1,712 chart images. Exact conversation deduplication removed
+1,866 duplicates, with held-out copies taking priority; image families stay in
+one split. This does not guarantee semantic deduplication. Secret-pattern filters
+excluded 21 conversations and 28 documents. Dataset cards, manifests, and
+unsupported records remain provenance inventory rather than fabricated labels.
+Solarchive coverage is currently the verified 33-row historical sample, not the
+full archive. Detector weights are referenced separately, not merged into the LLM.
+
+Validate the package before training:
+
+```sh
+.venv/bin/python scripts/train_chart_foundation.py --data outputs/chart-foundation-data --preflight
+.venv/bin/python -m pytest tests/test_chart_foundation_data.py -q
+```
+
+The training notebook requests a CUDA GPU with at least 40 GB VRAM, uploads this
+zip, then performs document adaptation followed by chart/text QLoRA training.
+It saves an adapter, processor, source manifest, and held-out loss metrics; it
+does not publish automatically. The available Colab account currently exposes
+T4 but has larger GPU options disabled. No new model weights have been trained.
+Novita execution also remains unavailable until `NOVITA_API_KEY` is configured.

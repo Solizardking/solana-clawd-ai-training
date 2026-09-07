@@ -14,7 +14,7 @@ def split_for(group):
     return 'test' if n < 5 else 'validation' if n < 10 else 'train'
 
 
-def prepare(bucket, output, metadata=None):
+def prepare(bucket, output, metadata=None, data_dir=None):
     import pyarrow.parquet as pq
     bucket, output = Path(bucket), Path(output)
     output.mkdir(parents=True, exist_ok=True)
@@ -33,9 +33,11 @@ def prepare(bucket, output, metadata=None):
         counts[f'{lane}/{split}'] += 1
 
     try:
-        for path in sorted((bucket / 'data').glob('*.parquet')):
+        for path in sorted((Path(data_dir) if data_dir else bucket / 'data').glob('*.parquet')):
             table = pq.ParquetFile(path)
-            source = dict(file=path.name, rows=table.metadata.num_rows, columns=table.schema_arrow.names)
+            with path.open('rb') as file:
+                digest = hashlib.file_digest(file, 'sha256').hexdigest()
+            source = dict(file=path.name, rows=table.metadata.num_rows, columns=table.schema_arrow.names, sha256=digest)
             sources.append(source)
             if 'messages' not in table.schema_arrow.names:
                 rejected['non_chart_conversation_schema'] += table.metadata.num_rows
@@ -81,9 +83,10 @@ def main():
     p.add_argument('--bucket', default='local')
     p.add_argument('--output', default='outputs/chart-agent/dataset')
     p.add_argument('--metadata')
+    p.add_argument('--data-dir', help='Directly downloaded parquet directory; image references still use --bucket')
     p.add_argument('--research', nargs='*', default=[])
     args = p.parse_args()
-    report = prepare(args.bucket, args.output, args.metadata)
+    report = prepare(args.bucket, args.output, args.metadata, args.data_dir)
     if args.research:
         report['research'] = build_index(args.research, Path(args.output).parent / 'research.sqlite')
         (Path(args.output) / 'manifest.json').write_text(json.dumps(report, indent=2))

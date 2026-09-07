@@ -9,6 +9,7 @@ import httpx
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--analyze', action='store_true')
+    p.add_argument('--tools', action='store_true')
     args = p.parse_args()
     key = Path('outputs/chart-agent/api-key').read_text().strip()
     with httpx.Client(base_url='http://127.0.0.1:8090', timeout=330, headers={'Authorization': 'Bearer ' + key}) as client:
@@ -24,11 +25,18 @@ if __name__ == '__main__':
             if endpoint == 'ready':
                 data.pop('tape', None)
             report[endpoint] = data
+        response = client.post('/tokenize', json={'text': 'Solana Token-2022 mint So11111111111111111111111111111111111111112 decimals=9 PDA ALT'})
+        response.raise_for_status()
+        report['tokenizer'] = response.json()
         if args.analyze:
             image = Path('outputs/chart-agent/assets/images/syn_bar_0005.png')
             response = client.post('/analyze', json={'question': 'Read the chart: identify the category with the highest value and cite the visible numbers. Keep the answer under 100 words.',
                 'image_base64': base64.b64encode(image.read_bytes()).decode(), 'max_tokens': 350})
             response.raise_for_status()
             report['analysis'] = response.json()
+        if args.tools:
+            response = client.post('/analyze', json={'question': 'Use get_token_candles to retrieve 1-minute OHLCV for Solana mint So11111111111111111111111111111111111111112. Report the latest closed candle timestamp, closing price, whether the data is stale, and the source. Do not use research papers for current prices. Keep the answer under 100 words.', 'max_tokens': 400})
+            response.raise_for_status()
+            report['tool_analysis'] = response.json()
         Path('outputs/chart-agent/service-smoke.json').write_text(json.dumps(report, indent=2))
         print(json.dumps(report, indent=2))

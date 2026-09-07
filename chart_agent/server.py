@@ -77,6 +77,7 @@ class AnalyzeRequest(BaseModel):
     image_base64: str | None = Field(default=None, max_length=8_000_000)
     mint: str | None = Field(default=None, max_length=44)
     max_tokens: int = Field(default=1200, ge=64, le=2400)
+    use_research: bool = False
 
 
 class TokenizeRequest(BaseModel):
@@ -160,8 +161,8 @@ async def run_tool(name, args):
 
 
 async def analyze_impl(body):
-    evidence = {'research': search(research_path, body.question),
-                'training_examples': retrieve(os.getenv('CHART_EXAMPLES_DB', str(ROOT / 'outputs/chart-agent/examples.sqlite')), body.question),
+    evidence = {'research': search(research_path, body.question) if body.use_research else [],
+                'training_examples': retrieve(os.getenv('CHART_EXAMPLES_DB', str(ROOT / 'outputs/chart-agent/examples.sqlite')), body.question) if body.use_research else [],
                 'tape_status': {k: v for k, v in tape.snapshot().items() if k != 'events'}}
     if body.mint:
         try:

@@ -30,6 +30,9 @@
 The repo layout is documented in [STRUCTURE.md](STRUCTURE.md), including source
 lanes, generated output lanes, NVIDIA integration ownership, and safety rules.
 
+For the self-hosted DavidAU 27B chart vision app, realtime Solana candles, research
+retrieval, and SOL GPT tool integration, see [Clawd Chart Fable](docs/chart-agent-self-hosting.md).
+
 ```bash
 python3 scripts/organize_ai_training.py --check
 python3 nvidia/scripts/verify_nvidia.py --strict
