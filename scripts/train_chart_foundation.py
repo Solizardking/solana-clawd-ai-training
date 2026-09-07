@@ -13,6 +13,25 @@ def read_rows(path):
         return [json.loads(line) for line in stream if line.strip()]
 
 
+def validate_resume(checkpoint, stage, manifest):
+    """Require a complete Trainer checkpoint and identical packaged inputs."""
+    checkpoint = checkpoint.resolve()
+    if checkpoint.parent.name != stage:
+        raise ValueError("Checkpoint directory must belong to the selected stage")
+    required = ("adapter_config.json", "adapter_model.safetensors", "trainer_state.json",
+                "optimizer.pt", "scheduler.pt", "rng_state.pth")
+    for name in required:
+        if not (checkpoint / name).is_file() or not (checkpoint / name).stat().st_size:
+            raise ValueError(f"Incomplete resume checkpoint: {name}")
+    saved_manifest = json.loads((checkpoint.parent.parent / "data-manifest.json").read_text())
+    if saved_manifest != manifest:
+        raise ValueError("Resume data manifest differs from the original training inputs")
+    state = json.loads((checkpoint / "trainer_state.json").read_text())
+    if state.get("global_step", 0) <= 0:
+        raise ValueError("Resume checkpoint has no completed optimizer steps")
+    return checkpoint
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--data", type=Path, required=True)
@@ -22,8 +41,18 @@ def main():
     p.add_argument("--preflight", action="store_true")
     p.add_argument("--smoke", action="store_true", help="One optimizer step per stage on a small mixed image/text subset")
     p.add_argument("--hub-repo", help="Persist checkpoints to an existing private model repository")
+    p.add_argument("--resume-checkpoint", type=Path, help="Trusted Trainer checkpoint including optimizer and RNG state")
+    p.add_argument("--resume-stage", choices=("documents", "sft"))
     args = p.parse_args()
     manifest = json.loads((args.data / "manifest.json").read_text())
+    if bool(args.resume_checkpoint) != bool(args.resume_stage):
+        p.error("--resume-checkpoint and --resume-stage must be supplied together")
+    if args.resume_checkpoint:
+        if args.smoke:
+            p.error("Cannot resume full checkpoints in smoke mode")
+        args.resume_checkpoint = validate_resume(args.resume_checkpoint, args.resume_stage, manifest)
+        if args.output.resolve() == args.resume_checkpoint.parent.parent:
+            p.error("Use a fresh output directory to preserve the source checkpoint")
     sets = {name: read_rows(args.data / f"{name}.jsonl") for name in
             ("train", "validation", "test", "documents-train", "documents-validation")}
     if any(not rows for rows in sets.values()):
@@ -125,7 +154,18 @@ def main():
                     commit_message=f"Persist {Path(training_args.output_dir).name} step {state.global_step}")
 
     metrics = {"smoke_only": args.smoke, "records_removed_for_length": filtered_counts, "max_steps_per_stage": args.max_steps}
+    if args.resume_checkpoint:
+        metrics["resume"] = {"stage": args.resume_stage, "checkpoint": str(args.resume_checkpoint)}
+        previous = args.resume_checkpoint.parent.parent / "metrics.json"
+        if args.resume_stage == "sft":
+            prior = json.loads(previous.read_text()) if previous.is_file() else {}
+            for key in ("documents", "documents_eval"):
+                if key in prior:
+                    metrics[key] = prior[key]
+            metrics["prior_stage_metrics_available"] = "documents" in metrics
     for stage, train_key, eval_key in (("documents", "documents-train", "documents-validation"), ("sft", "train", "validation")):
+        if args.resume_stage == "sft" and stage == "documents":
+            continue
         training = TrainingArguments(output_dir=str(args.output / stage), per_device_train_batch_size=1,
             per_device_eval_batch_size=1, gradient_accumulation_steps=16, learning_rate=5e-5,
             num_train_epochs=args.epochs, max_steps=args.max_steps, bf16=True, gradient_checkpointing=True,
@@ -134,9 +174,15 @@ def main():
             remove_unused_columns=False, report_to="none", seed=42)
         trainer = Trainer(model=model, args=training, train_dataset=sets[train_key],
                           eval_dataset=sets[eval_key], data_collator=collate, callbacks=[PersistCheckpoint()])
-        metrics[stage] = trainer.train().metrics
+        resume = str(args.resume_checkpoint) if stage == args.resume_stage else None
+        metrics[stage] = trainer.train(resume_from_checkpoint=resume).metrics
         metrics[stage + "_eval"] = trainer.evaluate()
         trainer.save_model(str(args.output / "adapter"))
+        (args.output / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
+        if args.hub_repo:
+            from huggingface_hub import HfApi
+            HfApi().upload_folder(repo_id=args.hub_repo, folder_path=str(args.output),
+                                 commit_message=f"Persist completed {stage} stage and metrics")
     metrics["test"] = trainer.evaluate(eval_dataset=sets["test"], metric_key_prefix="test")
     processor.save_pretrained(args.output / "adapter")
     (args.output / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")

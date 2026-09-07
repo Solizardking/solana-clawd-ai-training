@@ -6,6 +6,12 @@ services:
       target: model
     gpus: all
     restart: unless-stopped
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --max-time, '5', 'http://127.0.0.1:8091/health']
+      interval: 15s
+      timeout: 6s
+      retries: 4
+      start_period: 5m
     volumes:
       - ../../outputs/chart-agent/models:/models:ro
     command:
@@ -37,7 +43,14 @@ services:
       target: api
     restart: unless-stopped
     depends_on:
-      - model
+      model:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 4
+      start_period: 1m
     ports:
       - '127.0.0.1:8090:8090'
     environment:
@@ -59,7 +72,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [api]
+    depends_on:
+      api:
+        condition: service_healthy
 volumes:
   caddy_data:
   caddy_config:

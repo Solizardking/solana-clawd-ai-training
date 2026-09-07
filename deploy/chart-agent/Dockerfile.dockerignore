@@ -1,0 +1,12 @@
+# Only application sources enter the build context. Runtime assets are mounted.
+**
+!chart_agent/
+!chart_agent/*.py
+!chart_agent/index.html
+!chart_agent/requirements.txt
+!docs/
+!docs/solgpt-chart-tool-catalog.md
+!deploy/
+!deploy/chart-agent/
+!deploy/chart-agent/Dockerfile
+!deploy/chart-agent/Dockerfile.dockerignore

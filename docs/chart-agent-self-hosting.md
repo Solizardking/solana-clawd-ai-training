@@ -249,6 +249,32 @@ records from the prepared **test** JSONL and download those image paths with
 
 ## Self-host on a GPU server
 
+### Recover interrupted training
+
+`scripts/train_chart_foundation.py` accepts an explicit `--resume-stage` and
+`--resume-checkpoint`. It checks the original data manifest and requires the
+adapter, Trainer state, optimizer, scheduler, and RNG files. Keep a pinned private
+Hub snapshot of the source run, including `data-manifest.json` and the complete
+`documents/checkpoint-N` or `sft/checkpoint-N` directory. Only load trusted training
+checkpoints. Use the same pinned environment, data, epoch count and step budget as
+the original run, with a fresh output directory:
+
+```sh
+python scripts/train_chart_foundation.py --data /data/chart-foundation \
+  --output /output/resumed-chart-foundation \
+  --resume-stage sft --resume-checkpoint /snapshots/prior/sft/checkpoint-100
+```
+
+This passes the checkpoint to `Trainer.train(resume_from_checkpoint=...)` and
+skips the document stage when resuming SFT. It preserves available prior-stage
+metrics and explicitly records when they are unavailable. Future runs also save
+and upload metrics immediately after each completed stage. Three CPU validation
+tests cover matching inputs, changed inputs, missing optimizer state, and a wrong
+stage. An actual CUDA resume has **not** been exercised yet. These local changes
+do not modify the already-running job's pinned script or its 12-hour timeout.
+
+### Serve inference
+
 `deploy/chart-agent/compose.yaml` separates a pinned llama.cpp CUDA build from the
 Python API and optional Caddy HTTPS service. Its Compose configuration validates;
 the Linux CUDA image has **not** been built or deployed in this Mac session.

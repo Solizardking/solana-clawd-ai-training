@@ -5,7 +5,7 @@ RUN git init /src && cd /src && git remote add origin https://github.com/ggml-or
 RUN cmake -S /src -B /src/build -G Ninja -DGGML_CUDA=ON -DLLAMA_CURL=ON -DCMAKE_CUDA_ARCHITECTURES="80;86;89;90" -DCMAKE_BUILD_TYPE=Release && cmake --build /src/build --target llama-server -j 4
 
 FROM nvidia/cuda:12.8.1-runtime-ubuntu24.04 AS model
-RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 libcurl4t64 libssl3t64 ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 libcurl4t64 libssl3t64 ca-certificates curl && rm -rf /var/lib/apt/lists/*
 COPY --from=llama-build /src/build/bin/ /opt/llama/
 ENV LD_LIBRARY_PATH=/opt/llama
 USER 10001:10001
