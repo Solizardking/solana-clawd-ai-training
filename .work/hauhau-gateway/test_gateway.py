@@ -35,8 +35,10 @@ class GatewayTests(unittest.TestCase):
         for key,value in [('inputMint',USDC),('inAmount','999'),('executionMode','async'),('otherAmountThreshold','0'),('prioritizationFeeLamports',5000001)]:
             with self.assertRaises(ValueError):g.validate_response({**o,key:value},p)
     def test_token_decimals_are_authoritative_and_cached(self):
-        g.TOKEN_TIME=0;g.TOKENS={}
-        with patch.object(g,'dflow',return_value=[[SOL,9],[USDC,6],['garbage',3]]) as api:
+        g.TOKENS={}
+        mint='8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump'
+        with patch.object(g,'upstream_json',return_value={'result':{'value':{'decimals':6}}}) as api:
             self.assertEqual(g.decimals(SOL),9);self.assertEqual(g.decimals(USDC),6)
+            self.assertEqual(g.decimals(mint),6);self.assertEqual(g.decimals(mint),6)
             api.assert_called_once()
 if __name__=='__main__':unittest.main()

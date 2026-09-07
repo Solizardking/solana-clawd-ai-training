@@ -16,8 +16,15 @@
 from .agent_vocab import SolanaAgentTokenizer
 from .clawd_ws import parse_pump_frame
 from .corpus import iter_secret_free_corpus
-from .solana_tokenizer import SolanaTokenizerPipeline, tx_to_text
 from .trading_tokens import PUMP_MCP_TOOLS, SOL_GPT_TOOLS, all_trading_tool_tokens
+
+
+def __getattr__(name):
+    # Live websocket tools must work without the dataframe training stack.
+    if name in {"SolanaTokenizerPipeline", "tx_to_text"}:
+        from . import solana_tokenizer
+        return getattr(solana_tokenizer, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 try:
     from .financial_tokenizer import FinancialTabularTokenizer

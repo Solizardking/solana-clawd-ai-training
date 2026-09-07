@@ -1,0 +1,8 @@
+*
+!Dockerfile
+!entrypoint.sh
+!gateway.py
+!fly.toml
+!www
+!www/**
+**/.DS_Store

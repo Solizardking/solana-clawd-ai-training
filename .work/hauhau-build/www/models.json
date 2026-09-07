@@ -1,0 +1,30 @@
+{
+  "models": [
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b-GGUF:Q4_K_M",
+      "repo": "solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+      "revision": "03954ae95d9d5d5ad86ed7679afb5f120988ec2e",
+      "file": "solana-trading-factory-8b-Q4_K_M.gguf",
+      "bytes": 4920740064,
+      "format": "GGUF"
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b-GGUF:Q5_K_M",
+      "repo": "solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+      "revision": "03954ae95d9d5d5ad86ed7679afb5f120988ec2e",
+      "file": "solana-trading-factory-8b-Q5_K_M.gguf",
+      "bytes": 5732993248,
+      "format": "GGUF"
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b",
+      "format": "merged safetensors",
+      "revision": "b5e5cbe55ab5b9e3dc1da3588af3f268990d12ca"
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b-lora",
+      "format": "LoRA adapter",
+      "revision": "c95979196cefb86e9ee0621154e8acace7341e10"
+    }
+  ]
+}
