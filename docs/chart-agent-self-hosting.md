@@ -33,7 +33,7 @@ The complete app/tool checks are in `outputs/chart-agent/final-smoke-output.json
 and `outputs/chart-agent/final-tool-smoke.json`. The latter verifies the UTC date
 fix: an earlier model answer had incorrectly converted an epoch timestamp to May.
 The server now supplies ISO timestamps and the regression check requires verbatim
-copying. Fifteen focused pipeline tests pass. Full app latency is higher than the
+copying. Twenty-nine focused pipeline tests pass. Full app latency is higher than the
 short vision smoke, especially with research context or machine contention.
 
 The served GGUF remains the upstream model; retrieval does not update its weights.
@@ -328,6 +328,37 @@ candles, and mark stale data. Public providers can rate-limit; errors remain vis
 `POST /tokenize` with `{"text":"<Solana text>"}` uses the running GGUF tokenizer,
 returns token IDs/count, and checks exact detokenization. It does not modify the
 vocabulary, addresses, or model embeddings.
+
+### Exact token amounts
+
+An independent 12-case base-model benchmark checked large unsigned integer
+amounts, decimal scaling, tiny amounts, raw balance differences, and exact mint
+preservation. The base model scored 10/12; all 12 tokenizer roundtrips were exact.
+It misplaced the decimal point for two raw-to-decimal conversions, including
+`18446744073709551615` with six decimals. Correct tokenization alone therefore
+does not guarantee correct arithmetic. Evidence is in
+`outputs/chart-agent/solana-amounts-base.json`.
+
+The native `convert_token_amount` tool performs integer/string conversion and
+returns raw and decimal amounts as strings. It rejects floating-point inputs,
+scientific notation, unsigned-64-bit overflow, and nonzero fractional base units.
+It uses supplied mint decimals and does not apply Token-2022 extension-specific
+display adjustments. The system instruction requires this tool for conversions;
+the original vocabulary and weights remain unchanged. Fourteen amount tests
+cover roundtrips and invalid inputs.
+Both previously failing conversions subsequently passed through authenticated
+`/analyze`: the model called `convert_token_amount` and returned the exact expected
+string in both cases. The tool traces and answers are recorded in
+`outputs/chart-agent/solana-amounts-tool-regression.json`. This verifies these
+regressions, not universal adherence to tool use for every future prompt.
+
+```sh
+.venv-charts/bin/python scripts/eval_solana_amounts.py \
+  --output outputs/chart-agent/solana-amounts-base.json
+```
+
+The benchmark refuses a base run when a LoRA has a nonzero global scale. Use a
+different output path and explicit `--lora-id` for a trained-adapter comparison.
 
 ## Checks
 
