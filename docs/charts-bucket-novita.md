@@ -204,3 +204,18 @@ inside that disposable Job container (`PIP_BREAK_SYSTEM_PACKAGES=1`). Retry:
 https://huggingface.co/jobs/ordlibrary/6a9f3582e686246ca69a959e.
 Local validation with the actual pinned processor succeeded on a packaged chart:
 `Qwen3VLProcessor` produced 198 input tokens and a valid image tensor/grid.
+
+The retry completed successfully (return code 0): both stages performed a
+parameter update, held-out evaluation ran, and the smoke adapter was verified
+on the Hub. Smoke losses are only compatibility evidence, not full-model scores.
+
+The full-data run is now submitted:
+https://huggingface.co/jobs/ordlibrary/6a9f3645259f8e97255ecdd8.
+It uses input revision `6456947cf89cbb5d1a4c0c120199a5038532bfc6`, one epoch per
+stage, a 12-hour timeout, and private output
+`ordlibrary/clawd-chart-foundation-27b-lora`. Full validation runs every 500 steps
+and at stage ends; checkpoint uploads remain every 100 steps. On successful
+completion the launcher also places adapter files at the model repository root
+for normal PEFT loading. Check `run-status.json` and `metrics.json` before treating
+that repository as a completed training result. Notebook generation does not
+update already-saved Colab Drive copies.
