@@ -95,6 +95,43 @@ def test_tape_disconnected_is_stale():
     assert len(tape.events) == 200
 
 
+def test_candles_reject_bad_time_and_detect_body_engulfing():
+    from chart_agent.candles import candle_features
+    candles = [[100, 12, 13, 9, 10, 1000], [160, 9, 14, 8, 13, 2000]]
+    features = candle_features(candles)
+    assert features['shapes'][-1]['shape'] == 'bullish_body_engulfing'
+    assert features['sma20'] is None
+    for invalid in [candles[::-1], [[100, 12, 11, 9, 10, 100], candles[1]], [[100, 12, 13, 9, float('nan'), 100], candles[1]]]:
+        with pytest.raises(ValueError):
+            candle_features(invalid)
+
+
+def test_examples_never_index_test_split(tmp_path):
+    from chart_agent.examples import index_examples, retrieve
+    rows = [{'split': split, 'lane': 'chart_reasoning', 'source': 'fixture', 'group': split,
+             'messages': [{'role': 'user', 'content': split + ' chart'}, {'role': 'assistant', 'content': split + ' answer'}]}
+            for split in ['train', 'test', 'validation']]
+    data = tmp_path / 'data.jsonl'
+    data.write_text('\n'.join(json.dumps(r) for r in rows))
+    db = tmp_path / 'examples.sqlite'
+    assert index_examples(data, db) == 1
+    assert retrieve(db, 'chart')[0]['answer'] == 'train answer'
+
+
+def test_credentials_only_select_requested_keys(tmp_path, monkeypatch):
+    from chart_agent.credentials import load_solgpt_env
+    monkeypatch.delenv('SOLGPT_API_KEY', raising=False)
+    monkeypatch.delenv('UNRELATED_SECRET', raising=False)
+    monkeypatch.setenv('SOLGPT_MCP_URL', 'https://existing.example/mcp')
+    path = tmp_path / '.env'
+    path.write_text('SOLGPT_API_KEY="fixture"\nUNRELATED_SECRET=ignored\nSOLGPT_MCP_URL=https://override.example/mcp')
+    load_solgpt_env(path)
+    import os
+    assert os.environ['SOLGPT_API_KEY'] == 'fixture'
+    assert 'UNRELATED_SECRET' not in os.environ
+    assert os.environ['SOLGPT_MCP_URL'] == 'https://existing.example/mcp'
+
+
 def test_bridge_requires_real_connection(monkeypatch):
     monkeypatch.delenv('SOLGPT_MCP_TOKEN', raising=False)
     monkeypatch.delenv('SOLGPT_API_KEY', raising=False)
