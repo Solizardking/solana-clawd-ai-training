@@ -20,6 +20,8 @@ def main():
     p.add_argument("--epochs", type=float, default=1.0)
     p.add_argument("--max-steps", type=int, default=-1, help="Per-stage step cap; -1 uses complete epochs")
     p.add_argument("--preflight", action="store_true")
+    p.add_argument("--smoke", action="store_true", help="One optimizer step per stage on a small mixed image/text subset")
+    p.add_argument("--hub-repo", help="Persist checkpoints to an existing private model repository")
     args = p.parse_args()
     manifest = json.loads((args.data / "manifest.json").read_text())
     sets = {name: read_rows(args.data / f"{name}.jsonl") for name in
@@ -38,11 +40,17 @@ def main():
     print(json.dumps({"base": BASE, "revision": REVISION, "counts": manifest["counts"]}, indent=2))
     if args.preflight:
         return
+    if args.smoke:
+        for name, rows in sets.items():
+            images = [r for r in rows if r.get("images")]
+            text = [r for r in rows if not r.get("images")]
+            sets[name] = images[:2] + text[:2]
+        args.max_steps = 1
 
     import torch
     from PIL import Image
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-    from transformers import AutoProcessor, BitsAndBytesConfig, Qwen3_5ForConditionalGeneration, Trainer, TrainingArguments, set_seed
+    from transformers import AutoProcessor, BitsAndBytesConfig, Qwen3_5ForConditionalGeneration, Trainer, TrainerCallback, TrainingArguments, set_seed
 
     if not torch.cuda.is_available() or torch.cuda.get_device_properties(0).total_memory < 39 * 1024**3:
         raise RuntimeError("This 27B QLoRA recipe requires a CUDA GPU with at least 40 GB VRAM. Select A100 or larger.")
@@ -106,7 +114,17 @@ def main():
         return batch
 
     args.output.mkdir(parents=True, exist_ok=True)
-    metrics = {"records_removed_for_length": filtered_counts, "max_steps_per_stage": args.max_steps}
+    processor.save_pretrained(args.output / "adapter")
+    (args.output / "data-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+
+    class PersistCheckpoint(TrainerCallback):
+        def on_save(self, training_args, state, control, **kwargs):
+            if args.hub_repo:
+                from huggingface_hub import HfApi
+                HfApi().upload_folder(repo_id=args.hub_repo, folder_path=str(args.output),
+                    commit_message=f"Persist {Path(training_args.output_dir).name} step {state.global_step}")
+
+    metrics = {"smoke_only": args.smoke, "records_removed_for_length": filtered_counts, "max_steps_per_stage": args.max_steps}
     for stage, train_key, eval_key in (("documents", "documents-train", "documents-validation"), ("sft", "train", "validation")):
         training = TrainingArguments(output_dir=str(args.output / stage), per_device_train_batch_size=1,
             per_device_eval_batch_size=1, gradient_accumulation_steps=16, learning_rate=5e-5,
@@ -115,7 +133,7 @@ def main():
             save_steps=100, save_total_limit=2, eval_strategy="steps", eval_steps=100,
             remove_unused_columns=False, report_to="none", seed=42)
         trainer = Trainer(model=model, args=training, train_dataset=sets[train_key],
-                          eval_dataset=sets[eval_key], data_collator=collate)
+                          eval_dataset=sets[eval_key], data_collator=collate, callbacks=[PersistCheckpoint()])
         metrics[stage] = trainer.train().metrics
         metrics[stage + "_eval"] = trainer.evaluate()
         trainer.save_model(str(args.output / "adapter"))
@@ -124,7 +142,8 @@ def main():
     (args.output / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     (args.output / "data-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     (args.output / "adapter/README.md").write_text(
-        f"---\nbase_model: {BASE}\nlicense: apache-2.0\n---\n# Clawd Chart Foundation 27B LoRA\n\n"
+        f"---\nbase_model: {BASE}\n---\n# Clawd Chart Foundation 27B LoRA\n\n"
+        f"Smoke-only run: {args.smoke}. Max steps per stage: {args.max_steps}.\n\n"
         "Two-stage document and chart/text adaptation. This is an adapter; load it with the pinned base checkpoint.\n\n"
         f"Base revision: `{REVISION}`. Training uses full-sequence loss with padding and image markers masked. "
         "Loss metrics do not establish trading profitability. See metrics.json and data-manifest.json for evidence.\n"

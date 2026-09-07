@@ -1,6 +1,7 @@
 """Public Solana OHLCV with explicit identity, timestamps and closed-bar features."""
 import math
 import time
+from datetime import datetime, timezone
 import httpx
 from .tools import validate_mint
 
@@ -73,4 +74,8 @@ async def token_candles(mint, timeframe='minute', aggregate=1):
     age = now - (closed[-1][0] + seconds)
     return {'source': 'geckoterminal', 'mint': mint, 'pool': pool, 'token_side': side, 'currency': 'USD',
             'fetched_at': now, 'timeframe': timeframe, 'aggregate': aggregate, 'last_close_age_seconds': age,
+            'latest_closed_candle': {'open_time_unix': closed[-1][0],
+                'open_time_utc': datetime.fromtimestamp(closed[-1][0], timezone.utc).isoformat(),
+                'close_time_utc': datetime.fromtimestamp(closed[-1][0] + seconds, timezone.utc).isoformat(),
+                'close_price_usd': closed[-1][4]},
             'stale': age > 2 * seconds, 'ohlcv': closed, 'features': features}

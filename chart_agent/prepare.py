@@ -17,6 +17,9 @@ def split_for(group):
 def prepare(bucket, output, metadata=None, data_dir=None):
     import pyarrow.parquet as pq
     bucket, output = Path(bucket), Path(output)
+    data_files = sorted((Path(data_dir) if data_dir else bucket / 'data').glob('*.parquet'))
+    if not data_files:
+        raise FileNotFoundError('No parquet shards found; download the data files before preparing')
     output.mkdir(parents=True, exist_ok=True)
     counts, rejected, sources = Counter(), Counter(), []
     seen = set()
@@ -33,7 +36,7 @@ def prepare(bucket, output, metadata=None, data_dir=None):
         counts[f'{lane}/{split}'] += 1
 
     try:
-        for path in sorted((Path(data_dir) if data_dir else bucket / 'data').glob('*.parquet')):
+        for path in data_files:
             table = pq.ParquetFile(path)
             with path.open('rb') as file:
                 digest = hashlib.file_digest(file, 'sha256').hexdigest()

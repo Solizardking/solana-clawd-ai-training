@@ -57,7 +57,11 @@ bash scripts/run_chart_agent.sh
 
 Open `http://127.0.0.1:8090`. The app launcher generates a private access key at
 `outputs/chart-agent/api-key` with mode 0600. Copy that file's value into the UI's
-password field and click Connect. The page keeps it in memory only. Stop each
+password field and click Connect. The page keeps it in memory only.
+Use “Consult research library and chart examples” when you want retrieved paper
+passages and training examples included in the initial prompt. The research tool
+is also available for follow-up lookup by the model.
+Stop each
 foreground server with Ctrl+C. Neither service is installed as a login/reboot daemon.
 The model server binds only to loopback and has no public port.
 
@@ -78,8 +82,13 @@ straight from the mount. The model downloader pins its revision and checks both
 SHA256 values against `configs/chart-agent-model.json`.
 
 ```sh
+.venv-connect/bin/python scripts/chart_bucket_download.py \
+  data/train-0000{0..6}-of-00007.parquet \
+  data/train-00000-of-00001-8a889f0a7c8838fe.parquet \
+  data/test-00000-of-00001-4a4c77e414c9480e.parquet
 .venv-charts/bin/python -m chart_agent.prepare \
   --metadata outputs/chart-agent/assets/metadata.csv \
+  --data-dir outputs/chart-agent/assets/data \
   --research \
   /Users/8bit/Downloads/arvix \
   /Users/8bit/Downloads/ChartDete-main/README.md \
