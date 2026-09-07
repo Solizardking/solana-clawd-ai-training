@@ -203,6 +203,8 @@ async def live():
 
 
 async def run_tool(name, args):
+    if name == 'convert_token_amount':
+        return convert_token_amount(args['amount'], args['decimals'], args['direction'])
     if name == 'get_token_candles':
         from .candles import token_candles
         return await token_candles(args['mint'], args.get('timeframe', 'minute'), args.get('aggregate', 1))
