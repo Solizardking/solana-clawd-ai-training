@@ -150,9 +150,12 @@ def test_api_auth_and_invalid_input(monkeypatch):
         async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test') as client:
             assert (await client.get('/health')).status_code == 200
             assert (await client.get('/live')).status_code == 401
+            assert (await client.post('/detect', json={'image_base64': 'invalid!'})).status_code == 401
             headers = {'Authorization': 'Bearer test-only-secret'}
             assert (await client.get('/live', headers=headers)).status_code == 200
             result = await client.post('/analyze', headers=headers, json={'question': 'chart', 'mint': 'bad'})
+            assert result.status_code == 422
+            result = await client.post('/detect', headers=headers, json={'image_base64': 'invalid!'})
             assert result.status_code == 422
             result = await client.post('/analyze', headers=headers, json={'question': 'chart', 'image_base64': 'invalid!'})
             assert result.status_code == 422

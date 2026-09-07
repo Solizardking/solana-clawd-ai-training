@@ -36,10 +36,44 @@ The server now supplies ISO timestamps and the regression check requires verbati
 copying. Twelve focused pipeline tests pass. Full app latency is higher than the
 short vision smoke, especially with research context or machine contention.
 
-**No fine-tuning has been performed by this setup.** The bucket supplies retrieved
-training examples and prepared SFT/evaluation records. GGUF inference and retrieval
-do not update model weights. The source's native tokenizer remains embedded in the
-GGUF; the existing Nemotron tokenizer is a different vocabulary and cannot replace it.
+The served GGUF remains the upstream model; retrieval does not update its weights.
+A separate A100 smoke run has now completed one optimizer step in each training
+stage. Its private 318,843,352-byte adapter and persisted metrics were verified at
+revision `d7a0e6f7148ee20f14c804e103d8a14bc14364de` of
+`ordlibrary/clawd-chart-foundation-27b-smoke`. It is a smoke artifact, not the final
+model, and has not replaced the served GGUF. Full training job
+`6a9f3645259f8e97255ecdd8` was verified RUNNING with a 12-hour timeout; follow its
+current record in `outputs/hf-chart-job.json`. See the separate training package
+and counts in [the training guide](charts-bucket-novita.md#hugging-face-gpu-jobs).
+The source's native tokenizer remains embedded in the GGUF; the existing Nemotron
+tokenizer is a different vocabulary and cannot replace it.
+
+## Chart-pattern detector
+
+The supplied ChartScanAI `custom_yolov8.pt` is now validated and converted to
+`outputs/chart-agent/assets/chart-pattern.onnx`. Its stored labels are `Buy` and
+`Sell`. The restricted PyTorch loader rejects unreviewed globals and never falls
+back to unrestricted pickle loading. The export passed ONNX validation and
+PyTorch/ONNX numerical comparison (rtol/atol 0.001; maximum absolute difference
+0.001053 across raw output values).
+
+The supplied AAPL and BTC example charts produced three and five boxes at the
+default 0.35 confidence threshold, with CPU inference around 0.12–0.19 seconds.
+These are execution examples, not a labeled holdout or profitable-trading test.
+The API returns this qualification with every pattern result.
+
+```sh
+uv venv .venv-detector
+uv pip install --python .venv-detector/bin/python ultralytics==8.3.223 onnx==1.19.1 onnxruntime==1.29.0
+.venv-detector/bin/python scripts/export_chart_pattern_detector.py --checkpoint /path/to/custom_yolov8.pt
+```
+
+Restart the chart API after exporting. It loads both the chart-element model and
+the separate pattern model. Override the latter with `CHART_PATTERN_DETECTOR`.
+The UI's **Detect patterns** button calls authenticated `POST /detect` directly,
+without waiting for LLM inference; normal `/analyze` also includes the pattern
+boxes. Verification artifacts are `chart-pattern.verification.json` beside the
+ONNX file and `outputs/chart-agent/{pattern-smoke,detection-api-smoke}.json`.
 
 ## Start locally
 

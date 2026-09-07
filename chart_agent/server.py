@@ -97,6 +97,36 @@ class TokenizeRequest(BaseModel):
     text: str = Field(min_length=1, max_length=6000)
 
 
+class DetectRequest(BaseModel):
+    image_base64: str = Field(min_length=1, max_length=8_000_000)
+
+
+async def detection_evidence(image):
+    result = {'bbox_image_size': list(image.size)}
+    if detector:
+        result['detections'] = await asyncio.to_thread(detector.detect, image)
+        result['detector_classes'] = detector.names
+    else:
+        result['detector_error'] = detector_error
+    if pattern_detector:
+        result['pattern_detector'] = {
+            'detections': await asyncio.to_thread(pattern_detector.detect, image),
+            'classes': pattern_detector.names, 'bbox_image_size': list(image.size),
+            'interpretation': 'Buy/Sell are model class labels, not validated trading instructions. No held-out accuracy or profitability has been established.'}
+    else:
+        result['pattern_detector_error'] = pattern_detector_error
+    return result
+
+
+@app.post('/detect', dependencies=[Depends(auth)])
+async def detect(body: DetectRequest):
+    try:
+        image = await asyncio.to_thread(decode_image, base64.b64decode(body.image_base64, validate=True))
+    except (ValueError, binascii.Error, OSError):
+        raise HTTPException(422, 'Invalid or oversized PNG/JPEG/WebP image')
+    return await detection_evidence(image)
+
+
 @app.post('/tokenize', dependencies=[Depends(auth)])
 async def tokenize(body: TokenizeRequest):
     try:
@@ -196,19 +226,7 @@ async def analyze_impl(body):
             image = await asyncio.to_thread(decode_image, raw)
         except (ValueError, binascii.Error, OSError):
             raise HTTPException(422, 'Invalid or oversized PNG/JPEG/WebP image')
-        if detector:
-            evidence['detections'] = await asyncio.to_thread(detector.detect, image)
-            evidence['detector_classes'] = detector.names
-            evidence['bbox_image_size'] = list(image.size)
-        else:
-            evidence['detector_error'] = detector_error
-        if pattern_detector:
-            evidence['pattern_detector'] = {
-                'detections': await asyncio.to_thread(pattern_detector.detect, image),
-                'classes': pattern_detector.names, 'bbox_image_size': list(image.size),
-                'interpretation': 'Buy/Sell are model class labels, not validated trading instructions. No held-out accuracy or profitability has been established.'}
-        else:
-            evidence['pattern_detector_error'] = pattern_detector_error
+        evidence.update(await detection_evidence(image))
         # Re-encode to strip metadata and bound the vision token cost.
         image.thumbnail((1400, 1400))
         buffer = io.BytesIO()
