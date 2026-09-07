@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Read the current chart training Job and its recent logs without exposing secrets."""
 import json
+import argparse
 from pathlib import Path
 from huggingface_hub import HfApi
 
-record = json.loads((Path(__file__).resolve().parents[1] / 'outputs/hf-chart-job.json').read_text())
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--record', type=Path, default=Path(__file__).resolve().parents[1] / 'outputs/hf-chart-job.json')
+args = p.parse_args()
+record = json.loads(args.record.read_text())
 api = HfApi()
 job = api.inspect_job(job_id=record['job_id'])
 print(record['job_url'])
