@@ -133,9 +133,11 @@ Saved Colab notebooks:
 Local copies live in `notebooks/davidau_qwen_gguf_vision.ipynb` and
 `notebooks/clawd_chart_foundation_27b_train.ipynb`. Regenerate them with
 `.venv-connect/bin/python scripts/make_chart_colab_notebooks.py` after changing
-the embedded runners. Notebook schemas and Python cells were validated locally;
-GPU inference and training are not yet verified. The inference notebook's CUDA
-build was started in Colab on September 7, 2026.
+the embedded runners. Notebook schemas and Python cells were validated locally.
+The Colab inference notebook's CUDA build was started on September 7, 2026;
+that notebook's completion remains unverified. Separately, local Metal vision
+inference and the Hugging Face A100 training smoke have passed; see below and
+the [current serving runbook](chart-agent-self-hosting.md).
 
 The prepared upload is `outputs/chart-foundation-data.zip` (118,301,880 bytes),
 SHA256 `3e389d917a4cecac5c9994dcfa68434c55cff7a21db04cb44803849a9e3f24df`.
@@ -166,8 +168,10 @@ The training notebook requests a CUDA GPU with at least 40 GB VRAM, uploads this
 zip, then performs document adaptation followed by chart/text QLoRA training.
 It saves an adapter, processor, source manifest, and held-out loss metrics; it
 does not publish automatically. The available Colab account currently exposes
-T4 but has larger GPU options disabled. No new model weights have been trained.
-Novita execution also remains unavailable until `NOVITA_API_KEY` is configured.
+T4 but has larger GPU options disabled. Training subsequently moved to Hugging
+Face Jobs: its smoke adapter completed and its full job is running, as detailed
+below. Novita execution remains unverified without a configured
+`NOVITA_API_KEY`; the sandbox recipe alone is not GPU hosting.
 
 ## Hugging Face GPU Jobs
 
@@ -209,7 +213,7 @@ The retry completed successfully (return code 0): both stages performed a
 parameter update, held-out evaluation ran, and the smoke adapter was verified
 on the Hub. Smoke losses are only compatibility evidence, not full-model scores.
 
-The full-data run is now submitted:
+The full-data run was submitted and has been observed executing optimizer steps:
 https://huggingface.co/jobs/ordlibrary/6a9f3645259f8e97255ecdd8.
 It uses input revision `6456947cf89cbb5d1a4c0c120199a5038532bfc6`, one epoch per
 stage, a 12-hour timeout, and private output
@@ -219,3 +223,15 @@ completion the launcher also places adapter files at the model repository root
 for normal PEFT loading. Check `run-status.json` and `metrics.json` before treating
 that repository as a completed training result. Notebook generation does not
 update already-saved Colab Drive copies.
+
+Do not run the full-launch command again while this job is active. Read its
+immutable record explicitly to avoid confusing later smoke or retry jobs:
+
+```sh
+.venv-connect/bin/python scripts/hf_chart_job_status.py \
+  --record outputs/hf-chart-full-job-6a9f3645259f8e97255ecdd8.json
+```
+
+The separate 18-class ChartDete detector is training locally on Apple MPS;
+its dataset and metrics are documented in the serving runbook. It does not
+change the input package or checkpoint schedule of this pinned LLM job.
