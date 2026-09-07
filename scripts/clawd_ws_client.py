@@ -35,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--frames", type=int, default=2)
     parser.add_argument("--tokenizer", type=Path, default=DEFAULT_TOKENIZER)
     parser.add_argument("--health-only", action="store_true")
+    parser.add_argument("--no-tokenizer", action="store_true", help="Inspect live frames without loading a local tokenizer")
     return parser
 
 
@@ -51,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     frames = recv_pump_frames(args.ws_url, timeout=args.timeout, max_frames=args.frames)
     tokenizer = None
-    if args.tokenizer.exists():
+    if not args.no_tokenizer and args.tokenizer.exists():
         tokenizer = load_nemotron_tokenizer(str(args.tokenizer))
     for frame in frames:
         text = frame_to_text(frame)

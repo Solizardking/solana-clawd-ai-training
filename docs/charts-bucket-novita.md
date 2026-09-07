@@ -80,3 +80,31 @@ model is a separate detector. Neither detector has been run by this setup.
 The bundle stays local until the explicit `--bundle` smoke command uploads it to
 Novita. That command verifies transport and cleanup, not detector or LLM inference.
 Research PDFs are inputs with provenance, not automatically labeled training data.
+
+## Custom detector, Solarchive, and live tape
+
+`prepare_chart_research.py` now records the supplied ChartScanAI
+`weights/custom_yolov8.pt` with its SHA256 and size. Override its location with
+`--weights /path/to/custom_yolov8.pt`. The checkpoint remains outside Git and is
+not embedded in the text bundle. ChartScanAI documents Buy/Sell classes; that
+description has not yet been verified by loading the weights.
+
+Connect the historical and live inputs:
+
+```sh
+python scripts/prepare_chart_research.py
+python scripts/chart_sources.py
+python scripts/clawd_ws_client.py --no-tokenizer --frames 2 --timeout 15
+```
+
+The source collector downloads a small October 2020 token-metadata sample from
+`solarchive/solarchive` at a resolved revision, validates its published SHA256,
+size and Parquet markers, and saves two live frames from
+`wss://clawd-ws.fly.dev/ws`. Outputs go under `outputs/chart-research/`.
+The historical sample is explicitly dated; it is not current market data.
+Attribution: Data from SolArchive.org, CC BY 4.0.
+
+The live token index uses **monthly** partitions, despite the dataset card's
+daily examples. This connector follows the actual index. Full-dataset ingestion,
+chart/time-series joins, detector inference and model retraining are separate
+steps; running this collector does not claim those steps are complete.

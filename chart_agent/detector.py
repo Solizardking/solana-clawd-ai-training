@@ -40,14 +40,16 @@ class Detector:
         options.intra_op_num_threads = 2
         self.session = ort.InferenceSession(str(path), sess_options=options, providers=['CPUExecutionProvider'])
         self.input = self.session.get_inputs()[0]
-        self.names = ast.literal_eval(self.session.get_modelmeta().custom_metadata_map['names'])
+        metadata = self.session.get_modelmeta().custom_metadata_map
+        self.names = ast.literal_eval(metadata['names'])
         if isinstance(self.names, list):
             self.names = dict(enumerate(self.names))
         self.names = {int(k): str(v) for k, v in self.names.items()}
         shape = self.input.shape
-        if len(shape) != 4 or shape[1] != 3 or not all(isinstance(v, int) for v in shape[2:]):
-            raise ValueError('Expected static NCHW RGB YOLO input')
-        self.height, self.width = shape[2:]
+        if len(shape) != 4 or shape[1] != 3:
+            raise ValueError('Expected NCHW RGB YOLO input')
+        self.height, self.width = (shape[2:] if all(isinstance(v, int) for v in shape[2:])
+                                   else ast.literal_eval(metadata['imgsz']))
 
     def detect(self, image, confidence=0.35):
         w, h = image.size

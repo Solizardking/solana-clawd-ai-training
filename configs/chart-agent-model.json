@@ -1,0 +1,12 @@
+{
+  "repo": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
+  "revision": "a51791d22b62b03aa5132feaac27147f32f289f7",
+  "files": [
+    {"name": "Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-Q4_K_M.gguf", "size": 18047253088, "sha256": "cf35a030cca2c9e1c55f05d697e8b9aff4885d5f65f0d0a502d2432d3d56edb2"},
+    {"name": "mmproj-F16.gguf", "size": 927606976, "sha256": "82e620db8cb83267e9775e5aad3e8d8aa5af7ace825e94c52d3d730eb35af88a"}
+  ],
+  "context": 8192,
+  "alias": "clawd-chart-fable",
+  "tokenizer": "Use the tokenizer and chat template embedded in this GGUF. Nemotron tokenizer IDs are incompatible.",
+  "mtp": false
+}

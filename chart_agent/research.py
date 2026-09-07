@@ -29,7 +29,7 @@ def build_index(paths, target):
                 for start in range(0, len(text), 1800):
                     chunk = text[start:start + 2200]
                     if chunk.strip():
-                        db.execute('INSERT INTO research VALUES (?, ?, ?)', (file.name, page, chunk))
+                        db.execute('INSERT INTO research VALUES (?, ?, ?)', ('/'.join(file.parts[-2:]), page, chunk))
                         chunks += 1
             report.append(dict(source=file.name, sha256=digest, pages=len(pages), chunks=chunks))
     db.commit()
