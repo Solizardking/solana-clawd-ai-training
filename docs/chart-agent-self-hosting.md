@@ -209,6 +209,15 @@ without waiting for LLM inference; normal `/analyze` also includes the pattern
 boxes. Verification artifacts are `chart-pattern.verification.json` beside the
 ONNX file and `outputs/chart-agent/{pattern-smoke,detection-api-smoke}.json`.
 
+The browser now overlays detector boxes and confidence labels on the uploaded
+image, with independent pattern, price/title, and chart-element toggles. SVG
+coordinates follow the original image and its displayed aspect ratio. The AAPL
+example was visually checked with three real pattern detections; switching the
+pattern toggle removed all three boxes. Selecting another image clears the
+overlay, evidence and analysis. A request tied to an earlier image cannot replace
+the new image's results. JavaScript syntax and the upload/reset behavior were
+checked in the browser using a temporary localhost instance.
+
 ## Start locally
 
 Use a separate environment from training and Model Kit:
