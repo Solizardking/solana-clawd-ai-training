@@ -168,3 +168,32 @@ It saves an adapter, processor, source manifest, and held-out loss metrics; it
 does not publish automatically. The available Colab account currently exposes
 T4 but has larger GPU options disabled. No new model weights have been trained.
 Novita execution also remains unavailable until `NOVITA_API_KEY` is configured.
+
+## Hugging Face GPU Jobs
+
+Hugging Face is now the selected compute path. The authenticated `ordlibrary`
+account has Jobs access. The package and pinned training script were uploaded to
+private dataset `ordlibrary/clawd-chart-foundation-training` at revision
+`f58a57564417a9e3064776f0e1b0a1410691b2ef`.
+
+```sh
+# A100 80 GB, one-hour maximum; one optimizer step per stage, mixed image/text
+.venv-connect/bin/python scripts/hf_chart_training_job.py
+.venv-connect/bin/python scripts/hf_chart_job_status.py
+# After the smoke succeeds: full epochs, explicitly bounded runtime
+.venv-connect/bin/python scripts/hf_chart_training_job.py --full --timeout 12h
+```
+
+The launcher checks repository privacy, verifies the archive SHA256 remotely,
+pins the dataset commit, and passes the Hub token through Jobs secrets. Saved
+checkpoints and final status upload to a private model repository. Smoke artifacts
+use `ordlibrary/clawd-chart-foundation-27b-smoke`; full runs use
+`ordlibrary/clawd-chart-foundation-27b-lora`. A smoke adapter is not the finished
+model. Full runs save intermediate checkpoints every 100 steps; abrupt timeout
+can lose work since the most recent upload.
+
+Job records are saved locally in `outputs/hf-chart-job.json`. Initial smoke:
+https://huggingface.co/jobs/ordlibrary/6a9f34df259f8e97255ecd82.
+The documented A100 price at setup is $2.50/hour; one hour caps the initial
+compute at approximately $2.50 and a 12-hour job at approximately $30, excluding
+any storage fees. No full run is implied by staging or scheduling a smoke job.
