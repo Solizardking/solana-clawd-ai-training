@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault('YOLO_CONFIG_DIR', str(ROOT / 'outputs/chart-agent/yolo-config'))
 os.environ.setdefault('MPLCONFIGDIR', str(ROOT / 'outputs/chart-agent/matplotlib'))
+Path(os.environ['YOLO_CONFIG_DIR']).mkdir(parents=True, exist_ok=True)
 
 # Explicitly reviewed constructors present in the supplied checkpoint. Unknown
 # pickle globals are rejected; never switch to weights_only=False on failure.

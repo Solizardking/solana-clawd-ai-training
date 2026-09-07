@@ -49,6 +49,8 @@ if os.environ['SMOKE'] == '1': cmd.append('--smoke')
 result = subprocess.run(cmd)
 (out/'run-status.json').write_text(json.dumps({'returncode': result.returncode, 'smoke_only': os.environ['SMOKE']=='1', 'data_revision':os.environ['DATA_REVISION']}))
 HfApi().upload_folder(repo_id=os.environ['MODEL_REPO'], folder_path=str(out), commit_message='Save training job artifacts and status')
+if result.returncode == 0:
+    HfApi().upload_folder(repo_id=os.environ['MODEL_REPO'], folder_path=str(out/'adapter'), commit_message='Make completed adapter loadable from repository root')
 sys.exit(result.returncode)
 '''
     bootstrap = "import subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','transformers==5.16.1','peft==0.20.0','accelerate==1.14.0','bitsandbytes>=0.46,<1','pillow==12.3.0','huggingface_hub==1.30.0'],check=True); exec(" + repr(runner) + ")"
@@ -61,6 +63,7 @@ sys.exit(result.returncode)
     record = {'job_id':job.id, 'job_url':f'https://huggingface.co/jobs/{owner}/{job.id}', 'data_repo':data_repo,
               'data_revision':commit.oid,'model_repo':model_repo,'timeout':args.timeout,'smoke_only':not args.full}
     (ROOT / 'outputs/hf-chart-job.json').write_text(json.dumps(record,indent=2)+'\n')
+    (ROOT / f'outputs/hf-chart-job-{job.id}.json').write_text(json.dumps(record,indent=2)+'\n')
     print(json.dumps(record,indent=2))
 
 if __name__ == '__main__':

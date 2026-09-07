@@ -130,7 +130,7 @@ def main():
             per_device_eval_batch_size=1, gradient_accumulation_steps=16, learning_rate=5e-5,
             num_train_epochs=args.epochs, max_steps=args.max_steps, bf16=True, gradient_checkpointing=True,
             gradient_checkpointing_kwargs={"use_reentrant": False}, optim="adamw_torch", logging_steps=10,
-            save_steps=100, save_total_limit=2, eval_strategy="steps", eval_steps=100,
+            save_steps=100, save_total_limit=2, eval_strategy="steps", eval_steps=500,
             remove_unused_columns=False, report_to="none", seed=42)
         trainer = Trainer(model=model, args=training, train_dataset=sets[train_key],
                           eval_dataset=sets[eval_key], data_collator=collate, callbacks=[PersistCheckpoint()])

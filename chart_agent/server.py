@@ -44,13 +44,15 @@ tape, bridge = Tape(), SolGptBridge()
 inference_lock = asyncio.Lock()
 detector = None
 detector_error = 'not_loaded'
+pattern_detector = None
+pattern_detector_error = 'not_loaded'
 research_path = os.getenv('CHART_RESEARCH_DB', str(ROOT / 'outputs/chart-agent/research.sqlite'))
 llama_url = os.getenv('LLAMA_URL', 'http://127.0.0.1:8091')
 
 
 @asynccontextmanager
 async def lifespan(app):
-    global detector, detector_error
+    global detector, detector_error, pattern_detector, pattern_detector_error
     if not os.getenv('CHART_API_KEY'):
         raise RuntimeError('CHART_API_KEY must be set before starting the server')
     try:
@@ -58,6 +60,15 @@ async def lifespan(app):
         detector_error = None
     except Exception as exc:
         detector_error = type(exc).__name__
+    pattern_path = Path(os.getenv('CHART_PATTERN_DETECTOR', str(ROOT / 'outputs/chart-agent/assets/chart-pattern.onnx')))
+    if pattern_path.is_file():
+        try:
+            pattern_detector = await asyncio.to_thread(Detector, pattern_path)
+            pattern_detector_error = None
+        except Exception as exc:
+            pattern_detector_error = type(exc).__name__
+    else:
+        pattern_detector_error = 'not_configured'
     task = asyncio.create_task(tape.run())
     yield
     task.cancel()
@@ -120,6 +131,8 @@ async def ready():
     except httpx.HTTPError:
         model_ready = False
     return dict(model_ready=model_ready, detector_ready=detector is not None, detector_error=detector_error,
+                pattern_detector_ready=pattern_detector is not None, pattern_detector_error=pattern_detector_error,
+                pattern_detector_classes=pattern_detector.names if pattern_detector else {},
                 detector_classes=detector.names if detector else {}, research_ready=Path(research_path).is_file(),
                 solgpt_configured=bool(bridge.key), solgpt_connected_tools=len(bridge.available), tape=tape.snapshot())
 
@@ -189,6 +202,13 @@ async def analyze_impl(body):
             evidence['bbox_image_size'] = list(image.size)
         else:
             evidence['detector_error'] = detector_error
+        if pattern_detector:
+            evidence['pattern_detector'] = {
+                'detections': await asyncio.to_thread(pattern_detector.detect, image),
+                'classes': pattern_detector.names, 'bbox_image_size': list(image.size),
+                'interpretation': 'Buy/Sell are model class labels, not validated trading instructions. No held-out accuracy or profitability has been established.'}
+        else:
+            evidence['pattern_detector_error'] = pattern_detector_error
         # Re-encode to strip metadata and bound the vision token cost.
         image.thumbnail((1400, 1400))
         buffer = io.BytesIO()
