@@ -33,7 +33,7 @@ class Tape:
                             event = json.loads(raw)
                         except (ValueError, TypeError):
                             continue
-                        if not isinstance(event, dict) or event.get('type') not in {'token-launch', 'trade', 'pump', 'pump-trade', 'new-token', 'token-trade'}:
+                        if not isinstance(event, dict) or event.get('type') not in {'token-launch', 'token-enriched', 'trade', 'pump', 'pump-trade', 'new-token', 'token-trade'}:
                             continue
                         self.last_received = time.time()
                         self.events.append({'received_at': self.last_received, 'event': event})
