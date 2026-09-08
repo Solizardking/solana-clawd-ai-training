@@ -1,3 +1,4 @@
+import pytest
 import asyncio
 import base64
 import io
@@ -6,9 +7,10 @@ import httpx
 from PIL import Image
 
 
-def test_nemotron_receives_evidence_without_image_and_uses_private_backend_key(monkeypatch):
+@pytest.mark.parametrize('backend', ['nemotron', 'spark'])
+def test_nemotron_receives_evidence_without_image_and_uses_private_backend_key(monkeypatch, backend):
     import chart_agent.server as server
-    monkeypatch.setattr(server, 'model_backend', 'nemotron')
+    monkeypatch.setattr(server, 'model_backend', backend)
     monkeypatch.setattr(server, 'model_name', 'clawd-nemotron')
     monkeypatch.setenv('CHART_MODEL_API_KEY', 'model-only-fixture')
     seen = []

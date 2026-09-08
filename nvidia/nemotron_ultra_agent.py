@@ -17,9 +17,9 @@ Architecture:
                 └─ SFT logger (trains the 1.5B student)
 
 Endpoint routing (first available wins):
-  1. HF_TOKEN → huggingface.co serverless inference
-  2. NVIDIA_API_KEY → NVIDIA NIM (integrate.api.nvidia.com/v1)
-  3. CLAWD_INFERENCE_URL → self-hosted (vLLM / TGI / Ollama)
+  1. CLAWD_INFERENCE_URL + CLAWD_MODEL → explicitly selected self-hosted model
+  2. HF_TOKEN → huggingface.co serverless inference
+  3. NVIDIA_API_KEY → NVIDIA NIM (integrate.api.nvidia.com/v1)
   4. ClawdRouter free tier → clawd-box-router.fly.dev/v1
 
 Usage:
@@ -45,6 +45,7 @@ import argparse
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -89,15 +90,16 @@ class Endpoint:
 
 def resolve_endpoint(prefer_ultra: bool = True) -> Endpoint:
     """Return the best available inference endpoint."""
+    if url := os.environ.get("CLAWD_INFERENCE_URL"):
+        key = os.environ.get("CLAWD_API_KEY", "none")
+        model = os.environ.get("CLAWD_MODEL", "solana-clawd-1.5b")
+        return Endpoint(url.rstrip("/"), key, model, "clawd-self-hosted")
     if hf := os.environ.get("HF_TOKEN"):
         model = MODEL_HF if prefer_ultra else "Qwen/Qwen2.5-7B-Instruct"
         return Endpoint(HF_INFERENCE_BASE, hf, model, "hf-serverless")
     if nv := os.environ.get("NVIDIA_API_KEY"):
         model = MODEL_NIM if prefer_ultra else MODEL_FALLBACK
         return Endpoint(NIM_BASE, nv, model, "nvidia-nim")
-    if url := os.environ.get("CLAWD_INFERENCE_URL"):
-        key = os.environ.get("CLAWD_API_KEY", "none")
-        return Endpoint(url, key, "solana-clawd-1.5b", "clawd-local")
     router_key = os.environ.get("CLAWD_ROUTER_KEY", "clawd_free_default")
     return Endpoint(CLAWD_ROUTER, router_key, "solana-clawd-1.5b", "clawd-router")
 
@@ -223,7 +225,18 @@ def gather_market_context(market: str) -> dict:
     sol_price = _perps_tool("get_sol_price")
     funding = _perps_tool("get_funding_rate", market=market)
 
+    chart_tape = {"available": False, "error": "chart_gateway_not_configured"}
+    if chart_url := os.environ.get("CLAWD_CHART_URL"):
+        import urllib.request
+        try:
+            request = urllib.request.Request(chart_url.rstrip("/") + "/live", headers={"Authorization": "Bearer " + os.environ.get("CLAWD_API_KEY", "")})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                chart_tape = json.load(response)
+            chart_tape["scope"] = "Token event feed; not a Phoenix perps quote or orderbook."
+        except Exception as exc:
+            chart_tape = {"available": False, "error": type(exc).__name__}
     return {
+        "chart_tape": chart_tape,
         "ticker": ticker.get("data", ticker),
         "ta_report": ta_report.get("data", ta_report),
         "orderbook_top5": orderbook.get("data", orderbook),
@@ -255,20 +268,16 @@ def run_signal_scan(market: str) -> dict:
 
 # ── Portfolio optimization ────────────────────────────────────────────────────
 
-def run_portfolio_opt(markets: list[str], budget: float = 1000.0) -> dict:
-    """Run Blueprint 2 Mean-CVaR optimization (best-effort)."""
+def run_portfolio_opt(markets: list[str], budget: float = 1000.0, prices: dict | None = None) -> dict:
+    """Optimize only supplied observed price histories; never fabricate market evidence."""
+    if not prices or any(m not in prices for m in markets):
+        return {"error": "observed_price_history_required", "available": False}
     try:
         sys.path.insert(0, str(_HERE / "blueprints" / "portfolio-optimization"))
         from scenarios import generate_scenarios, historical_returns
         from mean_cvar import optimize
         import numpy as np
 
-        np.random.seed(42)
-        base = {"SOL": 150, "BTC": 65000, "ETH": 3500}
-        prices = {
-            m: (base.get(m, 10.0) * np.cumprod(1 + np.random.normal(0.001, 0.04, 200))).tolist()
-            for m in markets
-        }
         rets, names = historical_returns(prices)
         sc = generate_scenarios(rets, names, n_scenarios=1000)
         result = optimize(sc.scenarios, sc.assets, cvar_alpha=0.95, max_cvar=0.12)
@@ -286,7 +295,9 @@ def run_portfolio_opt(markets: list[str], budget: float = 1000.0) -> dict:
 # ── System prompt ─────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """\
-You are the Nemotron Ultra 550B trading intelligence for the Solana Clawd sovereign agent.
+You are Clawd, an ecosystem-native Solana research assistant using the configured model.
+Never invent market observations. If data is missing or stale, return hold with the missing evidence in risk_flags.
+The canonical mint precision field is decimals, not decimal_precision.
 
 Your role:
 - ANALYZE Solana Phoenix perps markets using live data, technical signals, and quantitative research.
@@ -367,6 +378,9 @@ def _build_user_prompt(market: str, ctx: dict, signals: dict, port: dict) -> str
 ### Live Market Data
 {json.dumps(ctx.get("ticker", {}), indent=2)}
 
+### Chart Gateway Token Tape (not perps market data)
+{json.dumps(ctx.get("chart_tape", {}), indent=2)}
+
 ### Technical Analysis (1h)
 {json.dumps(ctx.get("ta_report", {}), indent=2)}
 
@@ -390,16 +404,19 @@ def execute_plan(plan: dict, gate: str) -> str:
     decision = plan.get("decision", "hold")
     cmd = plan.get("vulcan_command", "")
 
-    if decision == "refuse" or not cmd:
+    if decision not in ("enter", "exit") or not cmd:
         return f"[{gate}] refused/hold — no order"
 
     if gate == "observer":
         return f"[observer] plan: {cmd}"
 
     if gate == "paper":
-        if not cmd.startswith("vulcan paper"):
-            cmd = cmd.replace("vulcan trade", "vulcan paper").replace("market-buy", "buy").replace("market-sell", "sell")
-        parts = cmd.split()
+        try:
+            parts = shlex.split(cmd)
+        except ValueError:
+            return "[paper] rejected malformed command"
+        if len(parts) < 4 or parts[:2] != ["vulcan", "paper"] or parts[2] not in ("buy", "sell"):
+            return "[paper] rejected non-paper order command"
         result = _vulcan(parts[1:])
         if result.get("ok"):
             return f"[paper] OK: {result.get('data', {})}"
@@ -427,7 +444,7 @@ def _log_sft(tick: AgentTick, log_path: Path) -> None:
             {"role": "assistant", "content": assistant_content},
         ],
         "metadata": {
-            "source": "nemotron-ultra-550b",
+            "source": "clawd-configured-model",
             "model": tick.model,
             "market": tick.market,
             "timestamp": tick.timestamp,
@@ -564,7 +581,7 @@ Examples:
     endpoint = resolve_endpoint(prefer_ultra=not args.no_ultra)
     sft_log = Path(args.sft_log) if args.sft_log else None
 
-    print(f"Nemotron Ultra Trading Agent")
+    print("Clawd Trading Agent")
     print(f"  model    = {endpoint.model}")
     print(f"  endpoint = {endpoint.name} ({endpoint.base_url})")
     print(f"  gate     = {args.mode} — {TRUST_GATES[args.mode]}")

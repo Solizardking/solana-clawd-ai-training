@@ -6,8 +6,6 @@ from pathlib import Path
 
 
 def build_index(paths, target):
-    from pypdf import PdfReader
-
     target = Path(target)
     target.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(target)
@@ -22,6 +20,8 @@ def build_index(paths, target):
             if digest in seen:
                 continue
             seen.add(digest)
+            if file.suffix.lower() == '.pdf':
+                from pypdf import PdfReader
             pages = ([(i + 1, page.extract_text() or '') for i, page in enumerate(PdfReader(file).pages)]
                      if file.suffix.lower() == '.pdf' else [(1, file.read_text())])
             chunks = 0
