@@ -21,7 +21,7 @@ with httpx.Client(base_url=url,headers=headers,timeout=300) as client:
     assert '123.456789' in conversion['answer']
     image=ROOT/'outputs/chart-agent/assets/images/syn_bar_0005.png'
     encoded=base64.b64encode(image.read_bytes()).decode()
-    r=client.post('/analyze',json={'question':'Describe only the chart labels and values supported by OCR. State uncertainty. Do not invent a trading signal.','image_base64':encoded,'max_tokens':256});r.raise_for_status();chart=r.json()
+    r=client.post('/analyze',json={'question':'Describe only the chart labels and values supported by OCR. State uncertainty. Do not invent a trading signal.','image_base64':encoded,'max_tokens':512});r.raise_for_status();chart=r.json()
     assert chart['evidence']['ocr']['available'] and chart['evidence']['ocr']['words']
     report={'url':url,'ready':ready,'tokenizer':tokens,'conversion':conversion,'chart':chart,'authentication_checked':True}
     (ROOT/'outputs/spark-space-smoke.json').write_text(json.dumps(report,indent=2))

@@ -75,3 +75,11 @@ to HF, preserving the existing Orin inference service. The agent launcher is
 
 See [deployment instructions](../deploy/chart-agent/spark/README.md). Hosted
 readiness and end-to-end verification must pass before reporting the service live.
+
+Live deployment verification passed for authenticated inference, tokenizer
+roundtrip, actual conversion-tool execution in both directions, OCR, existing
+ONNX detectors, and a fresh live feed. The Orin observer used `clawd-spark` through
+its local gateway and held when perps data was unavailable. Serving fixes include
+`top_k=0` for sampled generation and explicit native tool-format guidance with
+deterministic chart-agent requests. A simulated JSON tool result is not accepted
+as evidence of tool execution in the deployment checks.

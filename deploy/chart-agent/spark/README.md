@@ -47,3 +47,20 @@ The trained ChartDete artifact is a separate opt-in upload requiring the pending
 specific authorization. Existing detector labels do not establish profitability.
 A10G-small HF hosting is billed while starting/running; configure a one-hour idle
 sleep and pause the Space when it is no longer needed.
+
+## Verified deployment
+
+The Space is running on A10G-small with 3600-second idle sleep. Live checks passed
+for authentication, native tokenizer roundtrips, actual amount-conversion tool
+execution, chart OCR, both existing detectors, and a connected, fresh token tape.
+The Orin gateway and its observer agent were also exercised against the hosted
+model. Vulcan is unavailable on the Orin, so the observer correctly reports
+missing perps market data and holds.
+
+The chart UI uses `CHART_API_KEY` from the local, ignored, mode-0600 file
+`outputs/spark-hosting-secrets.json`. The Orin launcher loads its private key
+from `~/.config/clawd-chart/gateway.env`; users do not need to copy HF tokens
+into browser fields.
+
+Evidence is in `outputs/spark-space-deployment.json`,
+`outputs/spark-space-smoke.json`, and `outputs/orin-spark-smoke.json`.
