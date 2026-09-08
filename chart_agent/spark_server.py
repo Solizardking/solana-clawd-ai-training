@@ -125,7 +125,7 @@ def generate(body):
         raise ValueError('Prompt and requested output exceed configured context capacity')
     with torch.inference_mode():
         output = model.generate(**inputs, max_new_tokens=body.max_tokens, do_sample=body.temperature>0,
-                                **({'temperature':body.temperature} if body.temperature>0 else {}), logits_to_keep=1, pad_token_id=tokenizer.pad_token_id)
+                                **({'temperature':body.temperature, 'top_k':0} if body.temperature>0 else {}), logits_to_keep=1, pad_token_id=tokenizer.pad_token_id)
     ids = output[0,count:].tolist()
     finish = 'stop' if ids and ids[-1] == tokenizer.eos_token_id else 'length'
     text = tokenizer.decode(ids, skip_special_tokens=True)
