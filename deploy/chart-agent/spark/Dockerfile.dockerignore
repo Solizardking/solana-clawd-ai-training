@@ -1,0 +1,17 @@
+**
+!chart_agent/
+!chart_agent/*.py
+!chart_agent/*.html
+!docs/
+!docs/solgpt-chart-tool-catalog.md
+!outputs/
+!outputs/chart-agent/
+!outputs/chart-agent/assets/
+!outputs/chart-agent/assets/weights/
+!outputs/chart-agent/assets/weights/best.onnx
+!outputs/chart-agent/assets/chart-pattern.onnx
+!outputs/chart-agent/research.sqlite
+!outputs/chart-agent/examples.sqlite
+!outputs/chart-agent/chartdete/
+!outputs/chart-agent/chartdete/chart-elements.onnx
+!outputs/chart-agent/chartdete/report.json

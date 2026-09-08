@@ -22,11 +22,14 @@ def main():
     for f in (ROOT/'chart_agent').iterdir():
         if f.suffix in ('.py','.html'):shutil.copy2(f,stage/'chart_agent'/f.name)
     shutil.copy2(ROOT/'deploy/chart-agent/spark/Dockerfile',stage/'Dockerfile')
+    shutil.copy2(ROOT/'deploy/chart-agent/spark/Dockerfile.dockerignore',stage/'Dockerfile.dockerignore')
     shutil.copy2(ROOT/'docs/solgpt-chart-tool-catalog.md',stage/'docs/solgpt-chart-tool-catalog.md')
     for name in ['assets/weights/best.onnx','assets/chart-pattern.onnx','research.sqlite','examples.sqlite']:
         target=stage/'outputs/chart-agent'/name;target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/'outputs/chart-agent'/name,target)
     if args.include_chartdete:
+        dockerfile=stage/'Dockerfile'
+        dockerfile.write_text(dockerfile.read_text().replace('USER user', 'COPY outputs/chart-agent/chartdete /app/outputs/chart-agent/chartdete\nUSER user'))
         target=stage/'outputs/chart-agent/chartdete';target.mkdir(exist_ok=True)
         for name in ['chart-elements.onnx','report.json']:
             shutil.copy2(ROOT/'outputs/chart-agent/chartdete/training/full/evaluation'/name,target/name)
@@ -44,11 +47,16 @@ def main():
     api.create_repo(REPO,repo_type='space',space_sdk='docker',private=True,exist_ok=True,space_secrets=space_secrets)
     assert api.repo_info(REPO,repo_type='space').private
     # Updating secrets also handles a resumed deployment into the existing Space.
-    for secret in space_secrets:api.add_space_secret(REPO,**secret)
-    api.add_space_variable(REPO,key='SPARK_CONTEXT_SIZE',value='8192')
+    existing_secrets=api.get_space_secrets(REPO)
+    for secret in space_secrets:
+        if secret['key'] not in existing_secrets:api.add_space_secret(REPO,**secret)
+    variables=api.get_space_variables(REPO)
+    if 'SPARK_CONTEXT_SIZE' not in variables:api.add_space_variable(REPO,key='SPARK_CONTEXT_SIZE',value='8192')
     if args.include_chartdete:api.add_space_variable(REPO,key='CHART_ELEMENT_DETECTOR',value='/app/outputs/chart-agent/chartdete/chart-elements.onnx')
     commit=api.upload_folder(repo_id=REPO,repo_type='space',folder_path=stage,commit_message='Deploy authenticated Spark chart stack and Orin-compatible API')
-    result={'space':REPO,'revision':commit.oid,'url':'https://ordlibrary-clawd-spark-chart-agent.hf.space','chartdete_included':args.include_chartdete,'gpu_activation':'pending verified adapter'}
+    previous=ROOT/'outputs/spark-space-deployment.json'
+    result=json.loads(previous.read_text()) if previous.exists() else {}
+    result.update({'space':REPO,'revision':commit.oid,'url':'https://ordlibrary-clawd-spark-chart-agent.hf.space','chartdete_included':args.include_chartdete,'runtime_stage':api.get_space_runtime(REPO).stage})
     (ROOT/'outputs/spark-space-deployment.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
 

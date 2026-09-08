@@ -41,3 +41,37 @@ The pipeline startup, including model download/load, took 71.38 seconds.
 Evidence: `outputs/spark-quality-6aa0292032d5d0c22c5adb45.json` and `.log`.
 Spark is a viable candidate for a small Solana-focused training pilot; it has not
 been fine-tuned or connected to the live chart API by this evaluation.
+
+## Corrective pilot and deployment (2026-09-08)
+
+The 128-step corrective pilot completed and retained its private adapter at
+`ordlibrary/clawd-spark-4b-lora-pilot`, revision
+`31b3053a70f4884b6107dfa0ded1a4d854889dab`.
+Adapter SHA-256:
+`fa4d5d75e1fffe1a6ba1ac4f824162a6bc490a3559517c8b789bb8e2a8cb546f`.
+Downloaded adapter bytes were checked against this digest before deployment.
+
+The reloaded model passed 10/10 original diagnostics and all six mint-field
+paraphrases (three prior development checks and three additional checks), native
+tool-request parsing, and exact tokenizer roundtrips. This is a narrow corrective
+evaluation, not broad Solana expertise or chart-trading accuracy.
+
+Training used 192 seeded existing rows and 32 unique corrective examples, each
+corrective example repeated twice per epoch, over two epochs. Thus there were
+512 presentations: 384 existing-data and 128 corrective presentations. The job's
+`correction_presentations: 64` metadata denotes the per-epoch count. The separate
+previously blocked nine visual additions were not used or uploaded.
+
+The first 64-step adapter passed the original diagnostics but failed a new mint
+paraphrase, so it was not promoted. An earlier run also failed artifact upload
+because PEFT placed a local cache path in the model card; the launcher now writes
+valid Hub model metadata and pins the base model in the adapter config.
+
+Deployment: private HF Space `ordlibrary/clawd-spark-chart-agent`, A10G-small with
+one-hour idle sleep. Connected Orin `name@192.168.55.1` runs the authenticated
+Python gateway on loopback port 8092. It forwards inference and chart processing
+to HF, preserving the existing Orin inference service. The agent launcher is
+`~/clawd-chart/run-agent.py` and defaults to observer mode.
+
+See [deployment instructions](../deploy/chart-agent/spark/README.md). Hosted
+readiness and end-to-end verification must pass before reporting the service live.

@@ -4,7 +4,10 @@ RUN pip install --no-cache-dir transformers==4.57.1 accelerate==1.10.1 peft==0.1
 WORKDIR /app
 COPY chart_agent /app/chart_agent
 COPY docs /app/docs
-COPY outputs /app/outputs
+COPY outputs/chart-agent/assets/weights/best.onnx /app/outputs/chart-agent/assets/weights/best.onnx
+COPY outputs/chart-agent/assets/chart-pattern.onnx /app/outputs/chart-agent/assets/chart-pattern.onnx
+COPY outputs/chart-agent/research.sqlite /app/outputs/chart-agent/research.sqlite
+COPY outputs/chart-agent/examples.sqlite /app/outputs/chart-agent/examples.sqlite
 RUN useradd -m -u 1000 user && mkdir -p /app/outputs/chart-agent/assets && chown -R user:user /app
 USER user
 ENV HOME=/home/user HF_HOME=/home/user/.cache/huggingface PYTHONUNBUFFERED=1
