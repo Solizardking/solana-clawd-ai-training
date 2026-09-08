@@ -34,6 +34,7 @@ def validate_resume(checkpoint, stage, manifest):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--profile", choices=("27b", "4b"), default="27b")
     p.add_argument("--data", type=Path, required=True)
     p.add_argument("--output", type=Path, default=Path("/content/clawd-chart-foundation-27b-lora"))
     p.add_argument("--epochs", type=float, default=1.0)
@@ -44,6 +45,8 @@ def main():
     p.add_argument("--resume-checkpoint", type=Path, help="Trusted Trainer checkpoint including optimizer and RNG state")
     p.add_argument("--resume-stage", choices=("documents", "sft"))
     args = p.parse_args()
+    base, revision = (BASE, REVISION) if args.profile == "27b" else (
+        "Qwen/Qwen3.5-4B", "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a")
     manifest = json.loads((args.data / "manifest.json").read_text())
     if bool(args.resume_checkpoint) != bool(args.resume_stage):
         p.error("--resume-checkpoint and --resume-stage must be supplied together")
@@ -66,7 +69,7 @@ def main():
                 path = (args.data / image).resolve()
                 if not path.is_relative_to(args.data.resolve()) or not path.is_file():
                     raise ValueError("Missing or invalid packaged image")
-    print(json.dumps({"base": BASE, "revision": REVISION, "counts": manifest["counts"]}, indent=2))
+    print(json.dumps({"base": base, "revision": revision, "counts": manifest["counts"]}, indent=2))
     if args.preflight:
         return
     if args.smoke:
@@ -82,9 +85,9 @@ def main():
     from transformers import AutoProcessor, BitsAndBytesConfig, Qwen3_5ForConditionalGeneration, Trainer, TrainerCallback, TrainingArguments, set_seed
 
     if not torch.cuda.is_available() or torch.cuda.get_device_properties(0).total_memory < 39 * 1024**3:
-        raise RuntimeError("This 27B QLoRA recipe requires a CUDA GPU with at least 40 GB VRAM. Select A100 or larger.")
+        raise RuntimeError("This training recipe requires a CUDA GPU with at least 40 GB VRAM. Select A100 or larger.")
     set_seed(42)
-    processor = AutoProcessor.from_pretrained(BASE, revision=REVISION)
+    processor = AutoProcessor.from_pretrained(base, revision=revision)
     processor.tokenizer.padding_side = "right"
     if processor.tokenizer.pad_token_id is None:
         processor.tokenizer.pad_token = processor.tokenizer.eos_token
@@ -102,9 +105,13 @@ def main():
         if not kept:
             raise ValueError(f"No records fit the token budget in {name}")
     quant = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=torch.bfloat16)
-    model = Qwen3_5ForConditionalGeneration.from_pretrained(BASE, revision=REVISION,
-        quantization_config=quant, device_map={"": 0}, torch_dtype=torch.bfloat16, attn_implementation="sdpa")
-    model = prepare_model_for_kbit_training(model)
+    model = Qwen3_5ForConditionalGeneration.from_pretrained(base, revision=revision,
+        quantization_config=quant if args.profile == "27b" else None,
+        device_map={"": 0}, torch_dtype=torch.bfloat16, attn_implementation="sdpa")
+    if args.profile == "27b":
+        model = prepare_model_for_kbit_training(model)
+    else:
+        model.enable_input_require_grads()
     model = get_peft_model(model, LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05,
         task_type="CAUSAL_LM", target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
         exclude_modules=r".*visual.*"))
@@ -153,7 +160,7 @@ def main():
                 HfApi().upload_folder(repo_id=args.hub_repo, folder_path=str(args.output),
                     commit_message=f"Persist {Path(training_args.output_dir).name} step {state.global_step}")
 
-    metrics = {"smoke_only": args.smoke, "records_removed_for_length": filtered_counts, "max_steps_per_stage": args.max_steps}
+    metrics = {"base": base, "revision": revision, "profile": args.profile, "smoke_only": args.smoke, "records_removed_for_length": filtered_counts, "max_steps_per_stage": args.max_steps}
     if args.resume_checkpoint:
         metrics["resume"] = {"stage": args.resume_stage, "checkpoint": str(args.resume_checkpoint)}
         previous = args.resume_checkpoint.parent.parent / "metrics.json"
@@ -188,10 +195,10 @@ def main():
     (args.output / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
     (args.output / "data-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     (args.output / "adapter/README.md").write_text(
-        f"---\nbase_model: {BASE}\n---\n# Clawd Chart Foundation 27B LoRA\n\n"
+        f"---\nbase_model: {base}\n---\n# Clawd Chart Foundation {args.profile.upper()} LoRA\n\n"
         f"Smoke-only run: {args.smoke}. Max steps per stage: {args.max_steps}.\n\n"
         "Two-stage document and chart/text adaptation. This is an adapter; load it with the pinned base checkpoint.\n\n"
-        f"Base revision: `{REVISION}`. Training uses full-sequence loss with padding and image markers masked. "
+        f"Base revision: `{revision}`. Training uses full-sequence loss with padding and image markers masked. "
         "Loss metrics do not establish trading profitability. See metrics.json and data-manifest.json for evidence.\n"
         "Historical token sample: Data from SolArchive.org (CC BY 4.0).\n")
     print("Saved trained adapter and evaluation metrics:", args.output)

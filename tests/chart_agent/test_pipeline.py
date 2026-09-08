@@ -29,9 +29,22 @@ def test_catalog_contract():
 
 def test_address_validation():
     assert validate_mint('So11111111111111111111111111111111111111112')
-    for invalid in ['SOL', '0' * 44, 'z' * 44, '../../secrets']:
+    # Observed Nemotron pilot regression: one extra base58 digit in wrapped SOL.
+    for invalid in ['SOL', '0' * 44, 'z' * 44, '../../secrets',
+                    'So111111111111111111111111111111111111111112']:
         with pytest.raises(ValueError):
             validate_mint(invalid)
+
+
+def test_openrouter_provider_key_is_not_used_for_mcp(monkeypatch):
+    monkeypatch.delenv('SOLGPT_MCP_TOKEN', raising=False)
+    monkeypatch.setenv('SOLGPT_API_KEY', 'sk-or-v1-fixture')
+    assert SolGptBridge().key is None
+    monkeypatch.setenv('SOLGPT_API_KEY', 'provider-fixture')
+    monkeypatch.setenv('SOLGPT_API_BASE', 'https://openrouter.ai/api/v1')
+    assert SolGptBridge().key is None
+    monkeypatch.setenv('SOLGPT_MCP_TOKEN', 'mcp-fixture')
+    assert SolGptBridge().key == 'mcp-fixture'
 
 
 def test_nms():

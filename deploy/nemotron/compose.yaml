@@ -1,0 +1,95 @@
+services:
+  model:
+    image: vllm/vllm-openai:v0.27.1
+    restart: unless-stopped
+    gpus: all
+    ipc: host
+    ports:
+      - "127.0.0.1:8091:8000"
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      VLLM_API_KEY: ${NEMOTRON_API_KEY:?Set a private model API key}
+    volumes:
+      - model-cache:/root/.cache/huggingface
+    command:
+      - --model
+      - nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4
+      - --revision
+      - cc84af2fe71647d87f4486c064f320e1e7535243
+      - --served-model-name
+      - clawd-nemotron
+      - --moe-backend
+      - humming
+      - --linear-backend
+      - humming
+      - --quantization
+      - modelopt_fp4
+      - --mamba-backend
+      - flashinfer
+      - --mamba-cache-mode
+      - align
+      - --mamba-ssu-algorithm
+      - simple
+      - --max-model-len
+      - "16384"
+      - --max-num-seqs
+      - "8"
+      - --enable-prefix-caching
+      - --async-scheduling
+      - --reasoning-parser
+      - nemotron_v3
+      - --tool-call-parser
+      - qwen3_coder
+      - --enable-auto-tool-choice
+    healthcheck:
+      test: [CMD, python3, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 4
+      start_period: 10m
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/chart-agent/Dockerfile
+      target: api
+    restart: unless-stopped
+    depends_on:
+      model:
+        condition: service_started
+    ports:
+      - "127.0.0.1:8090:8090"
+    environment:
+      CHART_API_KEY: ${CHART_API_KEY:?Set a private chart API key}
+      CHART_MODEL_BACKEND: nemotron
+      CHART_MODEL_NAME: clawd-nemotron
+      CHART_MODEL_API_KEY: ${NEMOTRON_API_KEY:?Set a private model API key}
+      LLAMA_URL: http://model:8000
+      CHART_ELEMENT_DETECTOR: /app/outputs/chart-agent/chartdete/training/full/evaluation/chart-elements.onnx
+      SOLGPT_MCP_TOKEN: ${SOLGPT_MCP_TOKEN:-}
+      SOLGPT_MCP_URL: ${SOLGPT_MCP_URL:-https://solgpt.us/api/mcp}
+    volumes:
+      - ../../outputs/chart-agent:/app/outputs/chart-agent:ro
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 4
+      start_period: 1m
+  https:
+    image: caddy:2.10.2
+    profiles: [public]
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      CHART_DOMAIN: ${CHART_DOMAIN:-localhost}
+    volumes:
+      - ../chart-agent/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  model-cache:
+  caddy-data:
+  caddy-config:

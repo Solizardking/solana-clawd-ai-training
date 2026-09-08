@@ -1,0 +1,13 @@
+{
+  "source": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+  "revision": "a9904d24bcc1d289a1950fa9d2b978c47cf903b9",
+  "source_sha256": "58933db77d3099b4f78c55a38347a72e1ea05b97d6bd8f38775303dc0194e0a9",
+  "template_sha256": "d460f00149b4d1c98c4a46985a2b12d5871593417313615120c52aff9cab75ba",
+  "change": "Wrap each complete assistant turn in generation tags; rendered text must remain identical. Assistant role delimiters are included in supervision.",
+  "render_verified": true,
+  "render_verified_rows": 38025,
+  "native_mask_audit_passed": true,
+  "native_audit_job": "6a9fbe05e686246ca69aa3e4",
+  "native_audit_rows": 38016,
+  "native_audit_scope": "Original prepared archive; nine local reviewed additions not included"
+}

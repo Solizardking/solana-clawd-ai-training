@@ -76,7 +76,12 @@ async def token_market(mint):
 class SolGptBridge:
     def __init__(self):
         self.url = os.getenv('SOLGPT_MCP_URL', 'https://solgpt.us/api/mcp')
-        self.key = os.getenv('SOLGPT_MCP_TOKEN') or os.getenv('SOLGPT_API_KEY')
+        legacy_key = os.getenv('SOLGPT_API_KEY')
+        # SOL GPT's model-provider config uses this name too. Never forward an
+        # OpenRouter credential to the separate SOL GPT MCP endpoint.
+        if legacy_key and (legacy_key.startswith('sk-or-') or os.getenv('SOLGPT_API_BASE')):
+            legacy_key = None
+        self.key = os.getenv('SOLGPT_MCP_TOKEN') or legacy_key
         self.available = {}
         self.contract = catalog()
 

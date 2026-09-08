@@ -1,5 +1,7 @@
 # Clawd Chart Fable
 
+> Current model selection (2026-09-08): the user canceled 27B job `6a9f3645259f8e97255ecdd8` and selected NVIDIA Nemotron 3.5 Lightning NVFP4. ChartDete completed 30 epochs and its evaluated 18-class detector was activated locally. Older run snapshots below are historical. See [current Nemotron setup and verified status](chart-agent-nemotron.md); persistent GPU hosting and Nemotron fine-tuning remain unfinished.
+
 Run the requested DavidAU 27B GGUF with its vision projector on your own machine.
 The application combines image reasoning, ONNX detection, local research retrieval,
 training-example retrieval, Solana market/candle tools, and the supplied SOL GPT
@@ -43,8 +45,19 @@ revision `d7a0e6f7148ee20f14c804e103d8a14bc14364de` of
 `ordlibrary/clawd-chart-foundation-27b-smoke`. It is a smoke artifact, not the final
 model, and has not replaced the served GGUF. Full training job
 `6a9f3645259f8e97255ecdd8` was verified RUNNING with a 12-hour timeout; follow its
-current record in `outputs/hf-chart-job.json`. See the separate training package
+immutable record in `outputs/hf-chart-full-job-6a9f3645259f8e97255ecdd8.json`. See the separate training package
 and counts in [the training guide](charts-bucket-novita.md#hugging-face-gpu-jobs).
+The document stage completed 147/147 optimizer steps. Its saved trainer state at
+`documents/checkpoint-147` was verified at repository revision
+`298db56a3d960ab7909b5dd8ce1c511e344eb30e`; local evidence is in
+`outputs/chart-agent/foundation-checkpoint-147/verification.json`. Instruction
+tuning subsequently started with 2,136 total steps. The early estimate at step 2
+was about 70 hours, exceeding the current job's 12-hour limit; this estimate may
+change as sequence lengths vary. Monitor the original job and preserve its saved
+checkpoints. Resume only after verifying a terminal state and available compute
+budget. The completed document checkpoint is not a completed instruction-tuned
+model, and completed-stage metrics were not yet available in the repository at
+that revision. No adapter has been activated from this full run.
 The source's native tokenizer remains embedded in the GGUF; the existing Nemotron
 tokenizer is a different vocabulary and cannot replace it.
 
@@ -170,6 +183,22 @@ is preserved rather than silently overwritten. This workflow was exercised with
 ONNX passed numerical comparison (rtol/atol 0.001; maximum absolute difference
 0.002625, with relative tolerance on larger values). Its validation mAP remains
 zero. The full test evaluation has not run yet.
+
+The evaluation also runs `scripts/evaluate_served_chart_detector.py` through
+the same `chart_agent.detector.Detector` used by the API. Its separate
+`served_detector_accuracy` result measures precision and recall at confidence
+0.35, matching IoU 0.5, class-aware NMS IoU 0.45, and at most 100 detections per
+image. These are operating-threshold metrics, not average precision. Checkpoint
+mAP uses the Ultralytics validation pipeline; raw ONNX parity alone does not
+establish serving accuracy. Export resolution must match the accuracy run
+(960 for full training, 640 for smoke). This check covers the detector code,
+not the HTTP request layer or the LLM's interpretation of detections.
+
+The served-code smoke check completed on four validation images with 169
+ground-truth objects and no predictions above threshold (zero recall). It uses
+the one-epoch smoke model and does not establish useful detector quality.
+Its evidence is `smoke/evaluation/served-detector.json`; three scoring tests
+cover duplicate predictions, missed objects, and spurious detections.
 
 The API supports the evaluated 18-class model as a **third detector**, configured
 only through `CHART_ELEMENT_DETECTOR=/absolute/path/to/chart-elements.onnx`.
@@ -306,6 +335,17 @@ they do not issue trade recommendations or infer profitability.
 
 ## SOL GPT tools
 
+OpenRouter provider credentials are separate from MCP credentials. The local
+`.env.openrouter` profile stores `SOLGPT_API_BASE`, `SOLGPT_API_KEY`,
+`SOLGPT_APP_TITLE`, and `SOLGPT_HTTP_REFERER` with mode 0600 and is Git-ignored.
+Validate it with `.venv-connect/bin/python scripts/check_chart_openrouter.py`;
+this checks OpenRouter's `/api/v1/key` endpoint without requesting inference.
+The supplied profile authenticated successfully. It does not switch the local
+chart app away from its self-hosted model or unlock the 72 MCP tools. The bridge
+ignores `SOLGPT_API_KEY` when it is an OpenRouter key or accompanied by a provider
+API base; use a separate `SOLGPT_MCP_TOKEN` for MCP. Rotate keys shared in chat
+and update only the private profile with the replacement.
+
 [The supplied catalog](solgpt-chart-tool-catalog.md) remains the 72-tool contract.
 The bridge discovers current input schemas from the actual MCP server and only
 executes names present in both the supplied contract and live discovery. Missing
@@ -370,6 +410,28 @@ The benchmark refuses a base run when a LoRA has a nonzero global scale. Use a
 different output path and explicit `--lora-id` for a trained-adapter comparison.
 
 ## Checks
+
+### Background training watch
+
+`scripts/watch_chart_training.py` is a deterministic monitor, not a scheduled
+AI agent. The current invocation checks every five minutes for at most 12 hours.
+It reads the original detector PID and pinned LLM job, writing
+`outputs/chart-agent/training-watch.json` and `training-watch.log`. A process
+command check distinguishes the detector from a reused PID. Observation errors
+remain errors and never imply a terminal job. A filesystem lock prevents two
+instances of this monitor from running concurrently.
+
+With `--evaluate-on-completion`, it invokes the final detector evaluation only
+after the training completion record is valid and the training process has
+exited. An attempt record prevents an interrupted evaluation from being silently
+repeated; such an interruption needs review. The monitor does not start training,
+upload artifacts, activate models, or provision hosting. A manual one-shot check
+and the first background tick passed with both training runs active and no
+evaluation attempt created. The completion-triggered invocation has not fired yet.
+
+Before starting another monitor, inspect the current watcher process recorded in
+the status file. Use `--detector-pid` with the verified training PID, not a stale
+copied PID; `--once` performs a single check without scheduling further checks.
 
 ```sh
 uv pip install --python .venv-charts/bin/python pytest

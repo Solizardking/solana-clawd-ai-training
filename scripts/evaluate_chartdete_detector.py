@@ -38,22 +38,32 @@ def main():
     subprocess.run([sys.executable,str(ROOT/'scripts/export_chart_pattern_detector.py'),
         '--checkpoint',str(checkpoint),'--output',str(onnx_path),
         '--description','ChartDete 18-class detector; see adjacent evaluation report before activation'],check=True)
+    export_verification=json.loads(onnx_path.with_suffix('.verification.json').read_text())
+    image_size=640 if args.smoke else 960
+    if export_verification['input_shape'] != [1,3,image_size,image_size]:
+        raise ValueError('Export resolution differs from the planned accuracy evaluation')
     from ultralytics import YOLO
     model=YOLO(str(checkpoint))
     expected={int(k):v for k,v in json.loads(args.data.read_text())['names'].items()}
     if model.names != expected: raise ValueError('Checkpoint class mapping differs from dataset')
     metrics=model.val(data=str(args.run/'smoke-data.yaml' if args.smoke else args.data),
-        split='val' if args.smoke else 'test', device=args.device, imgsz=640 if args.smoke else 960,
+        split='val' if args.smoke else 'test', device=args.device, imgsz=image_size,
         batch=2,workers=0,plots=False,save_json=True,project=str(out),name='metrics',exist_ok=False)
     per_class=[]
     for i,c in enumerate(metrics.box.ap_class_index):
         precision,recall,ap50,ap=metrics.box.class_result(i)
         per_class.append({'class_id':int(c),'name':model.names[int(c)],'precision':float(precision),
             'recall':float(recall),'AP50':float(ap50),'AP50_95':float(ap)})
+    from evaluate_served_chart_detector import evaluate
+    served_metrics=evaluate(onnx_path,args.data,'val' if args.smoke else 'test',
+                            args.run/'smoke-val.txt' if args.smoke else None)
     report={'smoke_only':args.smoke,'split':'smoke_validation' if args.smoke else 'test',
         'checkpoint_sha256':hashlib.file_digest(checkpoint.open('rb'),'sha256').hexdigest(),
         'dataset_archive_sha256':manifest['archive_sha256'],'metrics':metrics.results_dict,
-        'per_class':per_class,'export_verification':json.loads(onnx_path.with_suffix('.verification.json').read_text()),
+        'per_class':per_class,'export_verification':export_verification,
+        'accuracy_runtime':'ultralytics_pytorch_checkpoint','accuracy_image_size':image_size,
+        'api_end_to_end_accuracy_evaluated':False,
+        'served_detector_accuracy':served_metrics,
         'served':False,'activation_approved':False}
     report_path.write_text(json.dumps(report,indent=2))
     print('Evaluation saved:',report_path)

@@ -1,5 +1,7 @@
 # Charts bucket and Novita sandbox
 
+> Current model selection (2026-09-08): the user canceled 27B job `6a9f3645259f8e97255ecdd8` and selected NVIDIA Nemotron 3.5 Lightning NVFP4. ChartDete completed 30 epochs and its evaluated 18-class detector was activated locally. Older run snapshots below are historical. See [current Nemotron setup and verified status](chart-agent-nemotron.md); persistent GPU hosting and Nemotron fine-tuning remain unfinished.
+
 For the DavidAU 27B vision model, chart data preparation, local research retrieval,
 realtime Solana tools and GPU hosting, see [Clawd Chart Fable setup](chart-agent-self-hosting.md).
 During the September 7 setup, several mounted reads produced invalid/truncated

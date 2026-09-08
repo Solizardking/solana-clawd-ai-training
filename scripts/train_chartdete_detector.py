@@ -45,7 +45,15 @@ def main():
     name='smoke' if args.smoke else 'full'
     if not args.resume and (output/name).exists():
         raise ValueError('Existing run directory; inspect it and resume explicitly')
-    (output/f'{name}-provenance.json').write_text(json.dumps({'initial_checkpoint_sha256':digest,
+    provenance = output/f'{name}-provenance.json'
+    if args.resume:
+        original = json.loads(provenance.read_text())
+        if original['data_manifest'] != json.loads((root/'manifest.json').read_text()):
+            raise ValueError('Resume dataset differs from original training provenance')
+        with (output/f'{name}-resumes.jsonl').open('a') as history:
+            history.write(json.dumps({'checkpoint':str(checkpoint.resolve()), 'checkpoint_sha256':digest})+'\n')
+    else:
+        provenance.write_text(json.dumps({'initial_checkpoint_sha256':digest,
         'data_manifest':json.loads((root/'manifest.json').read_text()), 'smoke_only':args.smoke,
         'device':args.device,'epochs':1 if args.smoke else args.epochs},indent=2))
     model=YOLO(str(checkpoint))

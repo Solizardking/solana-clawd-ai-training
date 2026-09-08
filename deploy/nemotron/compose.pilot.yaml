@@ -1,0 +1,42 @@
+# Optional pilot-only override. The adapter must be downloaded and hash-verified first.
+# docker compose -f deploy/nemotron/compose.yaml -f deploy/nemotron/compose.pilot.yaml up -d
+services:
+  model:
+    volumes:
+      - ../../outputs/nemotron-pilot-adapter/checkpoints/epoch_0_step_9/model:/models/pilot:ro
+    command:
+      - --model
+      - nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4
+      - --revision
+      - cc84af2fe71647d87f4486c064f320e1e7535243
+      - --served-model-name
+      - clawd-nemotron
+      - --moe-backend
+      - marlin
+      - --linear-backend
+      - humming
+      - --quantization
+      - modelopt_fp4
+      - --mamba-backend
+      - flashinfer
+      - --mamba-cache-mode
+      - align
+      - --mamba-ssu-algorithm
+      - simple
+      - --max-model-len
+      - "4096"
+      - --max-num-seqs
+      - "2"
+      - --reasoning-parser
+      - nemotron_v3
+      - --tool-call-parser
+      - qwen3_coder
+      - --enable-auto-tool-choice
+      - --enable-lora
+      - --max-lora-rank
+      - "8"
+      - --lora-modules
+      - clawd-nemotron-pilot=/models/pilot
+  api:
+    environment:
+      CHART_MODEL_NAME: clawd-nemotron-pilot

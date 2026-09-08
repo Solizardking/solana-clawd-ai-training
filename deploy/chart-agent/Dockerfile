@@ -13,6 +13,7 @@ ENTRYPOINT ["/opt/llama/llama-server"]
 
 FROM python:3.13-slim AS api
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng && rm -rf /var/lib/apt/lists/*
 COPY chart_agent/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 COPY chart_agent/ /app/chart_agent/

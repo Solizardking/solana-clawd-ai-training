@@ -39,6 +39,7 @@ ultralytics.nn.modules.head.Detect
 ultralytics.nn.tasks.DetectionModel
 ultralytics.utils.IterableSimpleNamespace
 ultralytics.utils.loss.BboxLoss
+ultralytics.utils.loss.DFLoss
 ultralytics.utils.loss.v8DetectionLoss
 ultralytics.utils.tal.TaskAlignedAssigner'''.splitlines()
 
