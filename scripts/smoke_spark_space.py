@@ -22,7 +22,7 @@ with httpx.Client(base_url=url,headers=headers,timeout=300) as client:
     image=ROOT/'outputs/chart-agent/assets/images/syn_bar_0005.png'
     encoded=base64.b64encode(image.read_bytes()).decode()
     r=client.post('/analyze',json={'question':'Describe only the chart labels and values supported by OCR. State uncertainty. Do not invent a trading signal.','image_base64':encoded,'max_tokens':256});r.raise_for_status();chart=r.json()
-    assert chart['evidence']['ocr']['available']
+    assert chart['evidence']['ocr']['available'] and chart['evidence']['ocr']['words']
     report={'url':url,'ready':ready,'tokenizer':tokens,'conversion':conversion,'chart':chart,'authentication_checked':True}
     (ROOT/'outputs/spark-space-smoke.json').write_text(json.dumps(report,indent=2))
     print(json.dumps({'model':ready['model_name'],'tokenizer_exact':True,'conversion_tool_executed':True,'ocr_available':True,'live_tape_connected':ready['tape']['connected'],'live_tape_stale':ready['tape']['stale'],'chart_answer':chart['answer']},indent=2))
