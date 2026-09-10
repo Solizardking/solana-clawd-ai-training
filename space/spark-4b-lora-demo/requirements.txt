@@ -1,5 +1,5 @@
-transformers==4.57.1
-accelerate==1.10.1
+transformers==5.10.1
+accelerate==1.15.0
 peft==0.17.1
 sentencepiece==0.2.1
 safetensors
