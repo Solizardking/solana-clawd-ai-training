@@ -1,0 +1,265 @@
+{
+  "site": "onchainai",
+  "section": "local-training-data",
+  "generated": "2026-09-15T14:58:56.290669Z",
+  "root": "data/",
+  "disk_bytes_hint": "8.4M total for data/ (nemo_clawd 7.6M, rag 704K, processed 40K)",
+  "entries": [
+    {
+      "id": "core-ai",
+      "name": "Core AI dataset",
+      "card": "data/core_ai_dataset_card.md",
+      "manifest": "data/core_ai_dataset_manifest.json",
+      "hf_repo": "solanaclawd/solana-clawd-core-ai-instruct",
+      "public_safe": true,
+      "source_counts": {
+        "ai_training_sft": 25778,
+        "core_ai_knowledge_jsonl": 75,
+        "core_ai_source_chunk": 9320
+      },
+      "stats_summary": {
+        "ai_training_kept": 30365,
+        "core_ai_chunks": 9320
+      }
+    },
+    {
+      "id": "nemo-clawd",
+      "name": "Nemo Clawd training data",
+      "card": "data/nemo_clawd_dataset_card.md",
+      "readme": "data/nemo_clawd_README.md",
+      "manifest": "data/nemo_clawd_dataset_manifest.json",
+      "local_dir": "data/nemo_clawd",
+      "hf_repo": "solanaclawd/solana-clawd-nemo-clawd-instruct",
+      "public_safe": true,
+      "source_counts": {
+        "sft_chat_finetune": 80,
+        "sft_with_metadata": 80,
+        "risk_preferences": 7,
+        "source_grounded_eval": 49
+      },
+      "stats": {
+        "total_sft_rows": 80,
+        "total_preference_rows": 7,
+        "total_eval_rows": 49,
+        "total_pdf_chunks": 413,
+        "total_repo_chunks": 175,
+        "total_all_chunks": 588,
+        "unique_pdf_sources": 24,
+        "duplicate_pdfs_deduplicated": 2,
+        "source_notes": 24
+      }
+    },
+    {
+      "id": "nvidia-trading-factory",
+      "name": "Solana Clawd NVIDIA Trading Factory Instruct",
+      "card": "data/nvidia_trading_factory_dataset_card.md",
+      "manifest": "data/nvidia_trading_factory_manifest.json",
+      "hf_repo": "solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+      "counts": {
+        "examples": 199,
+        "sources": 53,
+        "missing_inputs": 2,
+        "duplicates_removed": 0,
+        "by_source_type": {
+          "autoresearch_grid_reference": 2,
+          "autoresearch_paper_reference": 3,
+          "autoresearch_rise_reference": 1,
+          "autoresearch_ta_reference": 3,
+          "autoresearch_twap_reference": 1,
+          "autoresearch_vulcan_reference": 3,
+          "cufolio_cvar_optimizer": 3,
+          "cufolio_cvar_parameters": 1,
+          "cufolio_optimization_handoff": 2,
+          "cufolio_rebalancing": 3,
+          "cufolio_reference": 3,
+          "cufolio_scenario_generation": 3,
+          "eval_policy": 1,
+          "external_reference": 7,
+          "factory_stage": 11,
+          "generated_cufolio_handoff": 1,
+          "generated_rise_data_plan": 1,
+          "generated_strategy_manifest": 2,
+          "generated_vulcan_command_plans": 1,
+          "labeling_policy": 1,
+          "market_scenario": 30,
+          "nvidia_aiq_config": 2,
+          "nvidia_cufolio_clawd": 3,
+          "nvidia_mean_cvar_optimizer": 3,
+          "nvidia_nemo_factory_config": 3,
+          "nvidia_nemotron_ultra_agent": 3,
+          "nvidia_nemotron_ultra_agent_docs": 2,
+          "nvidia_nim_config": 2,
+          "nvidia_perps_signal_agent": 3,
+          "nvidia_phoenix_prices": 3,
+          "nvidia_portfolio_optimization_readme": 1,
+          "nvidia_pretrain_solana_decoder": 2,
+          "nvidia_quantitative_signal_agent": 3,
+          "nvidia_scenario_generator": 2,
+          "nvidia_signal_agent": 1,
+          "nvidia_signal_detectors": 3,
+          "nvidia_signal_discovery_readme": 1,
+          "nvidia_signal_server": 3,
+          "nvidia_tx_cpt_collector": 3,
+          "nvidia_tx_dataset_builder": 2,
+          "nvidia_tx_evaluate": 3,
+          "nvidia_tx_finetune": 2,
+          "nvidia_tx_foundation_config": 1,
+          "nvidia_tx_foundation_pipeline": 3,
+          "nvidia_tx_foundation_pipeline_config": 3,
+          "nvidia_tx_foundation_readme": 2,
+          "nvidia_tx_train": 3,
+          "optimization_spec": 1,
+          "perps_tool": 13,
+          "portfolio_policy": 1,
+          "regime_scenario": 8,
+          "research_dataset_manifest": 3,
+          "rise_readonly_client": 1,
+          "risk_scenario": 1,
+          "safety_refusal": 4,
+          "solana_perps_agent": 3,
+          "solana_perps_prompts": 2,
+          "solana_perps_schema": 1,
+          "solana_perps_tools": 3,
+          "solana_trading_factory_adapter": 2,
+          "structured_output": 3,
+          "trading_factory_workspace": 2,
+          "training_pipeline_reference": 3,
+          "vulcan_strategy_specs": 3
+        },
+        "by_factory_stage": {
+          "alpha_research": 1,
+          "architecture": 126,
+          "backtesting": 11,
+          "data_ingestion": 1,
+          "execution_policy": 25,
+          "feature_engineering": 12,
+          "governance": 5,
+          "mean_cvar_optimization": 4,
+          "monitoring": 2,
+          "risk_controls": 11,
+          "scenario_generation": 1
+        }
+      },
+      "splits": {
+        "train": 179,
+        "eval": 9,
+        "test": 11
+      },
+      "sources_n": 53
+    },
+    {
+      "id": "realtime-research",
+      "name": "Solana Clawd Realtime Research Instruct",
+      "card": "data/realtime_research_dataset_card.md",
+      "manifest": "data/realtime_research_dataset_manifest.json",
+      "hf_repo": "solanaclawd/solana-clawd-realtime-research-instruct",
+      "counts": {
+        "examples": 29058,
+        "sources": 28,
+        "missing_inputs": 0,
+        "duplicate_examples": 0,
+        "duplicate_files_skipped": 2,
+        "secret_or_invalid_skipped": 296,
+        "by_source_type": {
+          "notebook": 122,
+          "parquet": 28250,
+          "pdf": 683,
+          "text": 3
+        }
+      },
+      "splits": {
+        "train": 26152,
+        "eval": 1452,
+        "test": 1454
+      },
+      "sources_n": 28
+    },
+    {
+      "id": "repo-corpus",
+      "name": "Repo corpus",
+      "card": "data/repo_corpus_dataset_card.md",
+      "manifest": "data/repo_corpus_manifest.json",
+      "hf_repo": "solanaclawd/solana-clawd-repo-corpus",
+      "source_counts": {
+        "configs": 23,
+        "data": 189,
+        "docs": 32,
+        "library": 10,
+        "memory": 2,
+        "nvidia": 156,
+        "ollama": 10,
+        "programs": 13,
+        "studio": 6
+      }
+    },
+    {
+      "id": "tx-foundation-cpt",
+      "name": "Solana Transaction Foundation CPT",
+      "card": "data/tx_foundation_cpt_dataset_card.md",
+      "manifest": "data/tx_foundation_cpt_manifest.json",
+      "hf_repo": "solanaclawd/solana-tx-foundation-cpt",
+      "num_examples": 19542,
+      "splits": {
+        "train": 17587,
+        "eval": 977,
+        "test": 978
+      },
+      "training_model": "solanaclawd/solana-tx-foundation-1.5b",
+      "local_model_path": "/Users/8bit/Downloads/solana-clawd/ai-training/outputs/solana-tx-foundation-1.5b/sft",
+      "local_model_present": false
+    },
+    {
+      "id": "eval",
+      "name": "Eval card",
+      "card": "data/eval_card.md",
+      "title": "Solana Clawd Eval"
+    },
+    {
+      "id": "nvidia-aiq-eval",
+      "name": "NVIDIA AIQ eval",
+      "manifest": "data/nvidia_aiq_eval.json",
+      "mode": "plan",
+      "ok": true,
+      "release_gate": "pass"
+    },
+    {
+      "id": "signal-discovery",
+      "name": "Signal discovery report",
+      "manifest": "data/signal_discovery_report.json",
+      "n_markets": 3,
+      "avg_confidence": 0.0,
+      "verdict_summary": {
+        "hold": 3
+      }
+    },
+    {
+      "id": "nvidia-rag-store",
+      "name": "NVIDIA RAG store",
+      "local_dir": "data/nvidia_rag_store",
+      "files": [
+        "chunks.jsonl",
+        "index.faiss",
+        "manifest.json"
+      ],
+      "manifest_keys": [
+        "generated_at",
+        "embedding_model",
+        "chunk_size",
+        "chunk_overlap",
+        "embedding_dim",
+        "chunks",
+        "sources"
+      ]
+    },
+    {
+      "id": "processed-hf-dataset",
+      "name": "Processed HF dataset dict",
+      "local_dir": "data/processed",
+      "splits": [
+        "test",
+        "train",
+        "eval"
+      ]
+    }
+  ]
+}

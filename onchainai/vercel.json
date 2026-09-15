@@ -1,0 +1,15 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/studio", "destination": "/studio.html" },
+    { "source": "/data", "destination": "/data.html" },
+    { "source": "/docs-index", "destination": "/docs.html" },
+    { "source": "/models", "destination": "/models.json" }
+  ],
+  "headers": [
+    {
+      "source": "/docs/(.*).md",
+      "headers": [{ "key": "Content-Type", "value": "text/markdown; charset=utf-8" }]
+    }
+  ]
+}

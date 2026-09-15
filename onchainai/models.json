@@ -1,0 +1,1068 @@
+{
+  "site": "onchainai",
+  "generated": "2026-09-15T14:53:12.723501Z",
+  "orgs": [
+    "solanaclawd",
+    "ordlibrary"
+  ],
+  "models": [
+    {
+      "id": "ordlibrary/CTGPT",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/CTGPT",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "license:mit",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/Clawd-GLM-5.2",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/Clawd-GLM-5.2",
+      "pipeline_tag": "text-generation",
+      "downloads": 0,
+      "likes": 1,
+      "tags": [
+        "peft",
+        "solana",
+        "defi",
+        "crypto",
+        "agent",
+        "lora",
+        "constitutional-ai",
+        "zk",
+        "light-protocol",
+        "clawd",
+        "text-generation",
+        "en"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/DeepSeek-R1-Solana-Reasoning",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/DeepSeek-R1-Solana-Reasoning",
+      "pipeline_tag": null,
+      "downloads": 20,
+      "likes": 1,
+      "tags": [
+        "safetensors",
+        "gpt2",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/DeepSolana-GPT2",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/DeepSolana-GPT2",
+      "pipeline_tag": null,
+      "downloads": 14,
+      "likes": 1,
+      "tags": [
+        "safetensors",
+        "gpt2",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/DeepSolanaCoder",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/DeepSolanaCoder",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 1,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/MCPsolana",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/MCPsolana",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "license:apache-2.0",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/Qwen-Clawd-3.8-27B-Unsloth-Lobster-onchain-edition",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/Qwen-Clawd-3.8-27B-Unsloth-Lobster-onchain-edition",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/SOLgpt",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/SOLgpt",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "license:mit",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/SolanaOS",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/SolanaOS",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 9,
+      "tags": [
+        "arxiv:2510.04871",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/bitcabalbot",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/bitcabalbot",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-chart-foundation-27b-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/clawd-chart-foundation-27b-lora",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "safetensors",
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-chart-foundation-27b-smoke",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/clawd-chart-foundation-27b-smoke",
+      "pipeline_tag": "text-generation",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "safetensors",
+        "lora",
+        "qwen",
+        "solana",
+        "clawd",
+        "chart-agent",
+        "smoke-test",
+        "text-generation",
+        "base_model:DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NM-DAU",
+        "base_model:adapter:DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NM-DAU",
+        "license:apache-2.0"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-nemotron-chart-lora-pilot",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/clawd-nemotron-chart-lora-pilot",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "safetensors",
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-spark-4b-lora-pilot",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/clawd-spark-4b-lora-pilot",
+      "pipeline_tag": null,
+      "downloads": 18,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "safetensors",
+        "base_model:XHToken/Spark-X2.5-4B",
+        "base_model:adapter:XHToken/Spark-X2.5-4B",
+        "doi:10.57967/hf/10342",
+        "license:apache-2.0",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-trading-wallet",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/clawd-trading-wallet",
+      "pipeline_tag": "text-generation",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "solana",
+        "trading",
+        "clawd",
+        "wallet",
+        "phoenix",
+        "perps",
+        "jupiter",
+        "defi",
+        "bip39",
+        "encrypted-key",
+        "natural-language-trading",
+        "text-generation"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/core-ai-clawd-1.5b",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/core-ai-clawd-1.5b",
+      "pipeline_tag": "text-generation",
+      "downloads": 24,
+      "likes": 0,
+      "tags": [
+        "ggml",
+        "gguf",
+        "solana",
+        "blockchain",
+        "onchain",
+        "clawd",
+        "qwen",
+        "trading",
+        "defi",
+        "text-generation",
+        "en",
+        "base_model:Qwen/Qwen2.5-1.5B-Instruct"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/core-ai-clawd-1.5b-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/core-ai-clawd-1.5b-lora",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/deepsol-clawd-code",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/deepsol-clawd-code",
+      "pipeline_tag": "text-generation",
+      "downloads": 145,
+      "likes": 0,
+      "tags": [
+        "transformers",
+        "safetensors",
+        "gpt2",
+        "text-generation",
+        "solana",
+        "clawd",
+        "code",
+        "en",
+        "license:apache-2.0",
+        "text-generation-inference",
+        "endpoints_compatible",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/hauhau-qwen36-onchain",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-onchain",
+      "pipeline_tag": "text-generation",
+      "downloads": 32,
+      "likes": 0,
+      "tags": [
+        "ggml",
+        "gguf",
+        "solana",
+        "blockchain",
+        "onchain",
+        "clawd",
+        "qwen",
+        "constitution",
+        "sovereign",
+        "verified-inference",
+        "text-generation",
+        "en"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/hauhau-qwen36-uncensored",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-uncensored",
+      "pipeline_tag": "text-generation",
+      "downloads": 614,
+      "likes": 0,
+      "tags": [
+        "ggml",
+        "gguf",
+        "solana",
+        "blockchain",
+        "onchain",
+        "clawd",
+        "qwen",
+        "uncensored",
+        "aggressive",
+        "text-generation",
+        "en",
+        "base_model:HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/medicaid-fraud-detection",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/medicaid-fraud-detection",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "healthcare",
+        "fraud-detection",
+        "medicaid",
+        "medical-billing",
+        "anomaly-detection",
+        "instruction-tuning",
+        "hcpcs",
+        "npi",
+        "cms",
+        "provider-spending",
+        "benford-law",
+        "z-score"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/ordgpt",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/ordgpt",
+      "pipeline_tag": "text-to-image",
+      "downloads": 0,
+      "likes": 1,
+      "tags": [
+        "diffusers",
+        "text-to-image",
+        "stable-diffusion",
+        "lora",
+        "template:sd-lora",
+        "base_model:black-forest-labs/FLUX.1-dev",
+        "base_model:adapter:black-forest-labs/FLUX.1-dev",
+        "license:mit",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/solana",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/solana",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/sollama",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/sollama",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/web3gpt",
+      "kind": "model",
+      "url": "https://huggingface.co/ordlibrary/web3gpt",
+      "pipeline_tag": "text-to-image",
+      "downloads": 0,
+      "likes": 1,
+      "tags": [
+        "diffusers",
+        "flux",
+        "lora",
+        "replicate",
+        "text-to-image",
+        "en",
+        "base_model:black-forest-labs/FLUX.1-dev",
+        "base_model:adapter:black-forest-labs/FLUX.1-dev",
+        "license:other",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/README",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/README",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "solana",
+        "agents",
+        "lora",
+        "onchain-ai",
+        "x402",
+        "trading",
+        "license:apache-2.0",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/clawd-fable",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/clawd-fable",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/clawd-solana-masterpiece-qwen15-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora",
+      "pipeline_tag": "text-generation",
+      "downloads": 13,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "safetensors",
+        "solana",
+        "clawd",
+        "lora",
+        "core-ai",
+        "text-generation",
+        "conversational",
+        "dataset:local",
+        "base_model:Qwen/Qwen2.5-1.5B-Instruct",
+        "base_model:adapter:Qwen/Qwen2.5-1.5B-Instruct",
+        "license:cc-by-4.0"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-1.5b",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-clawd-1.5b",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-1.5b-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-clawd-1.5b-lora",
+      "pipeline_tag": "text-generation",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "solana",
+        "defi",
+        "crypto",
+        "agent",
+        "lora",
+        "constitutional-ai",
+        "text-generation",
+        "en",
+        "dataset:solanaclawd/solana-clawd-instruct",
+        "base_model:Qwen/Qwen2.5-1.5B-Instruct",
+        "base_model:adapter:Qwen/Qwen2.5-1.5B-Instruct"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-core-ai-1.5b-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora",
+      "pipeline_tag": "text-generation",
+      "downloads": 19,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "safetensors",
+        "solana",
+        "defi",
+        "crypto",
+        "agent",
+        "lora",
+        "constitutional-ai",
+        "text-generation",
+        "conversational",
+        "en",
+        "dataset:solanaclawd/solana-clawd-core-ai-instruct"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-instruct",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-clawd-instruct",
+      "pipeline_tag": null,
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b",
+      "pipeline_tag": "text-generation",
+      "downloads": 662,
+      "likes": 0,
+      "tags": [
+        "safetensors",
+        "llama",
+        "solana",
+        "clawd",
+        "fable",
+        "qwen",
+        "text-generation",
+        "conversational",
+        "dataset:armand0e/claude-fable-5-claude-code",
+        "dataset:Glint-Research/Fable-5-traces",
+        "base_model:NousResearch/Hermes-3-Llama-3.1-8B",
+        "base_model:finetune:NousResearch/Hermes-3-Llama-3.1-8B"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+      "pipeline_tag": null,
+      "downloads": 473,
+      "likes": 0,
+      "tags": [
+        "gguf",
+        "endpoints_compatible",
+        "region:us",
+        "conversational"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-nvidia-trading-factory-8b-lora",
+      "kind": "model",
+      "url": "https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora",
+      "pipeline_tag": "text-generation",
+      "downloads": 34,
+      "likes": 0,
+      "tags": [
+        "peft",
+        "safetensors",
+        "solana",
+        "clawd",
+        "lora",
+        "trading",
+        "perps",
+        "nvidia",
+        "text-generation",
+        "conversational",
+        "dataset:solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+        "base_model:NousResearch/Hermes-3-Llama-3.1-8B"
+      ],
+      "private": false,
+      "error": null
+    }
+  ],
+  "datasets": [
+    {
+      "id": "ordlibrary/BRAIN",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/BRAIN",
+      "downloads": 3,
+      "likes": 0,
+      "tags": [
+        "license:apache-2.0",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/DarkModel",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/DarkModel",
+      "downloads": 3,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/NFTszn",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/NFTszn",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "license:apache-2.0",
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/Solana",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/Solana",
+      "downloads": 5,
+      "likes": 2,
+      "tags": [
+        "license:mit",
+        "doi:10.57967/hf/5949",
+        "region:us",
+        "solana",
+        "crypto",
+        "blockchain",
+        "web3",
+        "agent",
+        "trading",
+        "terminal",
+        "chesh",
+        "cheshireterminal"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/SolanaNfts",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/SolanaNfts",
+      "downloads": 3,
+      "likes": 0,
+      "tags": [
+        "license:mit",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/clawd-chart-foundation-training",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/clawd-chart-foundation-training",
+      "downloads": 11,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/medicaid",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/medicaid",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "license:mit",
+        "size_categories:10K<n<100K",
+        "format:json",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant",
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/ml-intern-sessions",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/ml-intern-sessions",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "language:en",
+        "license:other",
+        "region:us",
+        "agent-traces",
+        "coding-agent",
+        "ml-intern",
+        "session-traces",
+        "claude-code",
+        "hf-agent-trace-viewer"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/solana-clawd-model-kit",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/solana-clawd-model-kit",
+      "downloads": 88,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:100K<n<1M",
+        "region:us",
+        "solana",
+        "clawd",
+        "sft",
+        "cpt",
+        "crypto",
+        "tooling"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/solana2.0",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/solana2.0",
+      "downloads": 7,
+      "likes": 0,
+      "tags": [
+        "license:mit",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "ordlibrary/solanatwo",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/ordlibrary/solanatwo",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/README",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/README",
+      "downloads": 10,
+      "likes": 0,
+      "tags": [
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-core-ai-instruct",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct",
+      "downloads": 35,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:10K<n<100K",
+        "format:parquet",
+        "format:optimized-parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-eval",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-eval",
+      "downloads": 23,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:n<1K",
+        "format:parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-instruct",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct",
+      "downloads": 121,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:10K<n<100K",
+        "format:parquet",
+        "format:optimized-parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-live-data",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-live-data",
+      "downloads": 30,
+      "likes": 0,
+      "tags": [
+        "size_categories:n<1K",
+        "format:parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+      "downloads": 41,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "task_categories:reinforcement-learning",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:n<1K",
+        "format:parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-realtime-research-instruct",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct",
+      "downloads": 39,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:10K<n<100K",
+        "format:parquet",
+        "format:optimized-parquet",
+        "modality:text",
+        "modality:document",
+        "library:datasets",
+        "library:pandas",
+        "library:polars"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-clawd-repo-corpus",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-repo-corpus",
+      "downloads": 48,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "task_categories:question-answering",
+        "language:en",
+        "license:cc-by-4.0",
+        "size_categories:10K<n<100K",
+        "format:parquet",
+        "format:optimized-parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-private-datasets",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-private-datasets",
+      "downloads": 0,
+      "likes": 0,
+      "tags": [
+        "task_categories:text-generation",
+        "language:en",
+        "license:mit",
+        "region:us"
+      ],
+      "private": true,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-tx-foundation-cpt",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-cpt",
+      "downloads": 9,
+      "likes": 0,
+      "tags": [
+        "size_categories:10K<n<100K",
+        "format:parquet",
+        "format:optimized-parquet",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    },
+    {
+      "id": "solanaclawd/solana-tx-foundation-unified",
+      "kind": "dataset",
+      "url": "https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-unified",
+      "downloads": 24,
+      "likes": 0,
+      "tags": [
+        "size_categories:n<1K",
+        "format:json",
+        "modality:text",
+        "library:datasets",
+        "library:pandas",
+        "library:polars",
+        "library:mlcroissant",
+        "region:us"
+      ],
+      "private": false,
+      "error": null
+    }
+  ],
+  "featured": [
+    "ordlibrary/deepsol-clawd-code",
+    "ordlibrary/solana-clawd-model-kit",
+    "solanaclawd/solana-nvidia-trading-factory-8b",
+    "solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+    "solanaclawd/solana-nvidia-trading-factory-8b-lora",
+    "solanaclawd/solana-clawd-core-ai-1.5b-lora",
+    "solanaclawd/solana-clawd-1.5b-lora"
+  ],
+  "local_root": "~/Models/solana-clawd",
+  "deploy": {
+    "chart-agent": "deploy/chart-agent",
+    "nemotron": "deploy/nemotron",
+    "chart_agent": "chart_agent",
+    "studio": "studio.html"
+  }
+}

@@ -1,0 +1,25 @@
+/* Solana darker brand palette — derived from official #14F195 / #9945FF */
+:root {
+  --solana-green: #14F195;
+  --solana-purple: #9945FF;
+  --solana-green-dark: #05683F;
+  --solana-purple-dark: #3D0088;
+  --solana-green-deep: #022D1B;
+  --solana-purple-deep: #1A003A;
+  --solana-pink-dark: #790D57;
+  --solana-light-purple-dark: #3300A6;
+  --solana-blue-dark: #0A4586;
+  --solana-aqua-dark: #0099B3;
+  --solana-lime-dark: #11AB00;
+  --solana-yellow-dark: #7F8D0E;
+  --solana-orange-dark: #8A2100;
+  --solana-print-green-dark: #005734;
+  --solana-print-purple-dark: #2F225D;
+  --solana-gradient-dark: linear-gradient(90deg,
+    #3D0088 8%,
+    #300881 30%,
+    #184065 50%,
+    #184E59 60%,
+    #0D6250 72%,
+    #017343 97%);
+}

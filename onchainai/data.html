@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>onchainai — local training data</title>
+
+<link rel="stylesheet" href="./brand/fonts.css" />
+<link rel="stylesheet" href="./brand/solana-dark.css" />
+<link rel="icon" href="./brand/x402/favicon.svg" />
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+:root{--p:#9945FF;--g:#14F195;--bg:#050508;--card:#0d0d18;--border:#1a1a2e;--text:#c8d3f5;--muted:#6a6a9a;--font:JetBrains Mono,ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px;line-height:1.5;min-height:100vh}
+a{color:var(--g)}.wrap{max-width:1100px;margin:0 auto;padding:32px 18px 64px}
+.logo{font-size:22px;font-weight:800}.logo span{color:var(--p)}
+.sub{color:var(--muted);margin:8px 0 20px;max-width:70ch}
+.nav a{margin-right:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.card h3{color:#fff;font-size:13px}.meta{color:var(--muted);font-size:10px;word-break:break-word}
+.tag{font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(153,69,255,.35);color:var(--p);padding:2px 7px;border-radius:999px;width:fit-content}
+pre{white-space:pre-wrap;background:#08080e;border:1px solid var(--border);padding:8px;border-radius:8px;color:var(--muted);font-size:10px;max-height:140px;overflow:auto}
+
+  body {
+    font-family: "Solana Mono", ui-monospace, monospace !important;
+    background:
+      linear-gradient(180deg, rgba(5,5,8,0.88), rgba(5,5,8,0.96)),
+      url('./brand/solana-gradient-dark.png') center/cover fixed !important;
+  }
+  .logo, h1, h2, h3 { font-family: "Solana Sans", ui-sans-serif, system-ui, sans-serif !important; }
+  .logo span, .accent { color: var(--solana-purple, #9945FF) !important; }
+  .btn.primary { background: linear-gradient(90deg, #3D0088 0%, #05683F 100%); border-color: transparent; color: #fff; }
+  .btn.green { color: var(--solana-green, #14F195); }
+  .card, .list, .pill, .side { border-color: rgba(153,69,255,0.25) !important; }
+  .brand-mark { height: 28px; width: 28px; vertical-align: middle; margin-right: 8px; border-radius: 6px; }
+
+</style></head><body>
+<div class="wrap">
+  <div class="nav"><a href="./">← onchainai</a> <a href="./studio.html">studio</a> <a href="./models.json">hf models.json</a></div>
+  <div class="logo">onchain<span>ai</span> / data</div>
+  <p class="sub">Local training-data inventory from <code>solana-clawd-ai-training/data</code> — cards, manifests, nemo_clawd, nvidia_rag_store, processed.</p>
+  <div class="grid" id="g"></div>
+</div>
+<script>
+fetch('./data-catalog.json').then(r=>r.json()).then(cat=>{
+  const g=document.getElementById('g');
+  g.innerHTML = (cat.entries||[]).map(e=>{
+    const bits=[];
+    if(e.hf_repo) bits.push('<div>hf: <a href="https://huggingface.co/datasets/'+e.hf_repo+'" target="_blank" rel="noreferrer">'+e.hf_repo+'</a></div>');
+    if(e.num_examples!=null) bits.push('<div class="meta">examples: '+e.num_examples+'</div>');
+    if(e.counts) bits.push('<pre>'+JSON.stringify(e.counts,null,2)+'</pre>');
+    if(e.source_counts) bits.push('<pre>'+JSON.stringify(e.source_counts,null,2)+'</pre>');
+    if(e.stats) bits.push('<pre>'+JSON.stringify(e.stats,null,2)+'</pre>');
+    if(e.stats_summary) bits.push('<pre>'+JSON.stringify(e.stats_summary,null,2)+'</pre>');
+    if(e.local_dir) bits.push('<div class="meta">'+e.local_dir+'</div>');
+    if(e.card) bits.push('<div class="meta">card: '+e.card+'</div>');
+    return `<article class="card"><span class="tag">${e.id}</span><h3>${e.name||e.id}</h3>${bits.join('')}</article>`;
+  }).join('');
+});
+</script>
+</body></html>

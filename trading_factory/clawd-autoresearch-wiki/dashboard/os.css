@@ -1,3 +1,66 @@
+/* Clawdbot OS — Solana / x402 brand overlay */
+@import url('./brand/fonts.css');
+@import url('./brand/solana-dark.css');
+
+:root {
+  --sol-green: var(--solana-green, #14F195);
+  --sol-purple: var(--solana-purple, #9945FF);
+  --bg: #050508;
+  --bg2: #08080e;
+  --panel: rgba(13,13,24,0.92);
+  --border: #1a1a2e;
+  --text: #c8d3f5;
+  --text-dim: #6a6a9a;
+  --green: var(--sol-green);
+  --purple: var(--sol-purple);
+  --amber: #ffb020;
+  --font-sans: "Solana Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Solana Mono", ui-monospace, monospace;
+  --glow-p: 0 0 22px rgba(153,69,255,0.35);
+  --glow-g: 0 0 18px rgba(20,241,149,0.3);
+}
+
+body {
+  font-family: var(--font-mono) !important;
+  background:
+    linear-gradient(180deg, rgba(5,5,8,0.82), rgba(5,5,8,0.94)),
+    url('./brand/solana-gradient-dark.png') center/cover fixed !important;
+  color: var(--text) !important;
+}
+
+#topbar, .panel, .stat-card, #sidebar {
+  backdrop-filter: blur(10px);
+  border-color: var(--border) !important;
+}
+
+.logo, .brand-logo {
+  font-family: var(--font-sans) !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo .accent, .logo span { color: var(--sol-purple); }
+.brand-logo img { border-radius: 7px; box-shadow: var(--glow-p); }
+
+.btn-secondary, button#agent-toggle, .nav-btn.active {
+  border-color: rgba(153,69,255,0.45) !important;
+}
+button#agent-toggle {
+  background: linear-gradient(90deg, #3D0088, #05683F) !important;
+  color: #fff !important;
+  box-shadow: var(--glow-p);
+}
+.green, .stat-card-val.green { color: var(--sol-green) !important; }
+.ws-status .dot.on { background: var(--sol-green) !important; box-shadow: var(--glow-g); }
+
+#ticker-bar {
+  background: rgba(8,8,14,0.9) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+
 /* ── RESET + BASE ─────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#020208;color:#c8d8e8;font-family:'Share Tech Mono',monospace;font-size:12px;overflow:hidden}

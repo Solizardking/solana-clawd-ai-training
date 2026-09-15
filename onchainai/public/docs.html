@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>onchainai — docs</title>
+
+<link rel="stylesheet" href="./brand/fonts.css" />
+<link rel="stylesheet" href="./brand/solana-dark.css" />
+<link rel="icon" href="./brand/x402/favicon.svg" />
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+:root{--p:#9945FF;--g:#14F195;--bg:#050508;--card:#0d0d18;--border:#1a1a2e;--text:#c8d3f5;--muted:#6a6a9a;--font:JetBrains Mono,ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px;min-height:100vh}
+a{color:var(--g);text-decoration:none}a:hover{text-decoration:underline}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--border);background:#08080e;padding:16px;overflow:auto}
+.main{padding:20px 22px 60px;overflow:auto}
+.logo{font-weight:800;font-size:16px;margin-bottom:6px}.logo span{color:var(--p)}
+.nav a{display:inline-block;margin:0 8px 10px 0;color:var(--muted)}
+.list button{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;color:var(--text);padding:8px 10px;border-radius:8px;font:inherit;cursor:pointer;margin-bottom:4px}
+.list button:hover,.list button.active{border-color:var(--border);background:var(--card)}
+.list small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+#content{line-height:1.6}
+#content h1,#content h2,#content h3{color:#fff;margin:18px 0 8px}
+#content p,#content li{margin:6px 0}
+#content code{background:#111122;padding:1px 5px;border-radius:4px}
+#content pre{background:#0a0a12;border:1px solid var(--border);padding:12px;border-radius:8px;overflow:auto;margin:10px 0}
+#content a{color:var(--g)}
+.meta{color:var(--muted);margin-bottom:14px}
+
+  body {
+    font-family: "Solana Mono", ui-monospace, monospace !important;
+    background:
+      linear-gradient(180deg, rgba(5,5,8,0.88), rgba(5,5,8,0.96)),
+      url('./brand/solana-gradient-dark.png') center/cover fixed !important;
+  }
+  .logo, h1, h2, h3 { font-family: "Solana Sans", ui-sans-serif, system-ui, sans-serif !important; }
+  .logo span, .accent { color: var(--solana-purple, #9945FF) !important; }
+  .btn.primary { background: linear-gradient(90deg, #3D0088 0%, #05683F 100%); border-color: transparent; color: #fff; }
+  .btn.green { color: var(--solana-green, #14F195); }
+  .card, .list, .pill, .side { border-color: rgba(153,69,255,0.25) !important; }
+  .brand-mark { height: 28px; width: 28px; vertical-align: middle; margin-right: 8px; border-radius: 6px; }
+
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="logo">onchain<span>ai</span> / docs</div>
+    <div class="nav"><a href="./">home</a><a href="./data.html">data</a><a href="./studio.html">studio</a></div>
+    <div class="list" id="list"></div>
+  </aside>
+  <main class="main">
+    <div class="meta" id="meta">loading docs…</div>
+    <article id="content"></article>
+  </main>
+</div>
+<script>
+const listEl = document.getElementById('list');
+const content = document.getElementById('content');
+const meta = document.getElementById('meta');
+let catalog = null;
+
+function openDoc(file, btn) {
+  document.querySelectorAll('.list button').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  meta.textContent = 'docs/' + file;
+  location.hash = encodeURIComponent(file);
+  fetch('./docs/' + file).then(r => {
+    if (!r.ok) throw new Error(r.status);
+    return r.text();
+  }).then(md => {
+    content.innerHTML = marked.parse(md);
+  }).catch(e => {
+    content.innerHTML = '<p>failed to load ' + file + ': ' + e.message + '</p>';
+  });
+}
+
+fetch('./docs-catalog.json').then(r => r.json()).then(cat => {
+  catalog = cat;
+  listEl.innerHTML = (cat.entries || []).filter(e => !e.missing).map(e => {
+    return `<button data-file="${e.file}"><strong>${e.title}</strong><small>${e.file} · ${e.lines} lines</small></button>`;
+  }).join('');
+  listEl.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => openDoc(btn.dataset.file, btn));
+  });
+  const want = decodeURIComponent((location.hash || '').slice(1)) || (cat.entries.find(e => e.file === 'onchainai.md') || cat.entries[0] || {}).file;
+  const btn = [...listEl.querySelectorAll('button')].find(b => b.dataset.file === want) || listEl.querySelector('button');
+  if (btn) openDoc(btn.dataset.file, btn);
+});
+</script>
+</body>
+</html>

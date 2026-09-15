@@ -1,0 +1,130 @@
+{
+  "site": "onchainai",
+  "section": "docs",
+  "generated": "2026-09-15T14:59:36.777949Z",
+  "root": "docs/",
+  "entries": [
+    {
+      "file": "2026-07-04-ai-training-consolidation.md",
+      "title": "The July 4 AI Training Consolidation",
+      "bytes": 3492,
+      "lines": 104,
+      "slug": "2026-07-04-ai-training-consolidation"
+    },
+    {
+      "file": "chart-agent-nemotron.md",
+      "title": "Clawd Nemotron replacement",
+      "bytes": 31821,
+      "lines": 173,
+      "slug": "chart-agent-nemotron"
+    },
+    {
+      "file": "chart-agent-self-hosting.md",
+      "title": "Clawd Chart Fable",
+      "bytes": 30535,
+      "lines": 536,
+      "slug": "chart-agent-self-hosting"
+    },
+    {
+      "file": "chart-agent-spark.md",
+      "title": "Spark 4B evaluation",
+      "bytes": 4971,
+      "lines": 86,
+      "slug": "chart-agent-spark"
+    },
+    {
+      "file": "charts-bucket-novita.md",
+      "title": "Charts bucket and Novita sandbox",
+      "bytes": 12559,
+      "lines": 240,
+      "slug": "charts-bucket-novita"
+    },
+    {
+      "file": "clawd_fable.md",
+      "title": "Clawd Fable",
+      "bytes": 1332,
+      "lines": 50,
+      "slug": "clawd_fable"
+    },
+    {
+      "file": "clawd_solana_svm_ai_compute_design.md",
+      "title": "Clawd",
+      "bytes": 53347,
+      "lines": 1664,
+      "slug": "clawd_solana_svm_ai_compute_design"
+    },
+    {
+      "file": "dataset_card.md",
+      "title": "\u2500\u2500 HF Metadata (required for Hub) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+      "bytes": 10698,
+      "lines": 273,
+      "slug": "dataset_card"
+    },
+    {
+      "file": "hauhau_qwen36.md",
+      "title": "HauhauCS Qwen3.6 35B A3B Runtime",
+      "bytes": 1984,
+      "lines": 67,
+      "slug": "hauhau_qwen36"
+    },
+    {
+      "file": "hf_training_setup.md",
+      "title": "Hugging Face training setup",
+      "bytes": 9274,
+      "lines": 210,
+      "slug": "hf_training_setup"
+    },
+    {
+      "file": "hosting.md",
+      "title": "Hosting the Clawd Trading Factory model",
+      "bytes": 5735,
+      "lines": 142,
+      "slug": "hosting"
+    },
+    {
+      "file": "model_card.md",
+      "title": "Solana Clawd Core AI 1.5B LoRA",
+      "bytes": 24646,
+      "lines": 625,
+      "slug": "model_card"
+    },
+    {
+      "file": "onchain_constitution.md",
+      "title": "The Onchain Constitution",
+      "bytes": 20639,
+      "lines": 666,
+      "slug": "onchain_constitution"
+    },
+    {
+      "file": "onchain.md",
+      "title": "OnChain-AI Handoff",
+      "bytes": 14420,
+      "lines": 422,
+      "slug": "onchain"
+    },
+    {
+      "file": "onchainai.md",
+      "title": "Onchain Model Kit",
+      "bytes": 15477,
+      "lines": 420,
+      "slug": "onchainai"
+    },
+    {
+      "file": "SESSIONS.md",
+      "title": "Clawd AI Training \u2014 Session Log",
+      "bytes": 8692,
+      "lines": 194,
+      "slug": "sessions"
+    },
+    {
+      "file": "solgpt-chart-tool-catalog.md",
+      "title": "SOL GPT tool catalog",
+      "bytes": 18042,
+      "lines": 326,
+      "slug": "solgpt-chart-tool-catalog"
+    }
+  ],
+  "assets": [
+    "assets/ai-training-consolidation-flow.svg"
+  ]
+}

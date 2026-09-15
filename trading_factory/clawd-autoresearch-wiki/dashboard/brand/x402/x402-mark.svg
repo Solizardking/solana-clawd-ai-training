@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="x402 mark">
+  <defs>
+    <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14F195"/>
+      <stop offset="40%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#9945FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" fill="#000000"/>
+  <polygon points="64.00,14.00 107.30,39.00 107.30,89.00 64.00,114.00 20.70,89.00 20.70,39.00" fill="none" stroke="url(#hg)" stroke-width="5"
+           stroke-linejoin="round"/>
+  <text x="64" y="72" text-anchor="middle"
+        font-family="ABC Diatype, Diatype, ui-sans-serif, system-ui, sans-serif"
+        font-size="28" font-weight="700" fill="#FFFFFF" letter-spacing="0.5">x402</text>
+</svg>

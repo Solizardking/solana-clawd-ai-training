@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>onchainai — Solana Clawd models & data</title>
+
+<link rel="stylesheet" href="./brand/fonts.css" />
+<link rel="stylesheet" href="./brand/solana-dark.css" />
+<link rel="icon" href="./brand/x402/favicon.svg" />
+
+<meta name="description" content="Onchain AI: every Solana Clawd Hugging Face model and dataset, local studio, chart-agent and Nemotron deploy." />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --p:#9945FF; --g:#14F195; --bg:#050508; --card:#0d0d18;
+  --border:#1a1a2e; --text:#c8d3f5; --muted:#6a6a9a;
+  --font:'JetBrains Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px;line-height:1.5;
+background-image:linear-gradient(rgba(153,69,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(153,69,255,.035) 1px,transparent 1px);background-size:44px 44px}
+a{color:var(--g);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 20px 72px}
+header{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:flex-end;margin-bottom:28px}
+.logo{font-size:26px;font-weight:800}.logo span{color:var(--p)}
+.sub{color:var(--muted);margin-top:8px;max-width:60ch}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.btn{padding:9px 12px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;font-weight:600}
+.btn.primary{border-color:var(--p);box-shadow:0 0 16px rgba(153,69,255,.28)}
+.btn.green{border-color:rgba(20,241,149,.4);color:var(--g)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px}
+.pill{border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px;color:var(--muted)}
+.pill b{color:#fff}
+section{margin-top:34px}
+section h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:130px}
+.card h3{font-size:13px;color:#fff;word-break:break-word}
+.card p{color:var(--muted);flex:1}
+.tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:3px 7px;border-radius:999px;border:1px solid rgba(153,69,255,.35);color:var(--p);width:fit-content}
+.tag.g{color:var(--g);border-color:rgba(20,241,149,.35)}
+.tag.feat{color:#ffd28a;border-color:rgba(255,210,138,.4)}
+.meta{color:var(--muted);font-size:10px}
+input[type=search]{width:100%;max-width:420px;background:#08080e;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font:inherit;margin:8px 0 14px}
+.list{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.row{display:grid;grid-template-columns:1.4fr .8fr;gap:10px;padding:11px 13px;border-top:1px solid var(--border)}
+.row:first-child{border-top:0}
+footer{margin-top:40px;color:var(--muted);font-size:10px}
+@media(max-width:700px){.row{grid-template-columns:1fr}}
+
+  body {
+    font-family: "Solana Mono", ui-monospace, monospace !important;
+    background:
+      linear-gradient(180deg, rgba(5,5,8,0.88), rgba(5,5,8,0.96)),
+      url('./brand/solana-gradient-dark.png') center/cover fixed !important;
+  }
+  .logo, h1, h2, h3 { font-family: "Solana Sans", ui-sans-serif, system-ui, sans-serif !important; }
+  .logo span, .accent { color: var(--solana-purple, #9945FF) !important; }
+  .btn.primary { background: linear-gradient(90deg, #3D0088 0%, #05683F 100%); border-color: transparent; color: #fff; }
+  .btn.green { color: var(--solana-green, #14F195); }
+  .card, .list, .pill, .side { border-color: rgba(153,69,255,0.25) !important; }
+  .brand-mark { height: 28px; width: 28px; vertical-align: middle; margin-right: 8px; border-radius: 6px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="logo">onchain<span>ai</span></div>
+      <p class="sub">Every Solana Clawd Hugging Face model and dataset we ship — plus local studio, chart-agent, and Nemotron deploy.</p>
+    </div>
+    <div class="nav">
+      <a class="btn primary" href="./studio.html">Studio</a>
+      <a class="btn green" href="./data.html">Local data</a>
+      <a class="btn" href="./docs.html">Docs</a>
+      <a class="btn green" href="https://huggingface.co/solanaclawd" target="_blank" rel="noreferrer">solanaclawd</a>
+      <a class="btn" href="https://huggingface.co/ordlibrary" target="_blank" rel="noreferrer">ordlibrary</a>
+      <a class="btn" href="./docs.html#onchain_constitution.md">Doctrine</a>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+  <input id="q" type="search" placeholder="filter models & datasets…" />
+
+  <section>
+    <h2>Featured</h2>
+    <div class="grid" id="featured"></div>
+  </section>
+
+  <section>
+    <h2>Models (<span id="mc">0</span>)</h2>
+    <div class="grid" id="models"></div>
+  </section>
+
+  <section>
+    <h2>Datasets (<span id="dc">0</span>)</h2>
+    <div class="grid" id="datasets"></div>
+  </section>
+
+  <section>
+    <h2>Deploy / local</h2>
+    <div class="list">
+      <div class="row"><div><strong>chart-agent</strong><br/><span class="meta">GPU compose · llama.cpp chart fable</span></div><div class="meta">deploy/chart-agent</div></div>
+      <div class="row"><div><strong>nemotron</strong><br/><span class="meta">training + pilot compose</span></div><div class="meta">deploy/nemotron</div></div>
+      <div class="row"><div><strong>chart_agent</strong><br/><span class="meta">Python candles · OCR · spark</span></div><div class="meta">chart_agent/</div></div>
+      <div class="row"><div><strong>weights on disk</strong><br/><span class="meta">HF pulls + GGUF</span></div><div class="meta">~/Models/solana-clawd</div></div>
+    </div>
+  </section>
+
+  <footer>onchainai · catalog from huggingface api · no secrets on the static site</footer>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+function card(item, featured) {
+  const tags = [];
+  if (featured) tags.push('<span class="tag feat">featured</span>');
+  tags.push(`<span class="tag ${item.kind==='dataset'?'g':''}">${item.kind||'model'}</span>`);
+  if (item.pipeline_tag) tags.push(`<span class="tag">${item.pipeline_tag}</span>`);
+  const stats = [];
+  if (item.downloads != null) stats.push(`${item.downloads} dl`);
+  if (item.likes != null) stats.push(`${item.likes}♥`);
+  if (item.error) stats.push(`error ${item.error}`);
+  return `<article class="card" data-id="${item.id}">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${tags.join('')}</div>
+    <h3>${item.id}</h3>
+    <p>${(item.tags||[]).slice(0,6).join(' · ') || 'Solana Clawd artifact'}</p>
+    <a href="${item.url}" target="_blank" rel="noreferrer">open on huggingface</a>
+    <div class="meta">${stats.join(' · ')}</div>
+  </article>`;
+}
+function render(data, filter='') {
+  const f = filter.trim().toLowerCase();
+  const feat = new Set(data.featured||[]);
+  const models = (data.models||[]).filter(m => m.id && m.id !== 'solanaclawd/README' && (!f || m.id.toLowerCase().includes(f)));
+  const datasets = (data.datasets||[]).filter(d => d.id && d.id !== 'solanaclawd/README' && (!f || d.id.toLowerCase().includes(f)));
+  const featuredItems = [...(data.models||[]),...(data.datasets||[])].filter(x => feat.has(x.id));
+  $('featured').innerHTML = featuredItems.map(i => card(i, true)).join('') || '<p class="meta">no featured matches</p>';
+  $('models').innerHTML = models.map(i => card(i, feat.has(i.id))).join('');
+  $('datasets').innerHTML = datasets.map(i => card(i, feat.has(i.id))).join('');
+  $('mc').textContent = models.length;
+  $('dc').textContent = datasets.length;
+  $('stats').innerHTML = `
+    <div class="pill"><b>${(data.models||[]).length}</b> models</div>
+    <div class="pill"><b>${(data.datasets||[]).length}</b> datasets</div>
+    <div class="pill">orgs <b>${(data.orgs||[]).join(' + ')}</b></div>
+    <div class="pill">local <b>~/Models/solana-clawd</b></div>`;
+}
+fetch('./models.json').then(r=>r.json()).then(data => {
+  window.__catalog = data;
+  render(data);
+  $('q').addEventListener('input', e => render(data, e.target.value));
+}).catch(err => {
+  $('featured').innerHTML = `<p class="meta">failed to load models.json: ${err.message}</p>`;
+});
+</script>
+</body>
+</html>
