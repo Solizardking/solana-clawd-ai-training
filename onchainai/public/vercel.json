@@ -1,15 +1,62 @@
 {
   "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
-    { "source": "/studio", "destination": "/studio.html" },
-    { "source": "/data", "destination": "/data.html" },
-    { "source": "/docs-index", "destination": "/docs.html" },
-    { "source": "/models", "destination": "/models.json" }
+    {
+      "source": "/studio",
+      "destination": "/studio.html"
+    },
+    {
+      "source": "/data",
+      "destination": "/data.html"
+    },
+    {
+      "source": "/docs-index",
+      "destination": "/docs.html"
+    },
+    {
+      "source": "/models",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/model-kit",
+      "destination": "/kit/index.html"
+    },
+    {
+      "source": "/model-kit/",
+      "destination": "/kit/index.html"
+    },
+    {
+      "source": "/kit",
+      "destination": "/kit/index.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/kit/register.html"
+    }
   ],
   "headers": [
     {
       "source": "/docs/(.*).md",
-      "headers": [{ "key": "Content-Type", "value": "text/markdown; charset=utf-8" }]
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/markdown; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
     }
   ]
 }

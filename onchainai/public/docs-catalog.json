@@ -1,7 +1,7 @@
 {
   "site": "onchainai",
   "section": "docs",
-  "generated": "2026-09-15T14:59:36.777949Z",
+  "generated": "2026-09-15T15:12:33.664692Z",
   "root": "docs/",
   "entries": [
     {
@@ -10,6 +10,13 @@
       "bytes": 3492,
       "lines": 104,
       "slug": "2026-07-04-ai-training-consolidation"
+    },
+    {
+      "file": "SESSIONS.md",
+      "title": "Clawd AI Training \u2014 Session Log",
+      "bytes": 8692,
+      "lines": 194,
+      "slug": "sessions"
     },
     {
       "file": "chart-agent-nemotron.md",
@@ -82,18 +89,81 @@
       "slug": "hosting"
     },
     {
+      "file": "model-kit/2026-07-04-ai-training-consolidation.md",
+      "title": "The July 4 AI Training Consolidation",
+      "bytes": 3716,
+      "lines": 108,
+      "slug": "model-kit-2026-07-04-ai-training-consolidation"
+    },
+    {
+      "file": "model-kit/DEPLOYMENT.md",
+      "title": "Model Kit Site Deployment",
+      "bytes": 2965,
+      "lines": 113,
+      "slug": "model-kit-deployment"
+    },
+    {
+      "file": "model-kit/HUGGING_FACE.md",
+      "title": "Hugging Face Guide",
+      "bytes": 2201,
+      "lines": 93,
+      "slug": "model-kit-hugging_face"
+    },
+    {
+      "file": "model-kit/NVIDIA_BLUEPRINTS.md",
+      "title": "NVIDIA AI Blueprint Integration",
+      "bytes": 4158,
+      "lines": 109,
+      "slug": "model-kit-nvidia_blueprints"
+    },
+    {
+      "file": "model-kit/ONBOARDING.md",
+      "title": "Solana AI Model Kit Onboarding",
+      "bytes": 3162,
+      "lines": 154,
+      "slug": "model-kit-onboarding"
+    },
+    {
+      "file": "model-kit/ONCHAIN_X402.md",
+      "title": "onchain.x402.wtf Integration",
+      "bytes": 1929,
+      "lines": 69,
+      "slug": "model-kit-onchain_x402"
+    },
+    {
+      "file": "model-kit/PERPS.md",
+      "title": "Perps Tool Lane",
+      "bytes": 2735,
+      "lines": 81,
+      "slug": "model-kit-perps"
+    },
+    {
+      "file": "model-kit/README.md",
+      "title": "Solana AI Model Kit",
+      "bytes": 16814,
+      "lines": 421,
+      "slug": "model-kit-readme"
+    },
+    {
+      "file": "model-kit/SECURITY.md",
+      "title": "Model Kit Security Contract",
+      "bytes": 2150,
+      "lines": 62,
+      "slug": "model-kit-security"
+    },
+    {
+      "file": "model-kit/UNSLOTH.md",
+      "title": "Unsloth Guide",
+      "bytes": 1899,
+      "lines": 92,
+      "slug": "model-kit-unsloth"
+    },
+    {
       "file": "model_card.md",
       "title": "Solana Clawd Core AI 1.5B LoRA",
       "bytes": 24646,
       "lines": 625,
       "slug": "model_card"
-    },
-    {
-      "file": "onchain_constitution.md",
-      "title": "The Onchain Constitution",
-      "bytes": 20639,
-      "lines": 666,
-      "slug": "onchain_constitution"
     },
     {
       "file": "onchain.md",
@@ -103,18 +173,18 @@
       "slug": "onchain"
     },
     {
+      "file": "onchain_constitution.md",
+      "title": "The Onchain Constitution",
+      "bytes": 20639,
+      "lines": 666,
+      "slug": "onchain_constitution"
+    },
+    {
       "file": "onchainai.md",
       "title": "Onchain Model Kit",
       "bytes": 15477,
       "lines": 420,
       "slug": "onchainai"
-    },
-    {
-      "file": "SESSIONS.md",
-      "title": "Clawd AI Training \u2014 Session Log",
-      "bytes": 8692,
-      "lines": 194,
-      "slug": "sessions"
     },
     {
       "file": "solgpt-chart-tool-catalog.md",
@@ -125,6 +195,7 @@
     }
   ],
   "assets": [
-    "assets/ai-training-consolidation-flow.svg"
+    "assets/ai-training-consolidation-flow.svg",
+    "model-kit/assets/ai-training-consolidation-flow.svg"
   ]
 }

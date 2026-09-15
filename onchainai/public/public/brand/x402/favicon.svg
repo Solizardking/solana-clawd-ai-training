@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="x402">
+  <defs>
+    <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14F195"/>
+      <stop offset="100%" stop-color="#9945FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#000000"/>
+  <polygon points="16.00,3.50 26.83,9.75 26.83,22.25 16.00,28.50 5.17,22.25 5.17,9.75" fill="none" stroke="url(#fg)" stroke-width="1.8"
+           stroke-linejoin="round"/>
+  <text x="16" y="19.5" text-anchor="middle"
+        font-family="ABC Diatype, Diatype, ui-sans-serif, system-ui, sans-serif"
+        font-size="8" font-weight="700" fill="#FFFFFF">x402</text>
+</svg>
