@@ -3,7 +3,8 @@ Clawd Model Kit — HuggingFace Space
 solanaclawd/clawd-model-kit
 
 Tabs:
-  🦞 Chat       — Live chat with solana-clawd-core-ai-1.5b-lora via HF Router
+  🦞 Chat       — Live chat (LoRA via CLAWD_INFERENCE_URL, or GGUF via llama.cpp/Ollama)
+  📦 GGUF       — solana-nvidia-trading-factory-8b-GGUF (Q4_K_M / Q5_K_M)
   📊 Benchmark  — 18-MCQ Solana Knowledge Benchmark results
   🏭 Factory    — NVIDIA Trading Factory blueprints
   🤖 Ecosystem  — Full model + dataset registry
@@ -19,6 +20,9 @@ ROUTER   = "https://router.huggingface.co/v1"
 MODEL_CORE   = "solanaclawd/solana-clawd-core-ai-1.5b-lora"
 MODEL_8B     = "solanaclawd/solana-nvidia-trading-factory-8b-lora"
 MODEL_LEGACY = "solanaclawd/solana-clawd-1.5b-lora"
+MODEL_GGUF   = "solanaclawd/solana-nvidia-trading-factory-8b-GGUF"
+GGUF_Q4      = "solana-trading-factory-8b-Q4_K_M.gguf"
+GGUF_Q5      = "solana-trading-factory-8b-Q5_K_M.gguf"
 
 # The HF Router only serves models offered by an enabled inference provider, and
 # none of the Clawd adapters are. Point CLAWD_INFERENCE_URL at any
@@ -30,10 +34,12 @@ CLAWD_INFERENCE_KEY   = os.environ.get("CLAWD_INFERENCE_KEY", "") or HF_TOKEN
 # Served model name as the backend reports it, which is usually the merged repo
 # rather than the adapter the dropdown shows.
 CLAWD_INFERENCE_MODEL = os.environ.get(
-    "CLAWD_INFERENCE_MODEL", "solanaclawd/solana-nvidia-trading-factory-8b"
+    "CLAWD_INFERENCE_MODEL",
+    # Prefer the GGUF-friendly served name when pointing llama.cpp / Ollama at the quant.
+    "solana-trading-factory-8b-Q4_K_M",
 )
-# Adapters that only exist behind a self-hosted backend.
-SELF_HOSTED_ONLY = {MODEL_CORE, MODEL_8B, MODEL_LEGACY}
+# Adapters / GGUF that only exist behind a self-hosted OpenAI-compatible backend.
+SELF_HOSTED_ONLY = {MODEL_CORE, MODEL_8B, MODEL_LEGACY, MODEL_GGUF}
 
 SYSTEM_PROMPT = """You are Clawd — a sovereign Solana-native AI agent.
 You reason about Solana DeFi, perpetuals, agent architecture, ZK compression, and the Clawd Constitution.
@@ -97,6 +103,17 @@ MODELS = [
         "job":      "ordlibrary/6a35a2ce953ed90bfb945009 ✓",
         "status":   "LIVE",
         "note":     "Function-calling perps agent — 13 tools, Phoenix DEX, paper trading",
+    },
+    {
+        "id":       "solanaclawd/solana-nvidia-trading-factory-8b-GGUF",
+        "base":     "NousResearch/Hermes-3-Llama-3.1-8B (merged → GGUF)",
+        "type":     "GGUF (Q4_K_M / Q5_K_M)",
+        "params":   "8B quantized",
+        "dataset":  "solana-nvidia-trading-factory-instruct",
+        "score":     "local / edge ready",
+        "job":      "—",
+        "status":   "LIVE",
+        "note":     "llama.cpp / Ollama pack — solana-trading-factory-8b-Q4_K_M.gguf + Q5_K_M",
     },
     {
         "id":       "solanaclawd/solana-clawd-1.5b-lora",
@@ -163,15 +180,27 @@ def resolve_backend(model_choice: str) -> tuple[str, str, str]:
 
 def chat(message: str, history: list, model_choice: str) -> str:
     if not CLAWD_INFERENCE_URL and model_choice in SELF_HOSTED_ONLY:
+        if model_choice == MODEL_GGUF:
+            return (
+                "⚠️ GGUF needs a local or remote llama.cpp / Ollama server.\n\n"
+                f"Repo: https://huggingface.co/{MODEL_GGUF}\n"
+                f"Quants: `{GGUF_Q4}` (recommended) · `{GGUF_Q5}`\n\n"
+                "1. Download the GGUF\n"
+                "2. Serve with llama.cpp (`llama-server -m … --port 8080`) or Ollama\n"
+                "3. Set Space secrets:\n"
+                "   - `CLAWD_INFERENCE_URL=http://…/v1`\n"
+                f"   - `CLAWD_INFERENCE_MODEL={GGUF_Q4.replace('.gguf','')}` (or your Ollama tag)\n"
+                "   - `CLAWD_INFERENCE_KEY` if your server requires auth\n\n"
+                "See the **📦 GGUF** tab for copy-paste commands."
+            )
         return (
             "⚠️ No inference backend configured.\n\n"
             f"`{model_choice}` is a LoRA adapter, so the HF Router cannot serve it — "
             "the router only offers models from enabled inference providers.\n\n"
             "Set `CLAWD_INFERENCE_URL` as a Space secret, pointing at an "
-            "OpenAI-compatible server for the merged weights "
-            "(`solanaclawd/solana-nvidia-trading-factory-8b`), e.g. a vLLM "
-            "instance or an HF Inference Endpoint. Optionally set "
-            "`CLAWD_INFERENCE_KEY` and `CLAWD_INFERENCE_MODEL` too."
+            "OpenAI-compatible server for the merged weights or the "
+            f"[GGUF pack](https://huggingface.co/{MODEL_GGUF}) via llama.cpp/Ollama. "
+            "Optionally set `CLAWD_INFERENCE_KEY` and `CLAWD_INFERENCE_MODEL` too."
         )
     base_url, api_key, served_model = resolve_backend(model_choice)
     if not api_key:
@@ -441,6 +470,43 @@ export HF_TOKEN=hf_...    # huggingface.co/settings/tokens (write access)</pre>
 
 # ── Gradio App ────────────────────────────────────────────────────────────────
 
+
+# ── GGUF pack ────────────────────────────────────────────────────────────────
+
+def build_gguf_html() -> str:
+    return f"""
+    <div style="font-family:monospace;color:#e2e8f0;line-height:1.55">
+      <h2 style="color:#a78bfa;margin:0 0 8px">📦 Trading Factory 8B — GGUF</h2>
+      <p style="color:#94a3b8">
+        Quantized weights for local / edge inference (llama.cpp, Ollama, LM Studio).
+        Source: <a href="https://huggingface.co/{MODEL_GGUF}" style="color:#38bdf8">{MODEL_GGUF}</a>
+      </p>
+      <table style="width:100%;border-collapse:collapse;margin:12px 0">
+        <tr style="background:#1e1b4b">
+          <th style="text-align:left;padding:8px">File</th>
+          <th style="text-align:left;padding:8px">Use</th>
+        </tr>
+        <tr style="background:#0f172a">
+          <td style="padding:8px"><code>{GGUF_Q4}</code></td>
+          <td style="padding:8px;color:#94a3b8">Recommended — quality/size balance</td>
+        </tr>
+        <tr style="background:#111827">
+          <td style="padding:8px"><code>{GGUF_Q5}</code></td>
+          <td style="padding:8px;color:#94a3b8">Higher fidelity, larger RAM</td>
+        </tr>
+      </table>
+      <h3 style="color:#c4b5fd">Quick start (llama.cpp)</h3>
+      <pre style="background:#020617;padding:12px;border-radius:8px;overflow:auto;color:#86efac">huggingface-cli download {MODEL_GGUF} {GGUF_Q4} --local-dir ./models
+llama-server -m ./models/{GGUF_Q4} --port 8080 --host 0.0.0.0</pre>
+      <h3 style="color:#c4b5fd">Point this Space at it</h3>
+      <pre style="background:#020617;padding:12px;border-radius:8px;overflow:auto;color:#86efac">CLAWD_INFERENCE_URL=http://YOUR_HOST:8080/v1
+CLAWD_INFERENCE_MODEL=solana-trading-factory-8b-Q4_K_M
+CLAWD_INFERENCE_KEY=  # optional</pre>
+      <p style="color:#64748b;font-size:0.85em">Then pick <code>{MODEL_GGUF}</code> in the Chat tab.</p>
+    </div>
+    """
+
+
 HEADER = """
 <div style="font-family:monospace;background:linear-gradient(135deg,#0f1117,#1a1a2e);
             padding:24px;border-radius:12px;margin-bottom:8px;text-align:center">
@@ -476,10 +542,13 @@ with gr.Blocks(
 
         # ── Tab 1: Chat ────────────────────────────────────────────────────
         with gr.Tab("🦞 Chat"):
-            gr.Markdown("> Chat live with `solanaclawd/solana-clawd-core-ai-1.5b-lora` via HF Router. No GPU needed.")
+            gr.Markdown(
+                f"> Self-hosted chat via `CLAWD_INFERENCE_URL` (vLLM / llama.cpp / Ollama). "
+                f"GGUF pack: [`{MODEL_GGUF}`](https://huggingface.co/{MODEL_GGUF})."
+            )
             model_dd = gr.Dropdown(
-                choices=[MODEL_CORE, MODEL_8B, MODEL_LEGACY],
-                value=MODEL_CORE,
+                choices=[MODEL_GGUF, MODEL_8B, MODEL_CORE, MODEL_LEGACY],
+                value=MODEL_GGUF,
                 label="Model",
             )
             chatbot = gr.Chatbot(height=420, show_label=False, bubble_full_width=False)
@@ -510,7 +579,11 @@ with gr.Blocks(
             send.click(respond, [msg, chatbot, model_dd], [msg, chatbot])
             msg.submit(respond, [msg, chatbot, model_dd], [msg, chatbot])
 
-        # ── Tab 2: Benchmark ───────────────────────────────────────────────
+        # ── Tab 2: GGUF ────────────────────────────────────────────────────
+        with gr.Tab("📦 GGUF"):
+            gr.HTML(build_gguf_html())
+
+        # ── Tab 3: Benchmark ───────────────────────────────────────────────
         with gr.Tab("📊 Benchmark"):
             gr.HTML(build_benchmark_html())
 

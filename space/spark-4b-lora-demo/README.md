@@ -45,3 +45,7 @@ decoding by default.
 
 The live chart-agent stack remains the private Docker Space
 [`ordlibrary/clawd-spark-chart-agent`](https://huggingface.co/spaces/ordlibrary/clawd-spark-chart-agent).
+
+## Related
+
+Parent Space Model Kit + GGUF pack: [`solanaclawd/solana-nvidia-trading-factory-8b-GGUF`](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-GGUF).

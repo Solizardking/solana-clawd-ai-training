@@ -7,8 +7,6 @@
 <link rel="stylesheet" href="brand/fonts.css">
 <link rel="stylesheet" href="brand/solana-dark.css">
 <link rel="icon" href="brand/x402/favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Orbitron:wght@400;600;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="os.css">
 <script src="https://terminal.jup.ag/main-v2.js" data-preload defer></script>
 </head>
@@ -17,7 +15,7 @@
   <!-- TOPBAR -->
   <header id="topbar">
     <span class="logo brand-logo"><img src="logo.png" alt="" width="28" height="28"/><span>CLAWD<span class="accent">BOT</span></span></span>
-    <span class="logo" style="font-size:13px;color:var(--text-dim);font-family:'Share Tech Mono';letter-spacing:2px">OS</span>
+    <span class="logo" style="font-size:13px;color:var(--text-dim);font-family:var(--font-mono);letter-spacing:2px">OS</span>
     <div class="top-stat"><span class="top-stat-label">Agent</span><span class="top-stat-val" id="hdr-status">—</span></div>
     <div class="top-stat"><span class="top-stat-label">Cycles</span><span class="top-stat-val" id="hdr-cycles">—</span></div>
     <div class="top-stat"><span class="top-stat-label">Positions</span><span class="top-stat-val" id="hdr-positions">—</span></div>
@@ -90,11 +88,11 @@
     <div class="page" id="page-market">
       <div class="grid2">
         <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Token Lookup (Birdeye)</span></div>
-          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="token-addr" placeholder="Solana token address…" value="So11111111111111111111111111111111111111112" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none"><button class="btn-secondary" onclick="loadToken()">LOAD</button></div>
+          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="token-addr" placeholder="Solana token address…" value="So11111111111111111111111111111111111111112" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:var(--font-mono);font-size:11px;outline:none"><button class="btn-secondary" onclick="loadToken()">LOAD</button></div>
           <div id="token-info"><div class="empty-state"><div class="empty-state-text">Enter address above</div></div></div>
         </div>
         <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Aster DEX Orderbook</span></div>
-          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="ob-symbol" placeholder="e.g. BTCUSDT" value="BTCUSDT" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none"><button class="btn-secondary" onclick="loadOrderbook()">LOAD</button></div>
+          <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="ob-symbol" placeholder="e.g. BTCUSDT" value="BTCUSDT" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:var(--font-mono);font-size:11px;outline:none"><button class="btn-secondary" onclick="loadOrderbook()">LOAD</button></div>
           <div id="orderbook-display"><div class="empty-state"><div class="empty-state-text">Load a symbol</div></div></div>
         </div>
       </div>
@@ -114,7 +112,7 @@
     <!-- MEMORY -->
     <div class="page" id="page-memory">
       <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">Query Memory</span></div>
-        <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="mem-query" placeholder="e.g. SOL momentum…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none" onkeyup="if(event.key==='Enter')queryMemory()"><button class="btn-secondary" onclick="queryMemory()">SEARCH</button></div>
+        <div class="row" style="gap:8px;margin-bottom:12px"><input type="text" id="mem-query" placeholder="e.g. SOL momentum…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:var(--font-mono);font-size:11px;outline:none" onkeyup="if(event.key==='Enter')queryMemory()"><button class="btn-secondary" onclick="queryMemory()">SEARCH</button></div>
         <div id="mem-results" class="scroll-area-tall"><div class="empty-state"><div class="empty-state-icon">🧠</div><div class="empty-state-text">Enter query above</div></div></div>
       </div>
     </div>
@@ -123,7 +121,7 @@
     <div class="page" id="page-research">
       <div class="panel"><div class="panel-hdr"><span class="panel-hdr-left">ClawdBot Chat</span></div>
         <div class="terminal" id="chat-log" style="height:300px;margin-bottom:10px"></div>
-        <div class="row" style="gap:8px"><input type="text" id="chat-input" placeholder="Talk to ClawdBot…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:'Share Tech Mono';font-size:11px;outline:none" onkeyup="if(event.key==='Enter')sendChat()"><button class="btn-secondary text-green" onclick="sendChat()">SEND</button></div>
+        <div class="row" style="gap:8px"><input type="text" id="chat-input" placeholder="Talk to ClawdBot…" style="flex:1;background:var(--bg0);border:1px solid var(--border2);color:var(--text);padding:7px 10px;font-family:var(--font-mono);font-size:11px;outline:none" onkeyup="if(event.key==='Enter')sendChat()"><button class="btn-secondary text-green" onclick="sendChat()">SEND</button></div>
       </div>
     </div>
 

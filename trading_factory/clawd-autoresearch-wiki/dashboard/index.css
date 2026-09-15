@@ -2,7 +2,6 @@
    ClawdBot Dashboard — Cyberpunk Trading Intelligence UI
    ═══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ── Design Tokens ───────────────────────────────────────────── */
 :root {
@@ -55,7 +54,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; scroll-behavior: smooth; }
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-deep);
   color: var(--text-primary);
   min-height: 100vh;
@@ -307,7 +306,7 @@ body::before {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
 }
 
 .stat-card.cyan .stat-value { color: var(--cyan-400); }
@@ -479,13 +478,13 @@ body::before {
 
 .param-key {
   color: var(--text-secondary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
 }
 
 .param-value {
   color: var(--cyan-400);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-weight: 600;
 }
 
@@ -548,7 +547,7 @@ body::before {
 .signal-strength {
   font-size: 0.72rem;
   color: var(--text-secondary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
 }
 
 /* ── Memory List ─────────────────────────────────────────────── */
@@ -633,7 +632,7 @@ body::before {
 }
 
 .trade-pnl {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-weight: 700;
   font-size: 0.88rem;
 }
@@ -659,7 +658,7 @@ body::before {
 .changelog-meta {
   font-size: 0.68rem;
   color: var(--text-tertiary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
 }
 
 /* ── Architecture Diagram ────────────────────────────────────── */
@@ -667,7 +666,7 @@ body::before {
   background: var(--bg-elevated);
   border-radius: var(--radius-md);
   padding: 20px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   line-height: 1.6;
   color: var(--text-secondary);
@@ -735,7 +734,7 @@ body::before {
 }
 
 .ind-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -865,7 +864,7 @@ body::before {
 .token-price {
   font-size: 1.6rem;
   font-weight: 800;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--text-primary);
 }
 
@@ -896,7 +895,7 @@ body::before {
 }
 
 .tm-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -910,7 +909,7 @@ body::before {
   padding: 6px 10px;
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   transition: background var(--transition-fast);
   animation: tradeFlash 0.4s ease-out;
 }
@@ -1016,7 +1015,7 @@ body::before {
 }
 
 .pnl-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -1027,7 +1026,7 @@ body::before {
 .portfolio-total {
   font-size: 1rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--cyan-400);
   margin-bottom: 10px;
 }
@@ -1056,20 +1055,20 @@ body::before {
 .port-token {
   font-weight: 600;
   color: var(--cyan-400);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   min-width: 60px;
 }
 
 .port-amount {
   flex: 1;
   color: var(--text-secondary);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   font-size: 0.72rem;
 }
 
 .port-value {
   font-weight: 600;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--text-primary);
 }
 
@@ -1109,7 +1108,7 @@ body::before {
   display: flex;
   gap: 16px;
   font-size: 0.72rem;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--text-secondary);
   flex-wrap: wrap;
 }
@@ -1143,18 +1142,18 @@ body::before {
 .trending-symbol {
   font-weight: 600;
   color: var(--cyan-400);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   min-width: 60px;
 }
 
 .trending-price {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--text-primary);
   min-width: 80px;
 }
 
 .trending-vol {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono), monospace;
   color: var(--text-secondary);
   font-size: 0.72rem;
   margin-left: auto;
@@ -1162,6 +1161,6 @@ body::before {
 
 /* ── Font aux ────────────────────────────────────────────────── */
 :root {
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: var(--font-mono), monospace;
 }
 
