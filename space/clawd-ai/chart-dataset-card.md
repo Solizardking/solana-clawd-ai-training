@@ -74,7 +74,7 @@ Download and extract it before using the JSON loader:
 from pathlib import Path
 from zipfile import ZipFile
 from huggingface_hub import hf_hub_download
-from datasets import load_dataset
+from datasets import Features, List, Value, load_dataset
 
 archive = hf_hub_download(
     "ordlibrary/clawd-chart-foundation-training",
@@ -90,7 +90,17 @@ with ZipFile(archive) as package:
             raise ValueError("Unsafe archive path")
     package.extractall(root)
 
-sft = load_dataset("json", data_files={
+# Early text-only batches have empty images lists. Declare their type so the
+# loader does not infer a null element type before reaching vision examples.
+sft_features = Features({
+    "id": Value("string"),
+    "messages": List({"role": Value("string"), "content": Value("string")}),
+    "images": List(Value("string")),
+    "sources": List(Value("string")),
+    "split": Value("string"),
+    "group": Value("string"),
+})
+sft = load_dataset("json", features=sft_features, data_files={
     split: str(root / f"{split}.jsonl")
     for split in ("train", "validation", "test")
 })

@@ -15,13 +15,28 @@ ROOT = Path(__file__).resolve().parents[1]
 REPO = "solanaclawd/solana-clawd-realtime-research-instruct"
 
 
+def get_hub_token():
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HF_HUB_TOKEN")
+    if token:
+        return token.strip()
+    try:
+        from huggingface_hub import get_token
+        return get_token()
+    except ImportError:
+        cache = Path(os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache")))
+        home = Path(os.environ.get("HF_HOME", str(cache / "huggingface")))
+        token_path = Path(os.environ.get("HF_TOKEN_PATH", str(home / "token")))
+        try:
+            return token_path.read_text().strip() or None
+        except OSError:
+            return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--push", action="store_true", help="Publish README.md only; requires HF_TOKEN")
+    parser.add_argument("--push", action="store_true", help="Publish README.md only; uses HF_TOKEN or cached hf auth login")
     args = parser.parse_args()
-    token = os.environ.get("HF_TOKEN")
-    if args.push and not token:
-        parser.error("Publishing requires HF_TOKEN in the environment")
+    token = get_hub_token()
     headers = {"User-Agent": "solana-clawd-citations/1.0"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -33,6 +48,7 @@ def main():
     try:
         revision = json.loads(get(f"https://huggingface.co/api/datasets/{REPO}"))["sha"]
         card = get(f"https://huggingface.co/datasets/{REPO}/raw/{revision}/README.md").decode()
+        original = card
         citations = (ROOT / "data/realtime_research_citations.md").read_text().strip()
         marker = "## Research Citations\n"
         if marker in card:
@@ -46,6 +62,11 @@ def main():
         output.write_text(card, encoding="utf-8")
         print(f"Prepared citation-only card: {output}")
         if args.push:
+            if card == original:
+                print("Both citations are already published; no commit needed")
+                return 0
+            if not token:
+                parser.error("Publishing requires HF_TOKEN or a cached login. Run .venv-connect/bin/hf auth login, then retry.")
             operations = [
                 {"key": "header", "value": {"summary": "Cite Kamat RED-2400 and hour-aware risk management research", "parentCommit": revision}},
                 {"key": "file", "value": {"path": "README.md", "content": base64.b64encode(card.encode()).decode(), "encoding": "base64"}},
