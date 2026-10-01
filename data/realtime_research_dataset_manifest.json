@@ -1,26 +1,27 @@
 {
-  "generated_at": "2026-06-19T18:08:46+00:00",
+  "generated_at": "2026-10-01T16:37:12.641018+00:00",
   "dataset_name": "Solana Clawd Realtime Research Instruct",
   "repo_id": "solanaclawd/solana-clawd-realtime-research-instruct",
-  "builder": "scripts/realtime_dataset_ingest.py",
+  "builder": "scripts/expand_realtime_research.py",
   "counts": {
-    "examples": 29058,
-    "sources": 28,
+    "examples": 83662,
+    "sources": 33,
     "missing_inputs": 0,
-    "duplicate_examples": 0,
+    "duplicate_examples": 23552,
     "duplicate_files_skipped": 2,
-    "secret_or_invalid_skipped": 296,
+    "secret_or_invalid_skipped": 1277,
     "by_source_type": {
       "notebook": 122,
       "parquet": 28250,
       "pdf": 683,
-      "text": 3
+      "text": 3,
+      "expansion_conversations": 54604
     }
   },
   "splits": {
-    "train": 26152,
-    "eval": 1452,
-    "test": 1454
+    "train": 78171,
+    "eval": 2595,
+    "test": 2896
   },
   "settings": {
     "train_ratio": 0.9,
@@ -188,7 +189,7 @@
       "skipped": 0,
       "metadata": {
         "title": "Explainable Patterns in Cryptocurrency Microstructure",
-        "author": "Bartosz Bieganowski; Robert Ślepaczuk",
+        "author": "Bartosz Bieganowski; Robert \u015alepaczuk",
         "subject": null,
         "keywords": null,
         "arxiv_id": "https://arxiv.org/abs/2602.00776v1",
@@ -455,12 +456,281 @@
       "metadata": {
         "chars": 10506
       }
+    },
+    {
+      "source_id": "nemo_clawd/processed",
+      "source_type": "local_sft",
+      "sha256": "482a1428e814d63e1c18641650530b3b5b8cd640e12f0be1db19019145e7bda9",
+      "records": 58,
+      "skipped": 0,
+      "metadata": {
+        "kind": "local_sft",
+        "source": "nemo_clawd/processed",
+        "rows": 80
+      }
+    },
+    {
+      "source_id": "solanaclawd/solana-clawd-instruct",
+      "source_type": "linked_dataset",
+      "sha256": "45573d08f32a866b97636f82b18916c9389a405b74d50b870fd4b71a115ae0d4",
+      "records": 20849,
+      "skipped": 0,
+      "metadata": {
+        "kind": "linked_published_dataset",
+        "name": "processed",
+        "repo_id": "solanaclawd/solana-clawd-instruct",
+        "revision": "a7ec746997bdebca82e1ac5c7c2ccb89bbda6c92",
+        "files": [
+          {
+            "file": "data/train-00000-of-00001.parquet",
+            "rows": 27405,
+            "sha256": "8ccfe5dcbca889b8dc73257a24e01eae8bc25bb8e5e31538cf734d99238ebe46"
+          },
+          {
+            "file": "data/eval-00000-of-00001.parquet",
+            "rows": 1522,
+            "sha256": "f3a31cadfb8791b8b188e0c098b0478887bc95eaaa877c6f996012f85c4deb73"
+          },
+          {
+            "file": "data/test-00000-of-00001.parquet",
+            "rows": 1523,
+            "sha256": "548fc83f387eb7a286f292bdac7d651c13bc95607ab8f97b8c6f09d42c3e64ea"
+          }
+        ]
+      }
+    },
+    {
+      "source_id": "solanaclawd/solana-clawd-core-ai-instruct",
+      "source_type": "linked_dataset",
+      "sha256": "1d278fafa4f08ccb780415e8e1014209bda85bb5c973cbcb96d14a5f97cd2eb2",
+      "records": 11265,
+      "skipped": 0,
+      "metadata": {
+        "kind": "linked_published_dataset",
+        "name": "core_ai",
+        "repo_id": "solanaclawd/solana-clawd-core-ai-instruct",
+        "revision": "57bad74c6ad1e26fff6ad33b30f8e211fb9a613b",
+        "files": [
+          {
+            "file": "data/train-00000-of-00001.parquet",
+            "rows": 31655,
+            "sha256": "ce839ef08501eb075854efddbcee59276f176c6f94fc3f1e8e586cadf4004937"
+          },
+          {
+            "file": "data/eval-00000-of-00001.parquet",
+            "rows": 1758,
+            "sha256": "d8b9ae5afaff655bea56218645399a99cbe466207021d65e2ba472504fdf42a6"
+          },
+          {
+            "file": "data/test-00000-of-00001.parquet",
+            "rows": 1760,
+            "sha256": "b059f7995128589fda4f56dfc646f6cc8d980091ea007f24c11836548a3babc7"
+          }
+        ]
+      }
+    },
+    {
+      "source_id": "solanaclawd/solana-clawd-repo-corpus",
+      "source_type": "linked_dataset",
+      "sha256": "e7b64d62b36592223f72091014e5a28c3136c122c655765f13bc3030150155aa",
+      "records": 22251,
+      "skipped": 0,
+      "metadata": {
+        "kind": "linked_published_dataset",
+        "name": "repo_corpus",
+        "repo_id": "solanaclawd/solana-clawd-repo-corpus",
+        "revision": "5908891baa92e6f7a4722e901c4324056df2738a",
+        "files": [
+          {
+            "file": "data/train-00000-of-00001.parquet",
+            "rows": 24768,
+            "sha256": "a84c60b3f502059bf9d962f20ec74e8597569beac939d9b6507c3fb1d8c36bf7"
+          },
+          {
+            "file": "data/eval-00000-of-00001.parquet",
+            "rows": 1376,
+            "sha256": "ab4de8f9dad0489a2dd6f68352ec9bd399b27be3e80968083e3b9e706bc888bd"
+          },
+          {
+            "file": "data/test-00000-of-00001.parquet",
+            "rows": 1377,
+            "sha256": "b99a28ade6f4482f2bdfdde19b4383b53e8289e9fe37586ed8a6b6bf01cdd265"
+          }
+        ]
+      }
+    },
+    {
+      "source_id": "solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+      "source_type": "linked_dataset",
+      "sha256": "790515fb7acc6c0e811268aaf932a505228c268deda38a8dc5fcfb89c6445c91",
+      "records": 181,
+      "skipped": 0,
+      "metadata": {
+        "kind": "linked_published_dataset",
+        "name": "trading_factory",
+        "repo_id": "solanaclawd/solana-clawd-nvidia-trading-factory-instruct",
+        "revision": "6e0b53994b485f1680194ca6a74fa96760a19257",
+        "files": [
+          {
+            "file": "data/train-00000-of-00001.parquet",
+            "rows": 179,
+            "sha256": "c5a9ffbf649aabc97acb977a5617e01bc7c98b76be83365e50e5ea9e2450728a"
+          },
+          {
+            "file": "data/eval-00000-of-00001.parquet",
+            "rows": 9,
+            "sha256": "46fdf42ad2b797e50a6a89bd4c6d6f51f2897c852f4eaa14831a1ea9385288e6"
+          },
+          {
+            "file": "data/test-00000-of-00001.parquet",
+            "rows": 11,
+            "sha256": "c41aee08da77c76e3e599fb1d7b59d53f268cc61a47fbbd423f7bba43c80d457"
+          }
+        ]
+      }
     }
   ],
-  "dataset_sha256": "d16898d2a2c813d117fa553661ecb3f4656f67fafc7203187fd92c1dd5ea70d8",
+  "dataset_sha256": "965fbb7365ccc4c3532e7a72b882e9c73339acd4eab666ddf1de9ac8b0d35499",
   "output": {
-    "jsonl": "data/realtime_research_sft.jsonl",
-    "dataset_dir": "data/realtime_research_processed",
-    "dataset_card": "data/realtime_research_dataset_card.md"
+    "jsonl": "raw/realtime_research_sft.jsonl",
+    "parquet": {
+      "train": "data/train-00000-of-00001.parquet",
+      "eval": "data/eval-00000-of-00001.parquet",
+      "test": "data/test-00000-of-00001.parquet"
+    }
+  },
+  "base_revision": "10b57b01fb4e078a9f670bb73a64d9a063d68f6b",
+  "expansion": {
+    "manifest": "metadata/realtime_research_expansion_manifest.json",
+    "lineage": "metadata/expansion_lineage.jsonl",
+    "auxiliary": [
+      {
+        "source": "nemo_clawd/corpus/all_chunks.jsonl",
+        "file": "auxiliary/nemo_corpus/chunks.jsonl",
+        "rows": 588,
+        "sha256": "17a103fc5596474401654bf348a04045182c5552c138437bfbc823b528515d24"
+      },
+      {
+        "source": "nemo_clawd/preference/risk_preferences.jsonl",
+        "file": "auxiliary/nemo_preferences/risk_preferences.jsonl",
+        "rows": 7,
+        "sha256": "de072645f44e2a4ea1d8adb6ef03ae85866ed3036392b5acaf2daa4d5f900a49"
+      },
+      {
+        "source": "nemo_clawd/eval/source_grounded_eval.jsonl",
+        "file": "auxiliary/nemo_evaluation/source_grounded_eval.jsonl",
+        "rows": 49,
+        "sha256": "207118d7fb59a13d2a0f032a6122635fedf140fc1bbb2b883969e10be4b42219"
+      },
+      {
+        "source": "nvidia_rag_store/chunks.jsonl",
+        "file": "auxiliary/nvidia_rag/chunks.jsonl",
+        "rows": 150,
+        "sha256": "e4a072400e47a3a2cb00bd11af853646df6bac6c14237feee8796ebe467e2bb2"
+      },
+      {
+        "source": "solanaclawd/solana-tx-foundation-cpt",
+        "file": "auxiliary/tx_foundation_cpt/train.jsonl",
+        "rows": 19542,
+        "sha256": "37bb4491f3d07830c8cf056295acb42bf3ec2d88e2daec746748911d8b66d8d8"
+      },
+      {
+        "source": {
+          "health": "https://clawd-ws.fly.dev/health",
+          "websocket": "wss://clawd-ws.fly.dev/ws"
+        },
+        "file": "auxiliary/live_tape/decisions.jsonl",
+        "rows": 4,
+        "sha256": "beec140bbdcba59f46af3006aa40d5b1732af86c4406a52c0e3deda8f0eabdbc",
+        "role": "native_clef_observed_field_decisions",
+        "included_in_main_chat_examples": false,
+        "snapshot": "auxiliary/live_tape/snapshot.json",
+        "snapshot_sha256": "e3a2d8bf0bf3e58b6e53ed5cfb30a58d081d0696af68c966bea531b1cd3e4632",
+        "snapshot_file_sha256": "776567a88253331b40f8bfadabbe063858979dd288b13dfa474ce1a1feb4f290",
+        "captured_at": "2026-10-01T16:42:02.091072+00:00",
+        "observed_fields": {
+          "health": [
+            "analyzer",
+            "birdeye",
+            "claims",
+            "clients",
+            "dflow",
+            "enrichLaunches",
+            "helius",
+            "heliusWebhook",
+            "jupiter",
+            "predictionStream",
+            "solana",
+            "status",
+            "totalClaims",
+            "totalLaunches",
+            "tracker",
+            "uptime_reported"
+          ],
+          "websocket_by_type": {
+            "status": [
+              "clients",
+              "connected",
+              "githubLaunches",
+              "totalClaims",
+              "totalLaunches",
+              "type",
+              "uptime"
+            ],
+            "token-launch": [
+              "creator",
+              "declared_socials",
+              "hasGithub",
+              "isV2",
+              "marketCapSol",
+              "mint",
+              "name",
+              "symbol",
+              "time",
+              "type"
+            ]
+          }
+        },
+        "freshness_checked_at": "2026-10-01T16:53:12.141173+00:00",
+        "freshness_at_staging": {
+          "snapshot_age_seconds": 670.050101,
+          "observation_age_seconds": [
+            670.051092,
+            670.051042,
+            670.051022,
+            670.051007,
+            670.141711
+          ],
+          "stale": true,
+          "event_age_seconds": [
+            null,
+            731.141173,
+            722.141173,
+            723.141173
+          ],
+          "scope": "Fresh receive time does not prove a token event or market value is current."
+        },
+        "freshness_limitations": [
+          "Saved snapshots are historical observations; current runtime answers require another bounded read-only capture.",
+          "A fresh receive timestamp does not establish that a launch event or its marketCapSol value is current.",
+          "Health and websocket counters are independent reported values and need not agree.",
+          "Creator names, symbols and declared social presence are untrusted data; declarations do not verify accounts.",
+          "Labels read back observed fields only. No future outcomes, trade profitability, or signing permissions are labeled."
+        ],
+        "tokenizer_reference": "auxiliary/live_tape/tokenizer_reference.json",
+        "runtime_files": [
+          "auxiliary/live_tape/clef_live_tape.py",
+          "auxiliary/live_tape/clef_research_data.py",
+          "auxiliary/live_tape/clef_research_training.py"
+        ],
+        "autoExecute": false
+      }
+    ]
+  },
+  "publication": {
+    "repo_id": "solanaclawd/solana-clawd-realtime-research-instruct",
+    "revision": "58eea08df320b56c0cfcec84f9ae1be1eb8bb5c2",
+    "commit_url": "https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct/commit/58eea08df320b56c0cfcec84f9ae1be1eb8bb5c2",
+    "verified_files": 81
   }
 }

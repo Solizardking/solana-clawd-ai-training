@@ -152,7 +152,7 @@ def export_merged_release(model: Any, processor: Any, upstream_module: Any,
         "standalone_backbone": True,
         "backbone": backbone,
         "joint_head_config": head_config,
-        "training": metadata,
+        "training": json.loads(training_json),
         "files": files,
         "total_bytes": sum(value["bytes"] for value in files.values()),
         "loader": "from export_clef_release import load_release_model",
@@ -179,6 +179,54 @@ def verify_release(output_dir: Path) -> dict[str, Any]:
     observed.pop("tensor_names")
     if observed != manifest["backbone"]:
         raise ValueError("Backbone shard inventory differs from exported manifest")
+    return manifest
+
+
+def refresh_release_manifest(output_dir: Path, status: str | None = None,
+                             reload_verification: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Inventory actual release bytes after runtime/docs/evaluation are added.
+
+    Recompute all hashes, including backbone shards. This is an explicit final
+    publication step, not a way to verify prior hashes or infer a training or
+    reload success. The caller supplies any authoritative runtime verification.
+    The manifest does not hash itself, avoiding a circular digest.
+    """
+    output_dir = Path(output_dir)
+    manifest_path = output_dir / "release.json"
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("format") != "clef-merged-release-v1":
+        raise ValueError("Unsupported Clef release manifest")
+    if status is not None and (not isinstance(status, str) or not status.strip()):
+        raise ValueError("Release status must be a nonempty string")
+    if reload_verification is not None and not isinstance(reload_verification, dict):
+        raise ValueError("Reload verification must be a structured record")
+    verification = (json.loads(json.dumps(reload_verification))
+                    if reload_verification is not None else None)
+    observed = _backbone_inventory(output_dir)
+    observed.pop("tensor_names")
+    files = {}
+    for path in sorted(output_dir.rglob("*")):
+        if path == manifest_path:
+            continue
+        if path.is_symlink():
+            raise ValueError("Release inventory cannot include symlinks")
+        if path.is_file():
+            files[path.relative_to(output_dir).as_posix()] = {
+                "bytes": path.stat().st_size, "sha256": _sha256(path),
+            }
+    manifest.update(backbone=observed, files=files,
+                    total_bytes=sum(value["bytes"] for value in files.values()),
+                    training=json.loads((output_dir / "training.json").read_text()),
+                    joint_head_config=json.loads((output_dir / "joint_head_config.json").read_text()))
+    if status is not None:
+        manifest["status"] = status
+    if verification is not None:
+        manifest["reload_verification"] = verification
+        manifest["verification_scope"] = (
+            "Export hashes, shard references, vision tensor presence and supplied standalone "
+            "runtime reload verification; see reload_verification for the tested scope."
+        )
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return manifest
 
 

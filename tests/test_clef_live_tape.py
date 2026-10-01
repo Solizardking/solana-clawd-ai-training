@@ -1,9 +1,13 @@
 """Live-evidence contracts; offline fixtures never claim a live observation."""
 import copy
+import base64
 from datetime import datetime, timedelta, timezone
 import json
+import hashlib
 from pathlib import Path
 import sys
+import struct
+import time
 from types import SimpleNamespace
 
 import pytest
@@ -172,3 +176,85 @@ def test_native_encoder_rejects_truncation_and_never_adds_tokens(monkeypatch):
     assert called[0] == (tokenizer, record, 1_000_000)
     with pytest.raises(ValueError, match="Complete live state"):
         tape.encode_native_record(module, processor, record, max_length=499)
+
+
+def _wire(payload, opcode=1, final=True):
+    payload = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
+    first = (0x80 if final else 0) | opcode
+    if len(payload) < 126:
+        return bytes((first, len(payload))) + payload
+    return bytes((first, 126)) + struct.pack("!H", len(payload)) + payload
+
+
+class FakeSocket:
+    def __init__(self, frames, valid_accept=True):
+        self.frames = frames
+        self.valid_accept = valid_accept
+        self.buffer = bytearray()
+        self.sent = []
+        self.closed = False
+
+    def settimeout(self, value):
+        assert 0 < value <= 30
+
+    def sendall(self, value):
+        self.sent.append(value)
+        if value.startswith(b"GET"):
+            request = value.decode()
+            key = request.split("Sec-WebSocket-Key: ")[1].split("\r\n")[0]
+            accept = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode() if self.valid_accept else "invalid"
+            header = f"HTTP/1.1 101 Switching Protocols\r\nSec-WebSocket-Accept: {accept}\r\n\r\n".encode()
+            # Frames in the same recv as the upgrade must not be discarded.
+            self.buffer.extend(header + self.frames)
+
+    def recv(self, size):
+        if not self.buffer:
+            raise TimeoutError("bounded receive timeout")
+        piece = bytes(self.buffer[:size])
+        del self.buffer[:size]
+        return piece
+
+    def close(self):
+        self.closed = True
+
+
+def fake_ws(monkeypatch, frames, valid_accept=True):
+    sock = FakeSocket(frames, valid_accept)
+    monkeypatch.setattr(tape.socket, "create_connection", lambda *args, **kwargs: sock)
+    monkeypatch.setattr(tape.ssl, "create_default_context", lambda: SimpleNamespace(wrap_socket=lambda raw, **kwargs: raw))
+    return sock
+
+
+def test_ws_keeps_upgrade_buffer_and_handles_ping_and_fragmentation(monkeypatch):
+    payload = json.dumps({"type": "token-launch", "mint": MINT, "symbol": "Clawd  "}).encode()
+    frames = _wire(b"ping", opcode=9) + _wire(payload[:20], final=False) + _wire(payload[20:], opcode=0)
+    sock = fake_ws(monkeypatch, frames)
+    observations, transport = tape._ws_observe(time.monotonic() + 2, 1)
+    assert observations[0]["frame"]["mint"] == MINT
+    assert observations[0]["frame"]["symbol"] == "Clawd  "
+    assert transport == {"status": "observed", "handshake_verified": True, "frames_received": 1}
+    assert sock.closed and any(value.startswith(b"\x8a") for value in sock.sent)
+
+
+def test_ws_partial_timeout_keeps_observed_frames(monkeypatch):
+    sock = fake_ws(monkeypatch, _wire({"type": "status", "connected": True}))
+    observations, transport = tape._ws_observe(time.monotonic() + 2, 2)
+    assert len(observations) == 1 and transport["frames_received"] == 1
+    assert transport["status"] == "timeout" and transport["handshake_verified"] is True
+    assert sock.closed
+
+
+def test_ws_rejects_unverified_upgrade_and_oversized_message(monkeypatch):
+    fake_ws(monkeypatch, _wire({"type": "status"}), valid_accept=False)
+    observations, transport = tape._ws_observe(time.monotonic() + 2, 1)
+    assert observations == [] and transport["handshake_verified"] is False
+    assert transport["error_type"] == "ValueError"
+    fake_ws(monkeypatch, bytes((0x81, 127)) + struct.pack("!Q", tape.MAX_RESPONSE_BYTES + 1))
+    observations, transport = tape._ws_observe(time.monotonic() + 2, 1)
+    assert observations == [] and transport["error_type"] == "ValueError"
+
+
+def test_ws_expired_budget_does_not_connect(monkeypatch):
+    monkeypatch.setattr(tape.socket, "create_connection", lambda *args, **kwargs: pytest.fail("expired capture must not reconnect"))
+    observations, transport = tape._ws_observe(time.monotonic() - 1, 1)
+    assert observations == [] and transport["status"] == "timeout"

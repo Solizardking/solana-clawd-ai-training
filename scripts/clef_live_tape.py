@@ -280,6 +280,10 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
             raise ValueError("Unsafe snapshot transport fields")
         if "error_type" in part and (not isinstance(part["error_type"], str) or not re.fullmatch(r"[A-Za-z_][A-Za-z_0-9]{0,100}", part["error_type"])):
             raise ValueError("Unsafe transport error detail")
+        if "handshake_verified" in part and type(part["handshake_verified"]) is not bool:
+            raise ValueError("Invalid transport handshake evidence")
+        if "frames_received" in part and (type(part["frames_received"]) is not int or part["frames_received"] != len(snapshot["frames"])):
+            raise ValueError("Invalid transport frame count")
     health = snapshot.get("health")
     if health is not None:
         if set(health) != {"received_at", "data"} or sanitize_health({**health["data"], "uptime": health["data"].get("uptime_reported")}) != health["data"]:
@@ -318,6 +322,9 @@ def snapshot_freshness(snapshot: dict[str, Any], *, now: datetime | None = None,
         raise ValueError("Timezone-aware now and a positive bounded max age are required")
     age = (now - _parse_time(snapshot["captured_at"])).total_seconds()
     has_observation = snapshot.get("health") is not None or bool(snapshot.get("frames"))
+    receive_ages = [(now - _parse_time(entry["received_at"])).total_seconds() for entry in snapshot.get("frames", [])]
+    if snapshot.get("health") is not None:
+        receive_ages.append((now - _parse_time(snapshot["health"]["received_at"])).total_seconds())
     event_ages = []
     for entry in snapshot.get("frames", []):
         value = entry["frame"].get("time")
@@ -325,7 +332,8 @@ def snapshot_freshness(snapshot: dict[str, Any], *, now: datetime | None = None,
             event_ages.append((now - _parse_time(value)).total_seconds() if isinstance(value, str) else None)
         except ValueError:
             event_ages.append(None)
-    return {"snapshot_age_seconds": age, "stale": not has_observation or age < 0 or age > max_age_seconds,
+    return {"snapshot_age_seconds": age, "observation_age_seconds": receive_ages,
+            "stale": not has_observation or age < 0 or age > max_age_seconds or any(value < 0 or value > max_age_seconds for value in receive_ages),
             "event_age_seconds": event_ages, "scope": "Fresh receive time does not prove a token event or market value is current."}
 
 
@@ -368,6 +376,9 @@ def live_decision_records(snapshot: dict[str, Any]) -> list[dict[str, Any]]:
             correct = str(sum((1 << bit) for bit, key in enumerate(("website", "twitter", "telegram")) if social[key]))
             add(f"launch-{index}-declared-socials", "Which exact creator-declared social-field presence mask is shown in this observed launch? Declaration is not verification of a social account.", options, correct,
                 {"source": WS_URL, "observation": entry})
+    from clef_research_data import decision_prompt_hash
+    for record in records:
+        record["provenance"]["prompt_hash"] = decision_prompt_hash(record)
     return records
 
 
@@ -399,7 +410,7 @@ def main() -> int:
     parser.add_argument("--decisions-output", type=Path)
     parser.add_argument("--timeout", type=float, default=15)
     parser.add_argument("--max-frames", type=int, default=4)
-    parser.add_argument("--tokenizer-audit", action="store_true", help="Use the actual Clef processor/upstream encoder, without model weights")
+    parser.add_argument("--tokenizer-audit", "--native-tokenizer", action="store_true", help="Use the actual Clef processor/upstream encoder, without model weights")
     args = parser.parse_args()
     snapshot = capture_live_snapshot(args.timeout, args.max_frames)
     args.output.parent.mkdir(parents=True, exist_ok=True)

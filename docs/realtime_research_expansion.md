@@ -43,6 +43,10 @@ may have their own terms in addition to the dataset card's license.
 # Build once into a fresh staging directory.
 .venv-connect/bin/python scripts/expand_realtime_research.py --restore-linked
 
+# Add safe observed-field decisions and access to the native Clef tokenizer.
+.venv-connect/bin/python scripts/stage_clef_live_tape.py \
+  --stage local/research-expansion
+
 # Check staged hashes, required files, and citations without publishing.
 .venv-connect/bin/python scripts/publish_research_expansion.py \
   --stage local/research-expansion
@@ -60,3 +64,25 @@ changes while work is staged, rebuild against that revision into a new directory
 the publisher does not overwrite concurrent changes. Publication does not
 implicitly start paid GPU work. Follow the [Clef training guide](clef_research_training.md)
 to run the genuine GPU pilot and then train and export the full model.
+
+The staged live package keeps historical observations and native decision rows
+separate from the main chat splits. Its tokenizer reference pins Clef's existing
+processor; runtime access captures new read-only evidence. No vocabulary changes
+or model weights are included in the dataset expansion.
+
+The complete dataset card and standalone training-input screen were published in
+commit `81607770f2b59c7e6b6a1d63bfad4591766b4757`. That update changes `README.md`
+and adds `preprocessing/model_input_filter.py` and
+`metadata/training_input_security_audit.json`; all 81 other existing files were
+verified unchanged. The three main Parquets remain identical to data revision
+`58eea08df320b56c0cfcec84f9ae1be1eb8bb5c2`, which training continues to pin.
+Publication evidence is in `local/research-dataset-card-deployment/published.json`.
+
+All three Python examples were executed from the published card. Loading and
+streaming preserve the documented train/eval/test splits; screening removes 14
+retained signing-material train rows and leaves 78,157/2,595/2,896 examples before
+subsequent native prompt, candidate-pool, and context checks. The card records
+measured repeated-answer, repeated-question, and source-overlap limitations;
+builder prompt/answer conflict checks do not establish universally disjoint
+questions, answers, or documents. The rebuilt workflow resolves current donor
+revisions, so exact snapshot reproduction requires the recorded immutable inputs.

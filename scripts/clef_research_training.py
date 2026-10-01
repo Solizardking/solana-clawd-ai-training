@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import math
 import json
 from pathlib import Path
 import sys
@@ -74,13 +76,14 @@ def evaluate(model, module, processor, encoded, rows, device):
     if not rows:
         raise ValueError("Evaluation cohort is empty")
     model.eval()
-    predictions, correct, nll, brier = [], 0, 0.0, 0.0
+    predictions, correct, nll, brier, chance = [], 0, 0.0, 0.0, 0.0
     with torch.inference_mode():
         for record, row in zip(encoded, rows, strict=True):
             logits = model(module.collate_records([record], processor.tokenizer.pad_token_id, device))[0]
             answers = {}
             for question, scores in zip(record.questions, logits, strict=True):
                 probabilities = scores.float().softmax(-1)
+                chance += 1 / len(question.option_ids)
                 if not torch.isfinite(probabilities).all():
                     raise ValueError("Nonfinite evaluation probabilities")
                 gold = question.option_ids.index(row["labels"][question.question_id])
@@ -98,7 +101,46 @@ def evaluate(model, module, processor, encoded, rows, device):
     questions = sum(len(record.questions) for record in encoded)
     return {"records": len(rows), "questions": questions, "accuracy": correct / questions,
             "nll": nll / questions, "multiclass_brier": brier / questions,
-            "chance_accuracy": 0.25, "scope": "Solana reference-answer selection; not the official Decision Index"}, predictions
+            "chance_accuracy": chance / questions,
+            "scope": "Solana reference-answer selection and observed-field readback; not the official Decision Index"}, predictions
+
+
+def compare_predictions(before, after, tolerance=1e-4):
+    """Require identical records/questions/options and measure saved-load parity."""
+    maximum = 0.0
+    if not before or len(before) != len(after):
+        raise ValueError("Reload verification needs matching nonempty cohorts")
+    for expected, observed in zip(before, after, strict=True):
+        if expected["id"] != observed["id"] or expected["answers"].keys() != observed["answers"].keys():
+            raise ValueError("Reloaded predictions refer to different records or questions")
+        for question, expected_answer in expected["answers"].items():
+            actual = observed["answers"][question]
+            if expected_answer["probabilities"].keys() != actual["probabilities"].keys():
+                raise ValueError("Reloaded prediction options differ")
+            for option, probability in expected_answer["probabilities"].items():
+                difference = abs(probability - actual["probabilities"][option])
+                if not math.isfinite(difference) or difference > tolerance:
+                    raise ValueError(f"Reloaded probabilities differ by {difference}, tolerance {tolerance}")
+                maximum = max(maximum, difference)
+    return {"matched": True, "records": len(before), "max_probability_difference": maximum, "tolerance": tolerance}
+
+
+def trainable_fingerprints(model):
+    """Hash actual trainable parameter bytes to prove both paths changed."""
+    import torch
+    digests = {"lora": hashlib.sha256(), "head": hashlib.sha256()}
+    counts = {key: 0 for key in digests}
+    for name, parameter in sorted(model.named_parameters()):
+        kind = "lora" if "lora_" in name else "head" if name.startswith("head.") else None
+        if kind is None or not parameter.requires_grad:
+            continue
+        digest = digests[kind]
+        digest.update(json.dumps([name, str(parameter.dtype), list(parameter.shape)]).encode())
+        digest.update(parameter.detach().cpu().contiguous().reshape(-1).view(torch.uint8).numpy().tobytes())
+        counts[kind] += parameter.numel()
+    if any(value == 0 for value in counts.values()):
+        raise ValueError("Both LoRA and native decision head must be trainable")
+    return {kind: {"sha256": digest.hexdigest(), "parameters": counts[kind]} for kind, digest in digests.items()}
 
 
 def save_adapter(model, processor, module, output: Path, metadata):

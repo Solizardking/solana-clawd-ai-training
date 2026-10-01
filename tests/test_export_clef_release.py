@@ -12,7 +12,8 @@ import sys
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from export_clef_release import export_merged_release, load_release_model, verify_release
+from export_clef_release import (export_merged_release, load_release_model,
+                                 refresh_release_manifest, verify_release)
 
 
 def load_local_upstream():
@@ -43,7 +44,7 @@ def tiny_processor():
     )
 
 
-def tiny_model(module, processor):
+def tiny_model(module, processor, base_dir=None):
     from transformers import Qwen3_5Config, Qwen3_5ForConditionalGeneration
     from clef_research_training import attach_lora
     config = Qwen3_5Config(
@@ -61,6 +62,8 @@ def tiny_model(module, processor):
     )
     model = module.ClefModel(Qwen3_5ForConditionalGeneration(config), module.JointSchemaHead(
         hidden_size=32, width=16, routing_layers=1, layers=1, heads=2, feedforward=32))
+    if base_dir is not None:
+        model.language_model.save_pretrained(base_dir)
     attach_lora(model, rank=2)
     return model
 
@@ -79,13 +82,16 @@ def typed_request():
 
 def test_real_hybrid_model_merge_reloads_native_typed_logits_and_vision(tmp_path):
     import torch
+    from peft import PeftModel
     from safetensors.torch import load_file
+    from transformers import Qwen3_5ForConditionalGeneration
 
     torch.manual_seed(7)
     torch.set_num_threads(2)
     module = load_local_upstream()
     processor = tiny_processor()
-    model = tiny_model(module, processor)
+    base_dir = tmp_path / "tiny-original-backbone"
+    model = tiny_model(module, processor, base_dir)
     request = typed_request()
     record = module.encode_record(processor.tokenizer, request, processor=processor)
     batch = module.collate_records([record], processor.tokenizer.pad_token_id, torch.device("cpu"))
@@ -106,6 +112,14 @@ def test_real_hybrid_model_merge_reloads_native_typed_logits_and_vision(tmp_path
     adapter_dir = tmp_path / "adapter"
     model.language_model.save_pretrained(adapter_dir)
     adapter_before = {path.name: path.read_bytes() for path in adapter_dir.iterdir() if path.is_file()}
+    # Mirror the production ordering: verify the saved adapter before export.
+    backbone = Qwen3_5ForConditionalGeneration.from_pretrained(base_dir, dtype=torch.float32,
+                                                               local_files_only=True, attn_implementation="sdpa")
+    reloaded_adapter = module.ClefModel(PeftModel.from_pretrained(backbone, adapter_dir), copy.deepcopy(model.head)).eval()
+    with torch.inference_mode():
+        for before, after in zip(expected_logits, reloaded_adapter(batch)[0], strict=True):
+            torch.testing.assert_close(after, before, rtol=1e-5, atol=1e-6)
+    model = reloaded_adapter
     output = tmp_path / "merged"
     metadata = {"status": "trained_and_reload_verified", "optimizer_steps": 1,
                 "merged_max_shard_size": "20KB", "test_scope": "tiny actual CPU model"}
@@ -137,6 +151,25 @@ def test_real_hybrid_model_merge_reloads_native_typed_logits_and_vision(tmp_path
     standalone = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(standalone)
     assert standalone.verify_release(output)["standalone_backbone"]
+
+    # Runtime/evaluation files are added only after standalone reload succeeds.
+    evaluation = {"matched": True, "questions": 3, "scope": "tiny actual CPU model"}
+    (output / "evaluation.json").write_text(json.dumps(evaluation) + "\n")
+    (output / "runtime.py").write_text("from export_clef_release import load_release_model\n")
+    updated_training = {**metadata, "status": "trained_and_standalone_reload_verified"}
+    (output / "training.json").write_text(json.dumps(updated_training) + "\n")
+    with pytest.raises(ValueError, match="training.json"):
+        verify_release(output)
+    refreshed = refresh_release_manifest(output, status="trained_and_standalone_reload_verified",
+                                         reload_verification=evaluation)
+    assert refreshed["training"] == updated_training
+    assert refreshed["reload_verification"] == evaluation
+    assert refreshed["status"] == "trained_and_standalone_reload_verified"
+    assert {"evaluation.json", "runtime.py"} <= set(refreshed["files"])
+    assert "release.json" not in refreshed["files"]
+    assert refreshed["total_bytes"] == sum(value["bytes"] for value in refreshed["files"].values())
+    assert verify_release(output) == refreshed
+    assert refresh_release_manifest(output) == refreshed
 
     shard = output / manifest["backbone"]["shards"][0]
     with shard.open("ab") as handle:

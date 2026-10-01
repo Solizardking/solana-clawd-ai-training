@@ -223,7 +223,7 @@ See `docs/hauhau_qwen36.md` for the full local runtime notes.
 |---|---|---|
 | `solanaclawd/solana-clawd-core-ai-instruct` | 35,173 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct) |
 | `solanaclawd/solana-clawd-instruct` | 36,109 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) |
-| `solanaclawd/solana-clawd-realtime-research-instruct` | 29,058 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) |
+| `solanaclawd/solana-clawd-realtime-research-instruct` | 83,662 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) |
 | `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | 142 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) |
 | `solanaclawd/solana-tx-foundation-unified` | 17,262 CPT + 64,907 SFT | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-unified) |
 | `solanaclawd/solana-tx-foundation-cpt` | 19,542 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-cpt) |
@@ -855,7 +855,7 @@ pull the latest model + dataset in two lines.
 | --- | --- | --- |
 | [`solanaclawd/solana-clawd-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) | dataset | **36,109 examples** — SFT instruction pairs (system/user/assistant), 32,498/1,805/1,806 train/eval/test |
 | [`solanaclawd/solana-clawd-core-ai-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct) | dataset | **35,173 examples** — public-safe blend of `core-ai` source chunks, `core-ai` knowledge JSONL, and the cleaned `ai-training` SFT corpus |
-| [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) | dataset | **29,058 examples** — submitted PDFs, notebooks, parquet Solana QA, and ZK skill context; 26,152/1,452/1,454 train/eval/test |
+| [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) | dataset | **83,662 examples** — original research plus NeMo and linked local sources; 78,171/2,595/2,896 train/eval/test, with auxiliary RAG, preferences, transaction text, and live-tape records |
 | [`solanaclawd/solana-clawd-nvidia-trading-factory-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) | dataset | **142 examples published** — NVIDIA trading-factory stage plans, Solana spot/perps market scenarios, cuFOLIO/cuOpt Mean-CVaR specs, Vulcan/Phoenix paper strategy specs, Rise read plans, autoresearch perps references, perps tool-use, and risk refusals; 127/7/8 train/eval/test |
 | `solanaclawd/solana-tx-foundation-cpt` | dataset | **19,542 examples** — Solana tx records in NeMo CPT format, tokenized by `SolanaTokenizerPipeline` (vocab_size=4886); used for Blueprint 1 continued pre-training |
 | [`solanaclawd/solana-clawd-eval`](https://huggingface.co/datasets/solanaclawd/solana-clawd-eval) | dataset | Held-out eval prompts (red-team + capability, 13 conversations) |
@@ -998,8 +998,8 @@ Published dataset:
 
 For native Cloudflare/Clef decision-head and LoRA fine-tuning on this dataset,
 see [the Clef research training guide](docs/clef_research_training.md), including
-Hugging Face H200 Jobs, a GPU validation pilot, split audits, held-out metrics,
-and adapter/head reload verification.
+local Apple MPS 4-bit training, Hugging Face H200 Jobs, a validation pilot,
+split audits, held-out metrics, and adapter/head reload verification.
 
 Read a public preview without installing the training stack or configuring auth:
 
@@ -1233,7 +1233,7 @@ YAML, markdown, manifests, commits, or Hub uploads.
 **Current dataset lanes**:
 
 - Core AI: **35,173** examples in `solanaclawd/solana-clawd-core-ai-instruct`
-- Realtime research: **29,058** examples in `solanaclawd/solana-clawd-realtime-research-instruct`
+- Realtime research: **83,662** examples in `solanaclawd/solana-clawd-realtime-research-instruct`
 - Trading factory: **142** examples in `solanaclawd/solana-clawd-nvidia-trading-factory-instruct`
 
 ### 3. Train (local or remote)
