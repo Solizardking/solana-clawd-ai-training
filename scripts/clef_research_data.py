@@ -25,8 +25,28 @@ def digest(value):
     return hashlib.sha256(canonical(value).encode()).hexdigest()
 
 
+def training_source_hash():
+    root = Path(__file__).resolve().parents[1]
+    files = ["scripts/clef_research_data.py", "scripts/clef_research_training.py",
+             "scripts/train_clef_research.py", "data/realtime_research_citations.md"]
+    return digest({name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files})
+
+
 def normalize(text):
     return " ".join(text.split()).casefold()
+
+
+def read_jsonl(path: Path, limit=0):
+    # str.splitlines also splits Unicode separators inside valid JSON strings.
+    # File iteration respects JSONL's literal newline record delimiter.
+    rows = []
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                rows.append(json.loads(line))
+                if limit and len(rows) >= limit:
+                    break
+    return rows
 
 
 def extract_pair(row):

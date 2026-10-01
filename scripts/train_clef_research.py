@@ -12,14 +12,13 @@ from pathlib import Path
 import random
 import time
 
-from clef_research_data import DATASET_ID, MODEL_ID, MODEL_REVISION, prepare_dataset
+from clef_research_data import DATASET_ID, MODEL_ID, MODEL_REVISION, prepare_dataset, read_jsonl, training_source_hash
 from clef_research_training import (attach_lora, encode_rows, evaluate, load_upstream,
                                    reload_adapter, save_adapter, supervised_loss)
 
 
 def read_rows(path, limit=0):
-    rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
-    return rows[:limit] if limit else rows
+    return read_jsonl(path, limit)
 
 
 def main():
@@ -98,6 +97,7 @@ def main():
         "trainable_parameters": sum(parameter.numel() for parameter in parameters),
         "baseline_eval": baseline, "losses": [], "optimizer_steps": 0,
         "status": "training", "versions": {}, "autoExecute": False,
+        "training_source_sha256": training_source_hash(),
     }
     for package in ("torch", "transformers", "peft", "huggingface_hub", "pyarrow"):
         metadata["versions"][package] = __import__(package).__version__
@@ -161,7 +161,7 @@ def main():
     verification_count = min(8, len(cohorts["test"][1]))
     encoded, rows = (values[:verification_count] for values in cohorts["test"])
     reload_metrics, reload_predictions = evaluate(reloaded, module, reloaded_processor, encoded, rows, device)
-    saved_predictions = [json.loads(line) for line in (args.output / "test-predictions.jsonl").read_text().splitlines()][:verification_count]
+    saved_predictions = read_jsonl(args.output / "test-predictions.jsonl", verification_count)
     for before, after in zip(saved_predictions, reload_predictions, strict=True):
         for question in before["answers"]:
             for option, probability in before["answers"][question]["probabilities"].items():

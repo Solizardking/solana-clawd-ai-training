@@ -12,6 +12,8 @@ import os
 from pathlib import Path
 import zipfile
 
+from clef_research_data import MODEL_REVISION, DATASET_REVISION, training_source_hash
+
 ROOT = Path(__file__).resolve().parents[1]
 FILES = ["scripts/clef_research_data.py", "scripts/clef_research_training.py",
          "scripts/train_clef_research.py", "data/realtime_research_citations.md"]
@@ -63,7 +65,8 @@ def main():
         script_args += ["--max-steps", "16", "--max-train-records", "128", "--max-eval-records", "32", "--checkpoint-steps", "8"]
     plan = {"stage": args.stage, "flavor": "h200", "timeout_hours": timeout,
             "output_repo": repo, "private_output": True, "script_args": script_args,
-            "bundle_sha256": package_hash, "dependencies": DEPENDENCIES}
+            "bundle_sha256": package_hash, "training_source_sha256": training_source_hash(),
+            "dependencies": DEPENDENCIES}
     (ROOT / f"local/clef-{args.stage}-job-plan.json").write_text(json.dumps(plan, indent=2) + "\n")
     if not args.submit:
         print(json.dumps(plan, indent=2))
@@ -97,6 +100,10 @@ def main():
         if (evidence.get("status") != "trained_and_reload_verified" or
                 not gradients.get("lora_nonzero") or not gradients.get("head_nonzero")):
             parser.error("Pilot has no verified training/reload evidence")
+        if (evidence.get("training_source_sha256") != plan["training_source_sha256"] or
+                evidence.get("model_revision") != MODEL_REVISION or
+                evidence.get("dataset_revision") != DATASET_REVISION):
+            parser.error("Pilot used different training code or revisions; validate the current package before full training")
     hardware = next(item for item in api.list_jobs_hardware() if item.name == "h200")
     cost = dataclasses.asdict(hardware)
     print(json.dumps({"hardware": cost, "timeout_hours": timeout}, indent=2))

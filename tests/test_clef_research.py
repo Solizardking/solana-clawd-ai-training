@@ -7,7 +7,7 @@ import sys
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from clef_research_data import build_decisions, digest
+from clef_research_data import build_decisions, digest, read_jsonl
 from clef_research_training import attach_lora, encode_rows, evaluate, load_upstream, supervised_loss
 
 
@@ -71,6 +71,14 @@ def test_multiturn_or_nontext_examples_are_rejected():
     assert audit["train_invalid"] == 2
 
 
+def test_jsonl_reader_preserves_unicode_separators_in_source_text(tmp_path):
+    rows = [{"text": "Research paragraph\u2028next line\u0085another line"}, {"text": "Second record"}]
+    path = tmp_path / "research.jsonl"
+    path.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows))
+    assert read_jsonl(path) == rows
+    assert read_jsonl(path, limit=1) == rows[:1]
+
+
 class TinyTokenizer:
     pad_token_id = 0
 
@@ -109,7 +117,9 @@ def test_native_clef_head_and_lora_train_and_saved_weights_reload(upstream, tmp_
     config = Qwen3_5Config(
         text_config={"hidden_size": 32, "intermediate_size": 64, "num_hidden_layers": 2,
                      "num_attention_heads": 4, "num_key_value_heads": 2, "head_dim": 8,
-                     "vocab_size": 128, "layer_types": ["full_attention", "full_attention"],
+                     "vocab_size": 128, "layer_types": ["linear_attention", "full_attention"],
+                     "linear_num_key_heads": 2, "linear_num_value_heads": 2,
+                     "linear_key_head_dim": 8, "linear_value_head_dim": 8,
                      "max_position_embeddings": 4096, "pad_token_id": 0},
         vision_config={"depth": 1, "hidden_size": 32, "intermediate_size": 64,
                        "num_heads": 4, "out_hidden_size": 32, "patch_size": 2,
@@ -121,6 +131,8 @@ def test_native_clef_head_and_lora_train_and_saved_weights_reload(upstream, tmp_
     model = upstream.ClefModel(backbone, upstream.JointSchemaHead(**head_config))
     targets = attach_lora(model, rank=2)
     assert all(".language_model.layers." in target for target in targets)
+    assert any("linear_attn" in target for target in targets)
+    assert any("self_attn" in target for target in targets)
     assert not any(parameter.requires_grad for name, parameter in model.named_parameters() if ".visual." in name)
     rows = build_decisions(fixture_splits())[0]["train"][:1]
     processor = SimpleNamespace(tokenizer=TinyTokenizer())

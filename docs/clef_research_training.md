@@ -44,6 +44,7 @@ uv pip install --python .venv-connect/bin/python \
   'torch==2.14.1' 'transformers==5.18.0' 'peft==0.21.2' 'pillow==12.3.0' \
   'torchvision==0.29.1'
 .venv-connect/bin/python scripts/clef_research_data.py
+.venv-connect/bin/python scripts/preflight_clef_research.py
 .venv-connect/bin/python -m pytest tests/test_clef_research.py -q
 .venv-connect/bin/python scripts/launch_clef_research_job.py
 ```
@@ -63,10 +64,12 @@ also require an account with sufficient credit.
 ```bash
 # Paid pilot: 16 optimizer steps, 128 training records, at most one hour.
 .venv-connect/bin/python scripts/launch_clef_research_job.py --submit --stage pilot
+.venv-connect/bin/python scripts/check_clef_research_job.py --stage pilot
 
 # After the real pilot completes and its saved adapter passes reload checks:
 .venv-connect/bin/python scripts/launch_clef_research_job.py --submit --stage full \
   --timeout-hours 8
+.venv-connect/bin/python scripts/check_clef_research_job.py --stage full
 ```
 
 Use `--output-repo your-namespace/your-model` to change the destination. The
