@@ -996,6 +996,11 @@ python3 scripts/realtime_dataset_ingest.py \
 Published dataset:
 [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct).
 
+For native Cloudflare/Clef decision-head and LoRA fine-tuning on this dataset,
+see [the Clef research training guide](docs/clef_research_training.md), including
+Hugging Face H200 Jobs, a GPU validation pilot, split audits, held-out metrics,
+and adapter/head reload verification.
+
 Read a public preview without installing the training stack or configuring auth:
 
 ```bash
