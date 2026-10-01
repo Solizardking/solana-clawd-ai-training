@@ -1787,6 +1787,7 @@ def build_dataset_card(manifest: dict[str, Any], settings: dict[str, Any]) -> st
         for s in manifest["sources"]
     )
     source_inventory = source_tables(manifest)
+    research_citations = (Path(__file__).resolve().parents[1] / "data" / "realtime_research_citations.md").read_text(encoding="utf-8").strip()
     labels = settings.get("documentai_labels") or {}
     labels_text = ", ".join(f"`{k}={v}`" for k, v in labels.items()) or "none configured"
     return f"""---
@@ -1842,6 +1843,8 @@ Rows also include non-training metadata columns: `source`, `source_type`,
 ## Source Inventory
 
 {source_inventory}
+
+{research_citations}
 
 ## Document Processing Providers
 

@@ -97,10 +97,10 @@ Rows also include non-training metadata columns: `source`, `source_type`,
 | 2605.05878v1.pdf | Agentic, Context-Aware Risk Intelligence in the Internet of Value | 15 | 16 | https://arxiv.org/abs/2605.05878v1 |
 | 2605.10400v1.pdf | Resolution-Aware Perpetual Futures on Binary Prediction Markets: An Empirical Risk-Design Framework Using Polymarket Data | 86 | 87 | https://arxiv.org/abs/2605.10400v1 |
 | 2605.10428v1.pdf | A Taxonomy of Event-Linked Perpetual Futures: Variant Designs Beyond the Single-Market Binary Case | 47 | 48 | https://arxiv.org/abs/2605.10428v1 |
-| 2605.12151v2.pdf | RED-2400: A Public Benchmark of Algorithmically-Rejected Trading Events with Outcome Labels | 8 | 9 | - |
+| 2605.12151v2.pdf | RED-2400: A Public Benchmark of Algorithmically-Rejected Trading Events with Outcome Labels | 8 | 9 | https://arxiv.org/abs/2605.12151v2 |
 | 2605.29174v1 (1).pdf | Paper Agents, Paper Gains: An Empirical Analysis of DeFi Investment Agents | 23 | 24 | https://arxiv.org/abs/2605.29174v1 |
 | 2605.29174v1.pdf | duplicate file skipped | - | 0 | - |
-| 2606.08232v1 (1).pdf | Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading: A Multi-Layer Intelligence Framework | 11 | 11 | - |
+| 2606.08232v1 (1).pdf | Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading: A Multi-Layer Intelligence Framework | 11 | 11 | https://arxiv.org/abs/2606.08232v1 |
 | 2606.08232v1.pdf | duplicate file skipped | - | 0 | - |
 
 ### Notebook Sources
@@ -123,6 +123,19 @@ Rows also include non-training metadata columns: `source`, `source_type`,
 | File | Type | Details | Examples |
 | --- | --- | --- | ---: |
 | SKILL.md | text | 10506 | 3 |
+
+## Research Citations
+
+Please cite the original research when using examples derived from these papers:
+
+- Kamat, A. U. (2026). *RED-2400: A Public Benchmark of Algorithmically-Rejected Trading Events with Outcome Labels*. arXiv:2605.12151. https://arxiv.org/abs/2605.12151
+- Kamat, A. U. (2026). *Hour-Aware Adaptive Risk Management for Autonomous Memecoin Trading*. arXiv:2606.08232. https://arxiv.org/abs/2606.08232
+
+The dataset source inventory records `2605.12151v2.pdf` (9 examples) and
+`2606.08232v1 (1).pdf` (11 examples). These citations refer to those existing
+sources. The second paper's title has changed in later arXiv revisions; the
+dataset uses the original v1 source, titled *Hour-Aware Adaptive Risk Management
+for Autonomous Memecoin Trading: A Multi-Layer Intelligence Framework*.
 
 ## Document Processing Providers
 

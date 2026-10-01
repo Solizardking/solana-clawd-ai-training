@@ -996,6 +996,32 @@ python3 scripts/realtime_dataset_ingest.py \
 Published dataset:
 [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct).
 
+Read a public preview without installing the training stack or configuring auth:
+
+```bash
+python3 scripts/connect_realtime_dataset.py
+python3 scripts/connect_realtime_dataset.py --split eval --limit 5 \
+  --output local/realtime-research-eval-preview.jsonl
+```
+
+The preview uses the Hugging Face dataset viewer API and accepts up to 100 rows
+per call. For full training access, install `datasets` in your training environment,
+provide `HF_TOKEN` through your shell or secret manager, and load the dataset:
+
+```python
+import os
+from datasets import load_dataset
+
+dataset = load_dataset(
+    "solanaclawd/solana-clawd-realtime-research-instruct",
+    split="train",
+    streaming=True,
+    token=os.environ["HF_TOKEN"],
+)
+example = next(iter(dataset))
+print(example["messages"])
+```
+
 NVIDIA Nemotron / NeMo Retriever extraction is supported for the PDF stage,
 following the NVIDIA Nemotron RAG document-processing pattern: extract text,
 tables as markdown, and chart elements through `nv-ingest`, then normalize the
