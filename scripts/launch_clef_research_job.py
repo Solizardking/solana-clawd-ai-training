@@ -71,9 +71,10 @@ def main():
     if not args.submit:
         print(json.dumps(plan, indent=2))
         return
-    token = os.environ.get("HF_TOKEN")
+    from huggingface_hub import get_token
+    token = get_token()
     if not token:
-        parser.error("Submission requires HF_TOKEN configured securely in the execution environment")
+        parser.error("Submission requires HF_TOKEN or a cached login. Run .venv-connect/bin/hf auth login.")
     from huggingface_hub import HfApi
     api = HfApi(token=token)
     api.whoami()

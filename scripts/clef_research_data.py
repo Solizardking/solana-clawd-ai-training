@@ -29,6 +29,8 @@ def training_source_hash():
     root = Path(__file__).resolve().parents[1]
     files = ["scripts/clef_research_data.py", "scripts/clef_research_training.py",
              "scripts/train_clef_research.py", "data/realtime_research_citations.md"]
+    files += [f"scripts/{name}" for name in ("clef_live_tape.py", "export_clef_release.py", "research_expansion_artifacts.py")
+              if (root / "scripts" / name).exists()]
     return digest({name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files})
 
 
@@ -148,7 +150,7 @@ def build_decisions(raw_splits, seed=42, candidate_pool=128):
     return decisions, dict(audit)
 
 
-def prepare_dataset(output_dir: Path, seed=42):
+def prepare_dataset(output_dir: Path, seed=42, dataset_revision=DATASET_REVISION, live_decisions=None):
     from huggingface_hub import hf_hub_download
     import pyarrow.parquet as parquet
 
@@ -156,10 +158,13 @@ def prepare_dataset(output_dir: Path, seed=42):
     raw, hashes = {}, {}
     for split in ("train", "eval", "test"):
         path = Path(hf_hub_download(DATASET_ID, f"data/{split}-00000-of-00001.parquet",
-                                  repo_type="dataset", revision=DATASET_REVISION))
+                                  repo_type="dataset", revision=dataset_revision))
         hashes[split] = hashlib.sha256(path.read_bytes()).hexdigest()
         raw[split] = parquet.read_table(path).to_pylist()
     decisions, audit = build_decisions(raw, seed)
+    if live_decisions:
+        decisions["train"].extend(live_decisions)
+        audit["live_observation_training_records"] = len(live_decisions)
     outputs = {}
     for split, rows in decisions.items():
         if not rows:
@@ -171,7 +176,7 @@ def prepare_dataset(output_dir: Path, seed=42):
         outputs[split] = {"rows": len(rows), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                           "label_counts": dict(Counter(row["labels"]["research_answer"] for row in rows))}
     manifest = {
-        "dataset": DATASET_ID, "dataset_revision": DATASET_REVISION,
+        "dataset": DATASET_ID, "dataset_revision": dataset_revision,
         "model": MODEL_ID, "model_revision": MODEL_REVISION,
         "decision_index_reference": {"space": INDEX_ID, "revision": INDEX_REVISION,
                                      "used_as_training_data": False},
@@ -183,6 +188,9 @@ def prepare_dataset(output_dir: Path, seed=42):
                         "No image training examples, policy labels, or official Decision Index score are produced."],
         "citations": ["https://arxiv.org/abs/2605.12151", "https://arxiv.org/abs/2606.08232"],
     }
+    if live_decisions:
+        manifest["live_observations"] = {"source": "https://clawd-ws.fly.dev/", "records": len(live_decisions),
+                                         "split": "train", "label_basis": "observed status and event fields; no trading outcome labels"}
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest
 
@@ -191,5 +199,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("local/clef-research-data"))
+    parser.add_argument("--dataset-revision", default=DATASET_REVISION)
     args = parser.parse_args()
-    print(json.dumps(prepare_dataset(args.output), indent=2))
+    print(json.dumps(prepare_dataset(args.output, dataset_revision=args.dataset_revision), indent=2))

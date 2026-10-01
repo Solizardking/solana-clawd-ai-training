@@ -14,7 +14,8 @@ def main():
     state_path = root / f"local/clef-{args.stage}-job.json"
     if not state_path.exists():
         parser.error("No recorded job ID; this stage has not been submitted")
-    token = os.environ.get("HF_TOKEN")
+    from huggingface_hub import get_token
+    token = get_token()
     if not token:
         parser.error("Inspection requires HF_TOKEN configured securely")
     from huggingface_hub import HfApi, hf_hub_download

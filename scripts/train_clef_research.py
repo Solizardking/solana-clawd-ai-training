@@ -12,7 +12,7 @@ from pathlib import Path
 import random
 import time
 
-from clef_research_data import DATASET_ID, MODEL_ID, MODEL_REVISION, prepare_dataset, read_jsonl, training_source_hash
+from clef_research_data import DATASET_ID, DATASET_REVISION, MODEL_ID, MODEL_REVISION, prepare_dataset, read_jsonl, training_source_hash
 from clef_research_training import (attach_lora, encode_rows, evaluate, load_upstream,
                                    reload_adapter, save_adapter, supervised_loss)
 
@@ -26,6 +26,9 @@ def main():
     parser.add_argument("--data-dir", type=Path, default=Path("local/clef-research-data"))
     parser.add_argument("--output", type=Path, default=Path("outputs/clef-research"))
     parser.add_argument("--output-repo", help="Optional private Hub destination; requires HF_TOKEN")
+    parser.add_argument("--dataset-revision", default=DATASET_REVISION)
+    parser.add_argument("--live-tape", action="store_true", help="Capture real read-only clawd-ws observations for native decision training")
+    parser.add_argument("--export-merged", action="store_true", help="Export a standalone merged backbone plus trained joint head after verification")
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--max-steps", type=int, default=0, help="Optimizer steps; 0 trains full epochs")
     parser.add_argument("--max-train-records", type=int, default=0)
@@ -63,7 +66,15 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
     # Rebuild from the pinned source on every run, never from a stale local manifest.
-    manifest = prepare_dataset(args.data_dir, args.seed)
+    live_decisions = None
+    if args.live_tape:
+        from clef_live_tape import capture_live_snapshot, live_decision_records
+        snapshot = capture_live_snapshot(timeout=15, max_frames=4)
+        (args.output / "live-training-snapshot.json").write_text(json.dumps(snapshot, indent=2) + "\n")
+        live_decisions = live_decision_records(snapshot)
+        if not live_decisions:
+            raise ValueError("No real live observations available for requested tape training")
+    manifest = prepare_dataset(args.data_dir, args.seed, dataset_revision=args.dataset_revision, live_decisions=live_decisions)
     module = load_upstream()
     base = snapshot_download(MODEL_ID, revision=MODEL_REVISION)
     model, processor = module.load_release_model(base, device=device, dtype=torch.bfloat16, attn_implementation="sdpa")
@@ -205,6 +216,25 @@ Decision Index score or a live trading policy. Signing keys are never inputs.
         shutil.copyfile(Path(__file__).with_name(name), args.output / name)
     if args.output_repo:
         api.upload_folder(repo_id=args.output_repo, folder_path=str(args.output), commit_message="Save trained Clef adapter, decision head, evaluation and verified reload")
+    if args.export_merged:
+        from export_clef_release import export_merged_release
+        merged_dir = args.output.with_name(args.output.name + "-merged")
+        release = export_merged_release(reloaded, reloaded_processor, module, merged_dir, metadata)
+        # Ship the read-only runtime adapter alongside the standalone model.
+        for name in ("clef_live_tape.py", "research_expansion_artifacts.py"):
+            shutil.copyfile(Path(__file__).with_name(name), merged_dir / name)
+        (merged_dir / "evaluation.json").write_text(json.dumps(metrics, indent=2) + "\n")
+        (merged_dir / "README.md").write_text(card.replace("library_name: peft", "library_name: transformers").replace(
+            "LoRA text-backbone adapter plus the trained native Clef joint schema head.",
+            "Standalone fine-tuned multimodal backbone with merged LoRA weights and the trained native Clef joint schema head."))
+        if args.output_repo:
+            merged_repo = args.output_repo + "-merged"
+            api.create_repo(merged_repo, private=True, exist_ok=True)
+            if not api.model_info(merged_repo).private:
+                raise ValueError("Standalone output repository must be private")
+            api.upload_folder(repo_id=merged_repo, folder_path=str(merged_dir), commit_message="Publish standalone fine-tuned Clef backbone, decision head and live read-only adapter")
+            release["repo_id"] = merged_repo
+        print(json.dumps({"standalone_release": release}, indent=2), flush=True)
     print(json.dumps({"output": str(args.output), "output_repo": args.output_repo, "evaluation": metrics}, indent=2), flush=True)
 
 
