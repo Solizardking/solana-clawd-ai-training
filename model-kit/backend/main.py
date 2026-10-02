@@ -1,8 +1,10 @@
-"""Render-ready API for the Solana AI Model Kit site.
+"""API and Fly-hosted site for the Solana AI Model Kit.
 
 The service is intentionally small. It exposes public kit metadata, builds
 CAAP/1.0 registration payloads, and can proxy an explicit live registration to
-onchain.x402.wtf without persisting user credentials.
+onchain.x402.wtf without persisting user credentials. When the frontend
+directory is present (Fly Machines), the same process also serves the static
+site so models and register share one origin.
 """
 import datetime as dt
 import asyncio
@@ -21,9 +23,10 @@ import uuid
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 
@@ -47,6 +50,8 @@ ARENA_CODE_EXECUTION = os.environ.get("MODEL_ARENA_ENABLE_CODE_EXECUTION", "1").
 ARENA_CODE_TIMEOUT = float(os.environ.get("MODEL_ARENA_CODE_TIMEOUT", "5"))
 BACKEND_DIR = Path(__file__).resolve().parent
 CONSTITUTION_MANIFEST_PATH = BACKEND_DIR / "constitution_manifest.json"
+FRONTEND_DIR = Path(os.environ.get("MODEL_KIT_FRONTEND_DIR") or (BACKEND_DIR.parent / "frontend")).resolve()
+FLY_PUBLIC_URL = os.environ.get("FLY_PUBLIC_URL", "https://solana-clawd-model-kit.fly.dev")
 
 MODEL_TYPES = [
     "TextGeneration",
@@ -60,6 +65,9 @@ CLUSTERS = ["devnet", "mainnet-beta", "testnet", "localnet"]
 
 def split_env_list(name: str, fallback: str) -> list[str]:
     return [item.strip() for item in os.environ.get(name, fallback).split(",") if item.strip()]
+
+
+REGISTER_HOSTS = set(split_env_list("MODEL_KIT_REGISTER_HOSTS", "register.x402.wtf"))
 
 
 def normalize_sha256(raw: str) -> str:
@@ -143,8 +151,22 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=split_env_list(
         "MODEL_KIT_CORS_ORIGINS",
-        "https://models.x402.wtf,https://register.x402.wtf,https://8bitlabs.ai,https://www.8bitlabs.ai,https://verify.8bitlabs.ai,http://localhost:8765,http://127.0.0.1:8765,http://localhost:5173,http://127.0.0.1:5173",
+        ",".join(
+            [
+                "https://models.x402.wtf",
+                "https://register.x402.wtf",
+                "https://8bitlabs.ai",
+                "https://www.8bitlabs.ai",
+                "https://verify.8bitlabs.ai",
+                FLY_PUBLIC_URL,
+                "http://localhost:8765",
+                "http://127.0.0.1:8765",
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+            ]
+        ),
     ),
+    allow_origin_regex=r"https://([a-z0-9-]+\.)*(fly\.dev|x402\.wtf|8bitlabs\.ai)",
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
@@ -1118,18 +1140,32 @@ def arena_run_url(base: Optional[str], run_id: str) -> Optional[str]:
     )
 
 
-@app.get("/")
-def root() -> dict[str, Any]:
+def frontend_available() -> bool:
+    return (FRONTEND_DIR / "index.html").is_file()
+
+
+def api_index() -> dict[str, Any]:
     return {
         "ok": True,
         "service": "solana-ai-model-kit-api",
         "models_home": MODELS_HOME,
         "register_home": REGISTER_HOME,
         "registry": DEFAULT_REGISTRY_HOME,
+        "site": FLY_PUBLIC_URL,
         "constitution": constitution_commitment(),
     }
 
 
+def frontend_page(name: str) -> FileResponse:
+    path = (FRONTEND_DIR / name).resolve()
+    if path != FRONTEND_DIR and FRONTEND_DIR not in path.parents:
+        raise HTTPException(status_code=404, detail="Unknown frontend path")
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Frontend asset not found")
+    return FileResponse(path)
+
+
+@app.get("/health")
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     return {
@@ -1139,6 +1175,35 @@ def health() -> dict[str, Any]:
         "protocol": PROTOCOL,
         "constitution": constitution_commitment(),
     }
+
+
+@app.get("/api")
+@app.get("/api/")
+def api_root() -> dict[str, Any]:
+    return api_index()
+
+
+@app.get("/", include_in_schema=False)
+def root(request: Request):
+    if not frontend_available():
+        return api_index()
+    host = (request.headers.get("host") or "").split(":")[0].lower()
+    if host in REGISTER_HOSTS:
+        return frontend_page("register.html")
+    return frontend_page("index.html")
+
+
+@app.get("/register", include_in_schema=False)
+@app.get("/register.html", include_in_schema=False)
+def register_page():
+    return frontend_page("register.html")
+
+
+@app.get("/models", include_in_schema=False)
+@app.get("/model-kit", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+def models_page():
+    return frontend_page("index.html")
 
 
 @app.get("/api/model-kit/status")
@@ -1370,3 +1435,7 @@ def register(req: RegistrationRequest, authorization: Optional[str] = Header(def
             "response": upstream,
         },
     )
+
+
+if frontend_available():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=False), name="frontend")

@@ -98,8 +98,12 @@ const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
 
 function defaultApiBase() {
-  if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+  const host = window.location.hostname;
+  if (["localhost", "127.0.0.1"].includes(host)) {
     return "http://127.0.0.1:8787";
+  }
+  if (host.endsWith(".fly.dev")) {
+    return "";
   }
   return runtimeConfig.apiBaseUrl || "";
 }

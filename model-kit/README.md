@@ -82,7 +82,9 @@ ai-training/model-kit/frontend/index.html
 ai-training/model-kit/frontend/register.html
 ```
 
-Render/Vercel deployment is documented in `docs/DEPLOYMENT.md`.
+Render/Vercel/Fly deployment is documented in `docs/DEPLOYMENT.md`.
+The production Fly Machine serves the site and API together at
+`https://solana-clawd-model-kit.fly.dev`.
 
 ## Model Arena
 
