@@ -9,16 +9,18 @@ accuracy. Clef is pinned at revision
 
 **Status on October 1, 2026:** the expanded dataset is
 [published and hash-verified](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct/commit/58eea08df320b56c0cfcec84f9ae1be1eb8bb5c2).
-All 81 uploaded files were verified. Hugging Face authentication works. Pilot
-submission returned HTTP 402 for both `ordlibrary` and `solanaclawd` because
-prepaid Jobs credits are insufficient. No Clef GPU job started. The user selected
-local training instead. Ten of the original 27B checkpoint's twelve source
-shards have been converted in memory on this Mac's M4 Max. Conversion is paused
-because macOS swap grew to about 35 GiB and left about 18 GiB of free disk space,
-below the checkpoint-save reserve. Training follows a successful saved-base
-reload check after resource headroom is restored.
-Local tokenizer audits and tiny-model tests do not establish that the 27B model
-has been trained. The verified publication record is already at
+All original expansion files were verified, and the complete dataset card was
+updated afterward. Hugging Face authentication works. Paid Jobs submission
+returned HTTP 402, and the user selected local training. The original 27B
+checkpoint is now saved as nine NF4 shards on this Mac's M4 Max. A constructor
+precision fix restored native FP32 positional buffers; all 3,664 persistent
+tensors matched saved bytes and two fresh loads produced identical finite
+probe outputs. The 16-step local pilot is running with actual optimizer updates
+and gradients in both LoRA and the native head, with CPU fallback disabled.
+The full epoch follows successful pilot and saved-adapter verification; neither
+a completed full model nor trained weights on the Hub are claimed yet.
+Current counters are in `outputs/clef-local-pilot/training.json` and
+`local/clef-local-pipeline.json`. The verified dataset publication record is at
 `local/research-expansion/published.json`. Rebuild commands below are for a fresh
 staging directory.
 
@@ -147,9 +149,9 @@ contains roughly 55 GB of BF16 source weights. The guarded converter estimates
 processor, vision weights, and readable BF16 output embeddings. Its initial disk
 guard requires about 25.2 GiB free, including one source shard and a 3 GiB reserve.
 This is a file-space estimate; macOS swap and other applications can consume
-additional space while the model is resident. The current busy Mac needs more
-headroom than its initial 31 GiB free. No user files or unrelated caches were
-removed to recover space.
+additional space while the model is resident. User-authorized cleanup restored
+headroom before conversion completed; its report is retained in
+`local/disk-cleanup-20261001/report.md`.
 The tested environment uses `bitsandbytes==0.50.2` with actual MPS NF4 kernels;
 CPU fallback is disabled during conversion and training.
 
@@ -175,14 +177,11 @@ distinguishes planned, loading, saving, reloading, failed, and complete states.
 Conversion does not train the model. Progress is not a resumable checkpoint;
 failed outputs are preserved, and a new attempt needs a fresh directory.
 
-The current task-owned process is paused with `SIGSTOP` at PID `75712`; its
-sleep guard is PID `75713`. Converted tensors remain in process memory. Keep
-that process alive to retain the ten completed shards. Restore internal disk
-headroom and reduce memory pressure before resuming it. Moving its active
-download directory behind an external symlink would break its deletion guard;
-an external-drive restart needs a separate output directory. The progress log is
-`local/clef-local-conversion.log`, and process state is recorded in
-`local/clef-local-conversion-process.json`.
+The saved base at `local/clef-27b-mps-nf4` is complete. Its original post-save
+precision failure and exact recovery verification remain in the conversion
+manifest; no saved weights were modified or redownloaded during recovery.
+`local/clef-base-recovery.log` records the full recovery check. The coordinator
+has its own sleep guard and runs the pilot without starting a second converter.
 
 ## Local native training and inference
 
@@ -260,19 +259,22 @@ exclusion counts, and actual update/reload evidence.
 Only a completed full run with fresh standalone live inference can pass the
 local model publisher. Planning does not create a Hub repository. Publication
 defaults to a private model and streams the existing complete weights; it does
-not make a second full-weight staging copy.
+not make a second full-weight staging copy. The public model page at
+`solanaclawd/clef-solana-research` is a card-only training preview. For that
+destination, explicitly use `--public` in both the plan and push commands.
+An existing repository's visibility is never changed automatically.
 
 ```bash
 .venv-connect/bin/python scripts/publish_clef_local_model.py \
   --release outputs/clef-local-full-merged \
   --inference-proof local/clef-local-full-live-inference.json \
-  --stage local/clef-local-model-publication
+  --stage local/clef-local-model-publication --public
 
 # Publish only after the completed artifact passes the command above.
 .venv-connect/bin/python scripts/publish_clef_local_model.py \
   --release outputs/clef-local-full-merged \
   --inference-proof local/clef-local-full-live-inference.json \
-  --stage local/clef-local-model-publication --push
+  --stage local/clef-local-model-publication --public --push
 ```
 
 The publisher keeps both Kamat references and the original Apache-2.0 source

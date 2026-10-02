@@ -228,8 +228,11 @@ class MockHub:
         return {"name": "fixture-owner"}
 
     def create_repo(self, repo_id, **kwargs):
-        assert kwargs["private"] is True
+        assert kwargs["private"] is self.package["private"]
         self.calls.append("create_repo")
+
+    def update_repo_settings(self, *args, **kwargs):
+        pytest.fail("Publication must never change existing repository visibility")
 
     def model_info(self, repo_id, revision=None, files_metadata=False):
         self.calls.append("model_info")
@@ -345,3 +348,122 @@ def test_missing_hub_auth_records_failed_attempt_without_creating_repository(rel
     state = json.loads((fixture.stage / "publication.json").read_text())
     assert state["status"] == "failed" and state["verified"] is False
     assert state["failed_phase"] == "authentication" and "commit" not in state
+
+
+def test_explicit_public_plan_and_push_preserve_provenance_and_verify_public_commit(release_fixture):
+    fixture = release_fixture
+    package = stage_publication(fixture.release, fixture.proof, fixture.stage, public=True)
+    assert package["private"] is False
+    overlay = json.loads((fixture.stage / "release.json").read_text())
+    assert overlay["publication"]["visibility"] == "public"
+    assert overlay["publication"]["source_release_manifest_sha256"] == file_sha(fixture.release / "release.json")
+    assert validate_package(package) == package
+    assert prepare_or_reuse(fixture.release, fixture.proof, fixture.stage, public=True) == package
+    api = MockHub(package, private=False)
+    result = push_publication(package, api=api, download=lambda repo, name, revision: package["files"][name]["local_path"])
+    assert result["status"] == "published_and_verified" and result["verified"] is True
+    assert result["private"] is False and result["weight_downloaded_locally"] is False
+    assert result["files_verified"] == len(package["files"])
+    assert json.loads((fixture.stage / "publication.json").read_text())["private"] is False
+
+
+@pytest.mark.parametrize("public", [False, True])
+def test_existing_visibility_mismatch_never_commits_or_switches_repository(release_fixture, public):
+    fixture = release_fixture
+    package = stage_publication(fixture.release, fixture.proof, fixture.stage, public=public)
+    api = MockHub(package, private=public)
+    with pytest.raises(RuntimeError, match="repository"):
+        push_publication(package, api=api)
+    assert "create_commit" not in api.calls
+    state = json.loads((fixture.stage / "publication.json").read_text())
+    assert state["failed_phase"] == "repository" and state["private"] is not public
+    assert state["verified"] is False and "commit" not in state
+
+
+@pytest.mark.parametrize("public", [False, True])
+def test_reusing_plan_cannot_change_visibility(release_fixture, public):
+    fixture = release_fixture
+    stage_publication(fixture.release, fixture.proof, fixture.stage, public=public)
+    with pytest.raises(ValueError, match="different visibility"):
+        prepare_or_reuse(fixture.release, fixture.proof, fixture.stage, public=not public)
+
+
+@pytest.mark.parametrize("field,value", [("private", False), ("overlay_visibility", "public")])
+def test_visibility_tampering_cannot_relabel_a_private_plan(release_fixture, field, value):
+    fixture = release_fixture
+    package = stage_publication(fixture.release, fixture.proof, fixture.stage)
+    if field == "private":
+        package[field] = value
+    else:
+        overlay = json.loads((fixture.stage / "release.json").read_text())
+        overlay["publication"]["visibility"] = value
+        write_json(fixture.stage / "release.json", overlay)
+        item = package["files"]["release.json"]
+        item.update(sha256=file_sha(fixture.stage / "release.json"), bytes=(fixture.stage / "release.json").stat().st_size)
+        package["total_bytes"] = sum(item["bytes"] for item in package["files"].values())
+    with pytest.raises(ValueError, match="provenance"):
+        validate_package(package)
+
+
+@pytest.mark.parametrize("private", [None, 0, "false"])
+def test_package_requires_boolean_visibility(release_fixture, private):
+    fixture = release_fixture
+    package = stage_publication(fixture.release, fixture.proof, fixture.stage)
+    package["private"] = private
+    with pytest.raises(ValueError, match="boolean visibility"):
+        validate_package(package)
+
+
+@pytest.mark.parametrize("mutation", ["pilot", "unverified_reload", "unbound_inference"])
+def test_public_option_does_not_bypass_full_training_reload_or_inference_gates(release_fixture, mutation):
+    fixture = release_fixture
+    if mutation == "pilot":
+        training = json.loads((fixture.release / "training.json").read_text())
+        training["run_mode"] = "pilot"
+        write_json(fixture.release / "training.json", training)
+        fixture.refresh()
+        fixture.proof_write()
+    elif mutation == "unverified_reload":
+        manifest = json.loads((fixture.release / "release.json").read_text())
+        manifest["reload_verified"] = False
+        write_json(fixture.release / "release.json", manifest)
+    else:
+        fixture.proof_write(release_manifest_sha256="0" * 64)
+    with pytest.raises(ValueError):
+        stage_publication(fixture.release, fixture.proof, fixture.stage, public=True)
+    assert not fixture.stage.exists()
+
+
+def test_public_remote_visibility_drift_records_committed_but_unverified_failure(release_fixture):
+    fixture = release_fixture
+    package = stage_publication(fixture.release, fixture.proof, fixture.stage, public=True)
+    api = MockHub(package, private=False)
+    original = api.model_info
+
+    def change_visibility_after_commit(*args, **kwargs):
+        info = original(*args, **kwargs)
+        if kwargs.get("revision") is not None:
+            info.private = True
+        return info
+    api.model_info = change_visibility_after_commit
+    with pytest.raises(RuntimeError, match="verification"):
+        push_publication(package, api=api, download=lambda repo, name, revision: package["files"][name]["local_path"])
+    state = json.loads((fixture.stage / "publication.json").read_text())
+    assert state["commit"] == api.revision and state["failed_phase"] == "verification"
+    assert state["verified"] is False and state["private"] is False
+
+
+@pytest.mark.parametrize("public", [False, True])
+def test_cli_plans_selected_visibility_without_push_or_hub_contact(release_fixture, monkeypatch, capsys, public):
+    import publish_clef_local_model as publisher
+    fixture = release_fixture
+    argv = ["publish_clef_local_model.py", "--release", str(fixture.release), "--inference-proof", str(fixture.proof),
+            "--stage", str(fixture.stage)]
+    if public:
+        argv.append("--public")
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(publisher, "push_publication", lambda *args, **kwargs: pytest.fail("Planning must not push"))
+    publisher.main()
+    result = json.loads(capsys.readouterr().out)
+    assert result["private"] is not public and result["hub_contacted"] is False
+    assert result["status"] == "planned"

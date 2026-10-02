@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Plan, or explicitly publish, a fully trained and verified private Clef release.
+"""Plan, or explicitly publish, a fully trained and verified Clef release.
 
 The staging overlay contains only small publication records. Original model
 files are referenced directly and the hash-covered standalone release is never
 modified. Planning does not contact the Hub or create a repository.
+Visibility defaults to private; public publication requires an explicit plan.
 """
 from __future__ import annotations
 
@@ -36,6 +37,18 @@ def file_sha(path):
 
 def write_json(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def planned_private(public):
+    if type(public) is not bool:
+        raise ValueError("Public publication requires an explicit boolean option")
+    return not public
+
+
+def package_visibility(package):
+    if type(package.get("private")) is not bool:
+        raise ValueError("Publication package requires an explicit boolean visibility")
+    return "private" if package["private"] else "public"
 
 
 def positive_integer(value, name):
@@ -264,7 +277,8 @@ def model_card(training, metrics, evidence, license_id):
     return "\n".join(lines)
 
 
-def stage_publication(release, inference, stage, repo_id=DEFAULT_REPO):
+def stage_publication(release, inference, stage, repo_id=DEFAULT_REPO, *, public=False):
+    private = planned_private(public)
     release, stage = Path(release).resolve(), Path(stage).resolve()
     if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", repo_id) is None:
         raise ValueError("Expected an owner/model repository ID")
@@ -308,14 +322,14 @@ def stage_publication(release, inference, stage, repo_id=DEFAULT_REPO):
     overlay = copy.deepcopy(manifest)
     overlay["files"] = {name: {"sha256": item["sha256"], "bytes": item["bytes"]} for name, item in files.items()}
     overlay["total_bytes"] = sum(item["bytes"] for item in files.values())
-    overlay["publication"] = {"visibility": "private", "repo_id": repo_id,
+    overlay["publication"] = {"visibility": "private" if private else "public", "repo_id": repo_id,
                               "source_release_manifest_sha256": file_sha(release / "release.json"),
                               "inference_observed_at": evidence["captured_at"], "inference_completed_at": evidence["inference_completed_at"],
                               "inference_evidence_sha256": files["inference-evidence.json"]["sha256"]}
     write_json(stage / "release.json", overlay)
     files["release.json"] = {"local_path": str(stage / "release.json"), "sha256": file_sha(stage / "release.json"),
                              "bytes": (stage / "release.json").stat().st_size}
-    package = {"schema_version": 1, "status": "planned", "repo_id": repo_id, "private": True,
+    package = {"schema_version": 1, "status": "planned", "repo_id": repo_id, "private": private,
                "release_dir": str(release), "stage_dir": str(stage), "files": files,
                "source_release_manifest_sha256": overlay["publication"]["source_release_manifest_sha256"],
                "total_bytes": sum(item["bytes"] for item in files.values()),
@@ -326,12 +340,13 @@ def stage_publication(release, inference, stage, repo_id=DEFAULT_REPO):
 
 
 def validate_package(package):
+    visibility = package_visibility(package)
     release, stage = Path(package["release_dir"]).resolve(), Path(package["stage_dir"]).resolve()
     if stage.is_relative_to(release) or release.is_relative_to(stage):
         raise ValueError("Publication staging must stay separate from its immutable release")
     manifest = verify_mps_release(release, expected_dataset_revision=EXPANDED_DATASET_REVISION)
     validate_full_training(manifest["training"])
-    if package.get("private") is not True or file_sha(release / "release.json") != package["source_release_manifest_sha256"]:
+    if file_sha(release / "release.json") != package["source_release_manifest_sha256"]:
         raise ValueError("Publication source identity changed after planning")
     if package.get("model_revision") != MODEL_REVISION or package.get("dataset_revision") != EXPANDED_DATASET_REVISION:
         raise ValueError("Publication package immutable pins differ from the verified source")
@@ -362,7 +377,7 @@ def validate_package(package):
     expected_overlay = copy.deepcopy(manifest)
     expected_overlay["files"] = overlay["files"]
     expected_overlay["total_bytes"] = sum(item["bytes"] for item in overlay["files"].values())
-    expected_overlay["publication"] = {"visibility": "private", "repo_id": package["repo_id"],
+    expected_overlay["publication"] = {"visibility": visibility, "repo_id": package["repo_id"],
         "source_release_manifest_sha256": package["source_release_manifest_sha256"],
         "inference_observed_at": evidence["captured_at"], "inference_completed_at": evidence["inference_completed_at"],
         "inference_evidence_sha256": package["files"]["inference-evidence.json"]["sha256"]}
@@ -371,13 +386,17 @@ def validate_package(package):
     return package
 
 
-def prepare_or_reuse(release, inference, stage, repo_id=DEFAULT_REPO):
+def prepare_or_reuse(release, inference, stage, repo_id=DEFAULT_REPO, *, public=False):
     """Let an explicitly requested push use the already reviewed plan."""
+    private = planned_private(public)
     stage = Path(stage)
     package_path = stage / "package.json"
     if not package_path.exists():
-        return stage_publication(release, inference, stage, repo_id)
+        return stage_publication(release, inference, stage, repo_id, public=public)
     package = json.loads(package_path.read_text())
+    package_visibility(package)
+    if package["private"] is not private:
+        raise ValueError("Existing publication plan has different visibility; choose a fresh stage")
     if Path(release).resolve() != Path(package["release_dir"]).resolve() or repo_id != package["repo_id"] or Path(package["stage_dir"]).resolve() != stage.resolve():
         raise ValueError("Existing publication stage belongs to a different release or repository")
     evidence = validate_inference(inference, release)
@@ -388,9 +407,10 @@ def prepare_or_reuse(release, inference, stage, repo_id=DEFAULT_REPO):
 
 def verify_remote(api, package, revision, download):
     """Use LFS metadata for weights; download only bounded small sidecars."""
+    package_visibility(package)
     info = api.model_info(package["repo_id"], revision=revision, files_metadata=True)
-    if info.sha != revision or info.private is not True:
-        raise ValueError("Published model commit or private visibility differs from the plan")
+    if info.sha != revision or info.private is not package["private"]:
+        raise ValueError("Published model commit or visibility differs from the explicit plan")
     siblings = {item.rfilename: item for item in info.siblings}
     if set(siblings) - {".gitattributes"} != set(package["files"]):
         raise ValueError("Published model has missing or unexpected artifact files")
@@ -412,7 +432,8 @@ def verify_remote(api, package, revision, download):
 
 
 def push_publication(package, *, api=None, download=None):
-    state = {"status": "publishing", "repo_id": package["repo_id"], "private": True,
+    package_visibility(package)
+    state = {"status": "publishing", "repo_id": package["repo_id"], "private": package["private"],
              "dataset_revision": EXPANDED_DATASET_REVISION, "model_revision": MODEL_REVISION,
              "observed_at": package["observed_at"], "verified": False}
     status_path = Path(package["stage_dir"]) / "publication.json"
@@ -432,12 +453,12 @@ def push_publication(package, *, api=None, download=None):
                                                                   local_dir=Path(package["stage_dir"]) / "remote-verification")
         api.whoami()
         phase = "repository"
-        api.create_repo(package["repo_id"], repo_type="model", private=True, exist_ok=True)
+        api.create_repo(package["repo_id"], repo_type="model", private=package["private"], exist_ok=True)
         current = api.model_info(package["repo_id"])
-        if current.private is not True:
-            raise ValueError("Publication requires a private destination repository")
+        if current.private is not package["private"]:
+            raise ValueError("Destination visibility differs from the explicit plan; automatic visibility changes are disabled")
         if {item.rfilename for item in current.siblings} - set(package["files"]) - {".gitattributes"}:
-            raise ValueError("Destination has unknown leftover files; choose a separate private repository")
+            raise ValueError("Destination has unknown leftover files; choose a separate repository")
         phase = "commit"
         operations = [CommitOperationAdd(path_in_repo=name, path_or_fileobj=item["local_path"])
                       for name, item in package["files"].items()]
@@ -464,10 +485,11 @@ def main():
     parser.add_argument("--inference-proof", type=Path, required=True)
     parser.add_argument("--stage", type=Path, default=Path("local/clef-local-publication"))
     parser.add_argument("--repo-id", default=DEFAULT_REPO)
-    parser.add_argument("--push", action="store_true", help="Explicitly create/update the private Hub model after all evidence gates pass")
+    parser.add_argument("--push", action="store_true", help="Explicitly create/update the Hub model after all evidence gates pass")
+    parser.add_argument("--public", action="store_true", help="Explicitly plan a public model; defaults to private and never changes existing visibility")
     args = parser.parse_args()
-    package = prepare_or_reuse(args.release, args.inference_proof, args.stage, args.repo_id)
-    result = push_publication(package) if args.push else {"status": "planned", "repo_id": package["repo_id"], "private": True,
+    package = prepare_or_reuse(args.release, args.inference_proof, args.stage, args.repo_id, public=args.public)
+    result = push_publication(package) if args.push else {"status": "planned", "repo_id": package["repo_id"], "private": package["private"],
              "files": len(package["files"]), "total_bytes": package["total_bytes"], "observed_at": package["observed_at"],
              "package": str(args.stage / "package.json"), "hub_contacted": False}
     print(json.dumps(result, indent=2))
