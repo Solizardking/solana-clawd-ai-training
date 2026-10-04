@@ -1,11 +1,13 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&pause=1200&color=9945FF&center=true&vCenter=true&width=720&lines=Solana+Clawd+AI+Training;Fine-tune+%E2%86%92+Eval+%E2%86%92+Attest+Onchain;One-shot+GPU+training+pipeline;Register+models+to+onchain.x402.wtf;Open-source+Solana+AI+stack" alt="Animated header" />
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=28&pause=1200&color=9945FF&center=true&vCenter=true&width=720&lines=Solana+Clawd+AI+Training;Fine-tune+%E2%86%92+Eval+%E2%86%92+Attest+Onchain;One-shot+GPU+training+pipeline;Explore+models.musebook.trade;Open-source+Solana+AI+stack" alt="Animated header" />
 
 <br/>
 
 [![GitHub](https://img.shields.io/badge/GitHub-solana--clawd--ai--training-181717?style=for-the-badge&logo=github)](https://github.com/Solizardking/solana-clawd-ai-training)
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-solanaclawd-FFD21F?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd)
+[![Clawd AI Catalog](https://img.shields.io/badge/Models-models.musebook.trade-9945FF?style=for-the-badge)](https://models.musebook.trade)
+[![Realtime Research Dataset](https://img.shields.io/badge/Dataset-Realtime_Research-14F195?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct)
 [![OnChain Registry](https://img.shields.io/badge/Registry-onchain.x402.wtf-9945FF?style=for-the-badge)](https://onchain.x402.wtf)
 
 <br/>
@@ -24,6 +26,57 @@
 </div>
 
 ---
+
+## Explore Clawd AI
+
+**[models.musebook.trade](https://models.musebook.trade)** is the official Clawd AI
+catalog entry point. It currently redirects to the
+[Clawd AI Space](https://huggingface.co/spaces/solanaclawd/clawd-ai), where you can
+browse models, datasets, research, demos, and Hub-reported download statistics.
+Catalog availability does not imply that every model has deployed inference.
+
+Clawd builds **ecosystem-native Solana intelligence**: accounts, PDAs, versioned
+transactions, ALTs, Pump.fun graduation, and RPC failure modes. The model reasons;
+a separate signing process acts under explicit authority. Signing keys never
+belong in the model's context.
+
+### Featured: Realtime Research Instruct
+
+**[solanaclawd/solana-clawd-realtime-research-instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct)**
+contains **83,662 English instruction conversations** for Solana mechanics,
+research retrieval, protocol reasoning, agent tools, and risk-aware analysis.
+
+| Published split | Conversations |
+| --- | ---: |
+| Train | 78,171 |
+| Eval | 2,595 |
+| Test | 2,896 |
+
+The dataset includes source identifiers, hashes, tags, and provenance metadata.
+Retrieval chunks, preferences, evaluation cases, transaction text, and historical
+live observations are separate auxiliary artifacts, excluded from these totals.
+The card declares **CC BY 4.0** and documents source-specific licensing; retain
+attribution and review upstream terms for your intended use. “Realtime” describes
+the ingestion lane, not a guarantee that stored observations are current.
+
+[Browse the dataset](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct)
+· [Read the dataset card](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct/blob/main/README.md)
+· [Preview without training dependencies](#2b-submit-pdfsjsonnotebooksparquet-as-realtime-datasets)
+· [Clef research training guide](docs/clef_research_training.md)
+
+```bash
+python3 scripts/connect_realtime_dataset.py --split train --limit 5
+```
+
+The newest research model page,
+[solanaclawd/clef-solana-research](https://huggingface.co/solanaclawd/clef-solana-research),
+tracks a Solana-domain adaptation of 27B Cloudflare/Clef with native typed
+probabilistic decisions. Its current public card reports a completed local pilot
+and pending cloud qualification; **trained weights and hosted inference are not
+published on that page yet**.
+
+Public catalog links and file inventories below were checked on **October 4, 2026**.
+Models, datasets, and Spaces have separate release states and licensing terms.
 
 ## Repository Map
 
@@ -176,16 +229,37 @@ curl -sS https://solana-clawd-rag.fly.dev/query \
 
 ## Models
 
-| Model | Size | Status | Links |
-|---|---|---|---|
-| `HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive` | 35B MoE GGUF | **Runtime model** — llama-cpp-python runner with The Onchain Constitution system prompt | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive) |
-| `solanaclawd/clawd-fable` | Full merged Fable model | **New lane** — `AliesTaha/fable-traces` + Clawd Code + Glint Fable traces | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-fable) |
-| `solanaclawd/clawd-fable-lora` | LoRA adapter | **Train target** — merge into `solanaclawd/clawd-fable` after adapter release | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-fable-lora) |
-| `solanaclawd/clawd-solana-masterpiece-qwen15-lora` | 1.5B LoRA | ✅ **Live** — latest Qwen 1.5B adapter | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora) |
-| `solanaclawd/solana-clawd-core-ai-1.5b-lora` | 1.5B LoRA | ✅ **Live** — train_loss 0.9008, token_acc 82.9% | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora) |
-| `solanaclawd/solana-nvidia-trading-factory-8b-lora` | 8B LoRA | ✅ **Live** — Hermes-3, Solana perps | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora) |
-| `solanaclawd/solana-tx-foundation-7b` | 7B CPT+SFT LoRA | ⏭️ **Next** — ready to launch after HF Jobs credits | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-tx-foundation-7b) |
-| `solanaclawd/solana-clawd-1.5b` | 1.5B merged | ⚠️ **Placeholder** — public repo only has `.gitattributes` | [![HF](https://img.shields.io/badge/HF-model-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/solanaclawd/solana-clawd-1.5b) |
+Browse the [Clawd AI catalog](https://models.musebook.trade) or the
+[public Solana Clawd model repositories](https://huggingface.co/models?search=solanaclawd%2F).
+“Published weights” below means weight files are present on the Hub; it does not
+assert benchmark quality or a running inference endpoint.
+
+| Model | Format / family | Verified public release state |
+| --- | --- | --- |
+| [Clef Solana Research](https://huggingface.co/solanaclawd/clef-solana-research) | 27B Cloudflare/Clef research adaptation | Newest organization model page; local pilot reported, no trained checkpoint published yet. |
+| [Trading Factory 8B — GGUF](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-GGUF) | Quantized Hermes-3 8B | Published Q4_K_M and Q5_K_M GGUF files for compatible local runtimes. |
+| [Trading Factory 8B — merged](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b) | Full Transformers checkpoint | Published `model.safetensors`; review the model card and base-model terms. |
+| [Trading Factory 8B — LoRA](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora) | Hermes-3 8B adapter | Published `adapter_model.safetensors`; requires its compatible base model. |
+| [Solana Masterpiece Qwen 1.5B LoRA](https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora) | Qwen 1.5B adapter | Published adapter weights. |
+| [Core AI 1.5B LoRA](https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora) | Qwen2.5-1.5B adapter | Published adapter weights; historical training/evaluation results are recorded below. |
+| [Clawd Fable](https://huggingface.co/solanaclawd/clawd-fable) | Fable project page | No public weight files found in the checked inventory; training instructions below describe the lane. |
+| [Solana Clawd 1.5B](https://huggingface.co/solanaclawd/solana-clawd-1.5b) | Merged-model target | Repository exists; no public weights found in the checked inventory. |
+
+Other public metadata-only repositories include
+[solana-clawd-1.5b-lora](https://huggingface.co/solanaclawd/solana-clawd-1.5b-lora)
+and the [model-namespace solana-clawd-instruct page](https://huggingface.co/solanaclawd/solana-clawd-instruct).
+For instruction data, use its [dataset repository](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct).
+
+### Related Clawd models from ordlibrary
+
+| Model | Published artifact / scope |
+| --- | --- |
+| [Clawd Chart Foundation 27B smoke](https://huggingface.co/ordlibrary/clawd-chart-foundation-27b-smoke) | PEFT chart-agent adapter; explicitly smoke-only / staged, not a production chart-agent release. |
+| [DeepSol Clawd Code](https://huggingface.co/ordlibrary/deepsol-clawd-code) | Small merged GPT-2-scale Solana code checkpoint, with published safetensors. |
+| [Clawd Spark 4B LoRA pilot](https://huggingface.co/ordlibrary/clawd-spark-4b-lora-pilot) | Published pilot adapter; evaluate the exact base and release files before use. |
+| [Hauhau Qwen3.6 onchain](https://huggingface.co/ordlibrary/hauhau-qwen36-onchain) | Published IQ2_M GGUF in the Hauhau runtime lane. |
+| [Hauhau Qwen3.6 uncensored](https://huggingface.co/ordlibrary/hauhau-qwen36-uncensored) | Related published IQ2_M GGUF; upstream model terms apply. |
+| [Core AI Clawd 1.5B GGUF](https://huggingface.co/ordlibrary/core-ai-clawd-1.5b) | Published Q4_K_M GGUF for compatible local inference. |
 
 ## Clawd Fable Local Train
 
@@ -226,15 +300,34 @@ See `docs/hauhau_qwen36.md` for the full local runtime notes.
 
 ## Datasets
 
-| Dataset | Examples | Links |
-|---|---|---|
-| `solanaclawd/solana-clawd-core-ai-instruct` | 35,173 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct) |
-| `solanaclawd/solana-clawd-instruct` | 36,109 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) |
-| `solanaclawd/solana-clawd-realtime-research-instruct` | 83,662 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) |
-| `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | 142 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) |
-| `solanaclawd/solana-tx-foundation-unified` | 17,262 CPT + 64,907 SFT | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-unified) |
-| `solanaclawd/solana-tx-foundation-cpt` | 19,542 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-cpt) |
-| `solanaclawd/solana-clawd-eval` | 13 | [![HF](https://img.shields.io/badge/HF-dataset-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/datasets/solanaclawd/solana-clawd-eval) |
+**Featured:** [Solana Clawd Realtime Research Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct)
+— **83,662 conversations**, with source provenance and separate auxiliary research artifacts.
+Counts below reflect the public Dataset Viewer default splits checked on October 4, 2026;
+raw corpus packages are identified separately.
+
+| Dataset | Published rows / format | Purpose |
+| --- | --- | --- |
+| [Realtime Research Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) | **83,662**; 78,171 train / 2,595 eval / 2,896 test | Solana research, protocol reasoning, tool use, and retrieval-grounded instruction tuning. |
+| [Clawd Live Data](https://huggingface.co/datasets/solanaclawd/solana-clawd-live-data) | **127**; 109 train / 8 eval / 10 test | Captured observation conversations; stored rows are historical snapshots. |
+| [NVIDIA Trading Factory Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) | **199**; 179 train / 9 eval / 11 test | Trading-factory planning, portfolio tooling, and risk-aware instruction data. |
+| [Clawd Repo Corpus](https://huggingface.co/datasets/solanaclawd/solana-clawd-repo-corpus) | **27,521**; 24,768 train / 1,376 eval / 1,377 test | Repository and ecosystem knowledge conversations; review source provenance. |
+| [Core AI Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct) | **35,173**; 31,655 train / 1,758 eval / 1,760 test | Core AI instruction-tuning corpus. |
+| [Clawd Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) | **30,450**; 27,405 train / 1,522 eval / 1,523 test | Solana-native system/user/assistant conversations. |
+| [Transaction Foundation Unified](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-unified) | Raw SFT and CPT JSONL plus optimization manifest | Inspect the published files and manifest; the viewer's single scaffold row is not a corpus total. |
+| [Transaction Foundation CPT](https://huggingface.co/datasets/solanaclawd/solana-tx-foundation-cpt) | **19,542** train rows | Transaction-text continued pretraining. |
+| [Clawd Eval](https://huggingface.co/datasets/solanaclawd/solana-clawd-eval) | **13** test rows | Small held-out capability and red-team set. |
+
+### Related training and research packages
+
+| Artifact | Contents / scope |
+| --- | --- |
+| [Clawd Chart Foundation Training](https://huggingface.co/datasets/ordlibrary/clawd-chart-foundation-training) | Card reports 41,214 supervised chat/chart rows, 3,345 document chunks, and 1,712 chart images; counts describe different artifact types. |
+| [Clawd Agentic Layer Whitepaper](https://huggingface.co/datasets/ordlibrary/clawd-agentic-layer-whitepaper) | Whitepaper v0.3 and retrieval corpus describing the proposed Solana agent economy and execution architecture. |
+| [Solana Clawd Model Kit](https://huggingface.co/datasets/ordlibrary/solana-clawd-model-kit) | SFT/CPT corpora, processed shards, manifests, and quality reports for training experiments. |
+
+See each card for artifact-specific licensing, attribution, source terms, and
+limitations. The repository's MIT software license does not relicense linked
+models or datasets; see [LICENSING.md](LICENSING.md).
 
 ## Evals
 
@@ -248,9 +341,20 @@ See `docs/hauhau_qwen36.md` for the full local runtime notes.
 
 ## Spaces
 
-| Space | Description |
-|---|---|
-| [![HF Space](https://img.shields.io/badge/Space-brave--new--world-FFD21F?logo=huggingface&logoColor=black)](https://huggingface.co/spaces/solanaclawd/brave-new-world) | Live Clawd demo — chat, perps tools, ZK reasoning |
+Open the [official catalog at models.musebook.trade](https://models.musebook.trade)
+for current links and metadata. Space publication is separate from runtime availability.
+
+| Space | Purpose |
+| --- | --- |
+| [Clawd AI](https://huggingface.co/spaces/solanaclawd/clawd-ai) | Official models, datasets, research, Spaces, and Hub download-statistics catalog. |
+| [Clawd Model Kit](https://huggingface.co/spaces/solanaclawd/clawd-model-kit) | Model Kit frontend and model registration / evaluation tooling. |
+| [Clawd Free Chat](https://huggingface.co/spaces/solanaclawd/clawd-free-chat) | Chat Space. |
+| [Brave New World](https://huggingface.co/spaces/solanaclawd/brave-new-world) | Clawd chat and agent-tool demo. |
+| [SOLGPT](https://huggingface.co/spaces/solanaclawd/solgpt) | SOLGPT Space. |
+| [Clawd Zoo](https://huggingface.co/spaces/solanaclawd/clawd-zoo) | Agent catalog and launchpad. |
+| [Clawd Gateway](https://huggingface.co/spaces/solanaclawd/clawd-gateway) | Gateway / skill-router Space. |
+| [Homebase](https://huggingface.co/spaces/solanaclawd/homebase) | Orchestrator shell. |
+| [Clawd Computer](https://huggingface.co/spaces/solanaclawd/clawd-computer) | Agent runtime Space. |
 
 ---
 
@@ -316,7 +420,7 @@ Clawd is not just another chatbot project. It is a full AI production network wi
 
 Together, these layers create a complete system for training, refining, launching, and monetizing AI models on Solana.
 
-The home of Clawd is **[onchain.x402.wtf](https://onchain.x402.wtf)**.
+Explore the Clawd model and research catalog at **[models.musebook.trade](https://models.musebook.trade)**. The existing [onchain.x402.wtf](https://onchain.x402.wtf) links below refer to the separate registry and registration interface.
 
 ---
 
@@ -409,7 +513,7 @@ Clawd is a decentralized AI and compute network where anyone can contribute, com
 
 AI becomes open. Compute becomes liquid. Models become on-chain assets. Contributors become owners.
 
-Powered by **$CLAWD**. Running on **Solana**. Live at **[onchain.x402.wtf](https://onchain.x402.wtf)**.
+Powered by **$CLAWD**. Running on **Solana**. Explore at **[models.musebook.trade](https://models.musebook.trade)**.
 
 ---
 
@@ -523,8 +627,8 @@ The architecture above is not theoretical. The Solana Clawd AI Training pipeline
 | Artifact | Type | Size |
 | --- | --- | --- |
 | `solanaclawd/solana-clawd-core-ai-instruct` | Dataset | 35,173 SFT examples |
-| `solanaclawd/solana-clawd-realtime-research-instruct` | Dataset | 29,058 examples |
-| `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | Dataset | 142 examples |
+| [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) | Dataset | 83,662 published conversations |
+| `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` | Dataset | 199 published conversations |
 | `solanaclawd/solana-nvidia-trading-factory-8b-lora` | Model | Hermes-3-8B · 85.5% eval accuracy |
 | `solanaclawd/solana-clawd-core-ai-1.5b-lora` | Model | Qwen2.5-1.5B · 82.9% token accuracy |
 
@@ -851,6 +955,10 @@ Clawd skill registration for `scripts/solana_client.py`.
 
 ## The Hugging Face integration
 
+For the current public release inventory, see [Models](#models), [Datasets](#datasets),
+and [Spaces](#spaces), or open [models.musebook.trade](https://models.musebook.trade).
+Historical training metrics below apply to their named runs, not every current release.
+
 We use the Hub as the **source of truth** for every artifact in the
 training pipeline. The whole point is that a new Clawd agent, spawned
 anywhere in the world, can `pip install` nothing, set a `HF_TOKEN`, and
@@ -860,17 +968,16 @@ pull the latest model + dataset in two lines.
 
 | Repo | Type | Purpose |
 | --- | --- | --- |
-| [`solanaclawd/solana-clawd-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) | dataset | **36,109 examples** — SFT instruction pairs (system/user/assistant), 32,498/1,805/1,806 train/eval/test |
+| [`solanaclawd/solana-clawd-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct) | dataset | **30,450 published examples** — SFT instruction pairs (system/user/assistant), 27,405/1,522/1,523 train/eval/test; public viewer checked October 4, 2026 |
 | [`solanaclawd/solana-clawd-core-ai-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-core-ai-instruct) | dataset | **35,173 examples** — public-safe blend of `core-ai` source chunks, `core-ai` knowledge JSONL, and the cleaned `ai-training` SFT corpus |
 | [`solanaclawd/solana-clawd-realtime-research-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) | dataset | **83,662 examples** — original research plus NeMo and linked local sources; 78,171/2,595/2,896 train/eval/test, with auxiliary RAG, preferences, transaction text, and live-tape records |
-| [`solanaclawd/solana-clawd-nvidia-trading-factory-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) | dataset | **142 examples published** — NVIDIA trading-factory stage plans, Solana spot/perps market scenarios, cuFOLIO/cuOpt Mean-CVaR specs, Vulcan/Phoenix paper strategy specs, Rise read plans, autoresearch perps references, perps tool-use, and risk refusals; 127/7/8 train/eval/test |
+| [`solanaclawd/solana-clawd-nvidia-trading-factory-instruct`](https://huggingface.co/datasets/solanaclawd/solana-clawd-nvidia-trading-factory-instruct) | dataset | **199 examples published** — NVIDIA trading-factory stage plans, Solana spot/perps market scenarios, cuFOLIO/cuOpt Mean-CVaR specs, Vulcan/Phoenix paper strategy specs, Rise read plans, autoresearch perps references, perps tool-use, and risk refusals; 179/9/11 train/eval/test |
 | `solanaclawd/solana-tx-foundation-cpt` | dataset | **19,542 examples** — Solana tx records in NeMo CPT format, tokenized by `SolanaTokenizerPipeline` (vocab_size=4886); used for Blueprint 1 continued pre-training |
 | [`solanaclawd/solana-clawd-eval`](https://huggingface.co/datasets/solanaclawd/solana-clawd-eval) | dataset | Held-out eval prompts (red-team + capability, 13 conversations) |
 | [`solanaclawd/solana-clawd-core-ai-1.5b-lora`](https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora) | model | Qwen2.5-1.5B LoRA adapter — **LIVE** (pushed 2026-06-19T23:44Z); recovery job [`ordlibrary/6a35a6833093dba73ce2a86b`](https://huggingface.co/jobs/ordlibrary/6a35a6833093dba73ce2a86b) completed on A100-large in 3h 14m; train_loss=0.9008, token_accuracy=82.9%, 24.54M tokens |
-| `solanaclawd/solana-tx-foundation-1.5b` | model | Qwen2.5-1.5B CPT+SFT model (Blueprint 1) — **in training**; base → CPT on `solana-tx-foundation-cpt` → SFT on merged 30K pairs |
+| `solanaclawd/solana-tx-foundation-1.5b` | training target | Transaction-foundation pipeline target; no public model repository verified in the October 4, 2026 inventory |
 | [`solanaclawd/solana-nvidia-trading-factory-8b-lora`](https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora) | model | Hermes-3-8B LoRA adapter for the Solana NVIDIA trading factory dataset; completed HF job `ordlibrary/6a35a2ce953ed90bfb945009` |
-| [`solanaclawd/solana-clawd-1.5b`](https://huggingface.co/solanaclawd/solana-clawd-1.5b) | model | Merged bf16 model (base + LoRA), vllm-ready |
-| [`solanaclawd/solana-clawd-7b-lora`](https://huggingface.co/solanaclawd/solana-clawd-7b-lora) | model | Optional larger variant (Qwen2.5-7B-Instruct) |
+| [`solanaclawd/solana-clawd-1.5b`](https://huggingface.co/solanaclawd/solana-clawd-1.5b) | model page | Public merged-model target; no published weights verified in the October 4, 2026 inventory |
 
 **External NVIDIA models** used by this pipeline (via NIM API or HF Inference API — not published under `solanaclawd`):
 
@@ -923,8 +1030,10 @@ hf repos list --namespace solanaclawd
 
 ### 1. Curate the dataset
 
-The canonical training input is `data/solana_clawd_merged.jsonl` — **36,109 conversations**
-assembled from three sources, all normalized to `{"messages": [...]}` format with the
+The historical local merged input was `data/solana_clawd_merged.jsonl` — **36,109 conversations**
+assembled from three sources. This local build count differs from the current
+[public Clawd Instruct release](https://huggingface.co/datasets/solanaclawd/solana-clawd-instruct),
+which exposes **30,450** conversations. The historical rows were all normalized to `{"messages": [...]}` format with the
 Clawd system prompt prepended where missing:
 
 | Source file | Format | Examples | Notes |
@@ -1241,7 +1350,7 @@ YAML, markdown, manifests, commits, or Hub uploads.
 
 - Core AI: **35,173** examples in `solanaclawd/solana-clawd-core-ai-instruct`
 - Realtime research: **83,662** examples in `solanaclawd/solana-clawd-realtime-research-instruct`
-- Trading factory: **142** examples in `solanaclawd/solana-clawd-nvidia-trading-factory-instruct`
+- Trading factory: **199** published examples in `solanaclawd/solana-clawd-nvidia-trading-factory-instruct` (public viewer checked October 4, 2026)
 
 ### 3. Train (local or remote)
 
@@ -1568,7 +1677,7 @@ fine-tune is helpful training, not a replacement for the laws.
 | `a100x4` | 320GB | ~$12.00 | 13B-30B with DDP |
 | `h200x8` | 640GB | ~$32.00 | 70B+ with DDP |
 
-With the current 36K-example dataset (32,498 train), a 1.5B LoRA run at 3 epochs
+For the historical 36K-example dataset (32,498 train), a 1.5B LoRA run at 3 epochs
 takes ~1–2 hrs on A100 (~$3–6 per full training run). A 7B run takes ~4–6 hrs (~$12–18).
 
 ## Self-hosted GPU deployment
@@ -2041,6 +2150,9 @@ The first Solana Clawd community article is at [`outputs/community-article.md`](
 - [`CONSTITUTION.md`](../CONSTITUTION.md) — the Clawd Constitution
 - [`three-laws.md`](../three-laws.md) — the three on-chain laws
 - [`dao/DAO_DESIGN.md`](dao/DAO_DESIGN.md) — DAO architecture and safety model
+- [models.musebook.trade](https://models.musebook.trade) — official Clawd AI catalog
+- [Hugging Face: solanaclawd](https://huggingface.co/solanaclawd) — official model, dataset, and Space repositories
+- [Realtime Research Instruct](https://huggingface.co/datasets/solanaclawd/solana-clawd-realtime-research-instruct) — featured research dataset
 - [onchain.x402.wtf](https://onchain.x402.wtf) — onchain AI registry
 - [zk.x402.wtf](https://zk.x402.wtf) — ZK attestation layer
 - [Percolator meta](https://github.com/aeyakovenko/percolator-meta) — recursive research pattern
