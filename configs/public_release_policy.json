@@ -4,11 +4,12 @@
     ".git/**", ".work/**", "artifacts/**", "data/**", "library/**",
     "local/**", "outputs/**", "target/**", "checkpoints/**", "vault/**",
     "8bitlabs.ai/**", ".venv*/**", "**/.venv*/**", "**/node_modules/**",
-    ".pytest_cache/**", "**/__pycache__/**", "**/.vercel/**", "**/.env",
+    ".pytest_cache/**", "**/.pytest_cache/**", "**/__pycache__/**", "**/.vercel/**", "**/.env",
+    "memory/*.json", "memory/*.jsonl", "memory/**/*.json", "memory/**/*.jsonl",
     ".env", ".env.*", "**/.env.*", "*.ses", "*.session", "*.session.json",
     "*.sqlite", "*.sqlite3", "*.db", "*.pkg", "*.pem", "*.key", "*.p12", "*.pfx",
     "*.otf", "*.ttf", "*.woff", "*.woff2", "*.safetensors", "*.gguf", "*.pt",
-    "*.pkl", "*.arrow", "*.parquet", "*.faiss", "*.log",
+    "*.pkl", "*.arrow", "*.parquet", "*.faiss", "*.log", "*.bin", "*.pyc",
     "solana1_yourgpt.jsonl", "trainingday.jsonl", "docs/SESSIONS.md",
     "docs/2026-07-04-ai-training-consolidation.md",
     "deploy/nemotron/training/assistant-mask.jinja",
@@ -18,7 +19,7 @@
   "allowed_environment_examples": [".env.example", ".env.sample", ".env.template"],
   "required_license_files": [
     "LICENSE", "LICENSING.md", "NOTICE", "THIRD_PARTY_NOTICES.md",
-    "LICENSES/Apache-2.0.txt",
+    "LICENSES/Apache-2.0.txt", "LICENSES/Autoresearch-MIT.txt", "space/LICENSE",
     "trading_factory/cufolio/LICENSE", "trading_factory/cufolio/LICENSE-3rd-party.txt",
     "trading_factory/clawd-autoresearch-wiki/nanochat-master/LICENSE",
     "trading_factory/clawd-autoresearch-wiki/solana-chat/LICENSE"

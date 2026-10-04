@@ -12,6 +12,9 @@ Used by signal-discovery, RAG pipeline, and AIQ evaluator.
 
 from __future__ import annotations
 
+# Public model identifier, separate from authentication credentials.
+MODEL_CLAWD = "solana-clawd-1.5b"
+
 import json
 import os
 from typing import Iterator
@@ -65,10 +68,10 @@ def _resolve_endpoint() -> tuple[str, str, str]:
     if tok := os.environ.get("HF_TOKEN"):
         return HF_BASE, tok, override or MODEL_HF_ULTRA
     if url := os.environ.get("CLAWD_INFERENCE_URL"):
-        return url, os.environ.get("CLAWD_API_KEY", "none"), "solana-clawd-1.5b"
+        return url, os.environ.get("CLAWD_API_KEY", "none"), MODEL_CLAWD
     if key := os.environ.get("CLAWD_ROUTER_KEY"):
-        return "https://clawd-box-router.fly.dev/v1", key, "solana-clawd-1.5b"
-    return "http://localhost:11434/v1", "ollama", "solana-clawd-1.5b"
+        return "https://clawd-box-router.fly.dev/v1", key, MODEL_CLAWD
+    return "http://localhost:11434/v1", "ollama", MODEL_CLAWD
 
 
 def chat(

@@ -1,0 +1,19 @@
+Solana Clawd AI Training
+Copyright (c) 2026 OpenClawd / Solizardking
+
+Original software is distributed under the root LICENSE, subject to component
+licenses and individual file notices. This notice does not change those terms.
+
+This source distribution includes:
+- NVIDIA cuFOLIO reference code, Apache-2.0.
+- NVIDIA transaction-foundation reference code, Apache-2.0 as specified by
+  individual SPDX notices. Clawd adaptations are present in this repository.
+- nanochat reference code and a Solana adaptation, MIT,
+  Copyright (c) 2025 Andrej Karpathy.
+- Autoresearch experiment scaffolding by Andrej Karpathy and contributors,
+  MIT according to the upstream README; see LICENSES/Autoresearch-MIT.txt.
+
+Retain original copyright headers and bundled component licenses.
+See THIRD_PARTY_NOTICES.md for license locations and release exclusions.
+Third-party names and marks identify their respective owners; inclusion does
+not imply sponsorship or endorsement.

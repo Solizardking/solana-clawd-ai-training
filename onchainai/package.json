@@ -2,9 +2,10 @@
   "name": "onchainai",
   "private": true,
   "version": "0.1.0",
-  "description": "Onchain AI — Solana Clawd model kit + studio",
+  "description": "Onchain AI \u2014 Solana Clawd model kit + studio",
   "scripts": {
     "dev": "npx --yes serve public -l 4177",
     "start": "npx --yes serve public -l 4177"
-  }
+  },
+  "license": "MIT"
 }

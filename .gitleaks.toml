@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+# Public Solana token mint from AGENTS.md, not an authentication credential.
+# Exact-match exception; all provider credential rules remain enabled.
+[[allowlists]]
+description = "Official public CLAWD mint address"
+regexTarget = "secret"
+regexes = ['^8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump$']

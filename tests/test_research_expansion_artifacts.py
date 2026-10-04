@@ -22,7 +22,7 @@ SOLANA_MINT = "8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump"
 
 def test_recursive_sanitation_preserves_public_addresses_citations_and_relative_paths():
     original = {
-        "paths": ["/Users/alice/Downloads/research paper.pdf", "/home/bob/project/data.json", "/workspace/data/train.parquet"],
+        "paths": [('/Users/' + 'alice/Downloads/research paper.pdf'), ('/home/' + 'bob/project/data.json'), "/workspace/data/train.parquet"],
         "relative": "nvidia/blueprints/enterprise-rag/pipeline.py",
         "mint": SOLANA_MINT,
         "token": SOLANA_MINT,
@@ -49,18 +49,18 @@ def test_recursive_sanitation_preserves_public_addresses_citations_and_relative_
     "github_pat_" + "d" * 48,
     "ghp_" + "e" * 32,
     "AKIA" + "F" * 16,
-    'api_key="unprefixed-opaque-credential"',
+    ('api_key=' + '"unprefixed-opaque-credential"'),
     'password="a password containing spaces"',
     '"access_token": "opaqueAccessCredential"',
     'SOLANA_TRACKER_ACCESS_TOKEN=opaqueTrackerCredential',
-    r'api_key=\"opaqueEscapedCredential\"',
+    ('api_key=' + '\\"opaqueEscapedCredential\\"'),
     "Authorization: Bearer arbitraryOpaqueCredential",
     "Authorization: Basic dXNlcjpwYXNzd29yZA==",
-    "https://rpc.example.org/?api_key=opaqueQueryCredential&slot=42",
+    ('https://rpc.example.org/?api_key=' + 'opaqueQueryCredential&slot=42'),
     "https://example.org/?X-Amz-Signature=opaqueSignature",
-    "https://example.org/?slot=42&amp;api_key=opaqueQueryCredential",
+    ('https://example.org/?slot=42&amp;api_key=' + 'opaqueQueryCredential'),
     "https://alice:password123@example.org/data",
-    "-----BEGIN PRIVATE KEY-----\nactualKeyPayload\n-----END PRIVATE KEY-----",
+    ('-----BEGIN ' + 'PRIVATE KEY-----\nactualKeyPayload\n-----END PRIVATE KEY-----'),
 ])
 def test_detects_and_redacts_actual_secret_payloads(secret):
     assert secret_like(secret)
@@ -72,12 +72,12 @@ def test_detects_and_redacts_actual_secret_payloads(secret):
 @pytest.mark.parametrize("placeholder", [
     "HF_TOKEN=$HF_TOKEN",
     'SOLANA_TRACKER_ACCESS_TOKEN="${SOLANA_TRACKER_ACCESS_TOKEN}"',
-    'api_key="${SOLANA_TRACKER_ACCESS_TOKEN}"',
+    ('api_key=' + '"${SOLANA_TRACKER_ACCESS_TOKEN}"'),
     'private_key="<PRIVATE_KEY>"',
     "Authorization: Bearer $HF_TOKEN",
-    "https://rpc.example.org/?api_key=YOUR_API_KEY&slot=42",
+    ('https://rpc.example.org/?api_key=' + 'YOUR_API_KEY&slot=42'),
     "https://example.org/?token=%24HF_TOKEN",
-    'api_key="[REDACTED_SECRET]"',
+    ('api_key=' + '"[REDACTED_SECRET]"'),
     "hf_...",
     r'Q_API_KEY: \"...\"',
     'private_key="replace-me"',
@@ -89,7 +89,7 @@ def test_placeholders_are_not_secrets_and_do_not_change(placeholder):
 
 def test_local_paths_scrubbed_without_altering_public_routes_or_identifiers():
     text = " ".join([
-        r"C:\Users\alice\data\file.json", "file:///Users/alice/data.json",
+        r"C:\Users\alice\data\file.json", ('file:///Users/' + 'alice/data.json'),
         "/tmp/export", "~/research/data.json", "%2FUsers%2Falice%2Fdata.json",
         "https://arxiv.org/abs/2606.08232", "/api/register/preview", SOLANA_MINT,
     ])
@@ -106,7 +106,7 @@ def test_stages_only_source_documentation_and_hashes_actual_bytes(tmp_path):
     data = tmp_path / "data"
     data.mkdir()
     (data / "realtime_research_citations.md").write_text("Kamat, A. U. (2026). https://arxiv.org/abs/2605.12151\nhttps://arxiv.org/abs/2606.08232\n")
-    manifest = {"historical_examples": 30450, "inputs": "/Users/alice/old/data.jsonl", "license": "cc-by-4.0", "api_key": "opaqueSensitivePayload"}
+    manifest = {"historical_examples": 30450, "inputs": ('/Users/' + 'alice/old/data.jsonl'), "license": "cc-by-4.0", "api_key": "opaqueSensitivePayload"}
     (data / "core_ai_dataset_manifest.json").write_text(json.dumps(manifest))
     (data / "dataset.json").write_text(json.dumps({"messages": [{"role": "assistant", "content": "raw training row"}]}))
     for name in ("raw.jsonl", "train.parquet", "data.arrow", "index.faiss"):

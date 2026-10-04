@@ -20,7 +20,8 @@ SENSITIVE_NAMES = re.compile(
     r"access-token[^/]*|refresh-token[^/]*)\.json$"
 )
 PRIVATE_KEY = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----")
-HOME_PATH = re.compile(r"/(?:Users|home)/[A-Za-z0-9_.-]+/")
+# Standard container/service accounts are not personal workstation identities.
+HOME_PATH = re.compile(r"/(?:Users|home)/(?!(?:user|ubuntu|runner|app|nvidia|jovyan)/)[A-Za-z0-9_.-]+/")
 WALLET_ARRAY = re.compile(r"\[\s*(?:\d{1,3}\s*,\s*){63}\d{1,3}\s*\]")
 TOKEN_QUERY = re.compile(
     r"(?i)https?://[^\s\"'<>]+[?&](?:api[_-]?key|token|secret|access_token)="
@@ -104,7 +105,12 @@ def gitleaks(root: Path, report: Path, history: bool = False) -> list[dict]:
     # Never let repository configuration suppress provider rules or findings.
     # An explicit empty configuration extends the scanner's default rules.
     configuration = report.with_suffix(".toml")
-    configuration.write_text("[extend]\nuseDefault = true\n")
+    configuration.write_text(
+        "[extend]\nuseDefault = true\n\n"
+        "[[allowlists]]\ndescription = 'Official public CLAWD token mint'\n"
+        "regexTarget = 'secret'\n"
+        "regexes = ['^8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump$']\n"
+    )
     ignore = report.with_suffix(".ignore")
     ignore.write_text("")
     command.extend([f"--config={configuration}", f"--gitleaks-ignore-path={ignore}"])

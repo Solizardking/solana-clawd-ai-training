@@ -27,6 +27,13 @@
 
 ## Repository Map
 
+Public release preparation: see [OPEN_SOURCE_RELEASE.md](OPEN_SOURCE_RELEASE.md).
+Original software retains the [MIT license](LICENSE), with component exceptions
+documented in [LICENSING.md](LICENSING.md) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Model and dataset artifacts
+require separate license and provenance review. Publish a checked history-free
+snapshot; the original private Git history is not part of the public release.
+
 The repo layout is documented in [STRUCTURE.md](STRUCTURE.md), including source
 lanes, generated output lanes, NVIDIA integration ownership, and safety rules.
 
@@ -542,7 +549,7 @@ curl -X POST https://onchain.x402.wtf/api/register \
 
 ```bash
 curl https://clawd-box-router.fly.dev/v1/chat/completions \
-  -H "Authorization: Bearer clawd_free_public" \
+  -H "Authorization: Bearer ${CLAWD_INFERENCE_TOKEN}" \
   -d '{
     "model": "solanaclawd/solana-clawd-1.5b",
     "messages": [

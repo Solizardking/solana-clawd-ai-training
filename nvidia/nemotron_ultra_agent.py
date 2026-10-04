@@ -41,6 +41,9 @@ Usage:
 
 from __future__ import annotations
 
+# Public model identifier, separate from authentication credentials.
+MODEL_CLAWD = "solana-clawd-1.5b"
+
 import argparse
 import json
 import os
@@ -92,7 +95,7 @@ def resolve_endpoint(prefer_ultra: bool = True) -> Endpoint:
     """Return the best available inference endpoint."""
     if url := os.environ.get("CLAWD_INFERENCE_URL"):
         key = os.environ.get("CLAWD_API_KEY", "none")
-        model = os.environ.get("CLAWD_MODEL", "solana-clawd-1.5b")
+        model = os.environ.get("CLAWD_MODEL", MODEL_CLAWD)
         return Endpoint(url.rstrip("/"), key, model, "clawd-self-hosted")
     if hf := os.environ.get("HF_TOKEN"):
         model = MODEL_HF if prefer_ultra else "Qwen/Qwen2.5-7B-Instruct"
@@ -101,7 +104,7 @@ def resolve_endpoint(prefer_ultra: bool = True) -> Endpoint:
         model = MODEL_NIM if prefer_ultra else MODEL_FALLBACK
         return Endpoint(NIM_BASE, nv, model, "nvidia-nim")
     router_key = os.environ.get("CLAWD_ROUTER_KEY", "clawd_free_default")
-    return Endpoint(CLAWD_ROUTER, router_key, "solana-clawd-1.5b", "clawd-router")
+    return Endpoint(CLAWD_ROUTER, router_key, MODEL_CLAWD, "clawd-router")
 
 
 # ── LLM client ───────────────────────────────────────────────────────────────

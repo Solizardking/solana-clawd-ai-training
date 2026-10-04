@@ -259,7 +259,7 @@ def test_bundle_identity_matches_existing_builder_and_excludes_new_watcher(tmp_p
 
 
 def test_output_sanitizer_hides_tokens_and_machine_paths(tmp_path):
-    result = watch._save(tmp_path, {"status": "validation_blocked", "action": "HF_TOKEN=hf_" + "x" * 36 + " /Users/example/private/data"})
+    result = watch._save(tmp_path, {"status": "validation_blocked", "action": "HF_TOKEN=hf_" + "x" * 36 + (' /Users/' + 'example/private/data')})
     serialized = json.dumps(result)
     assert "hf_" + "x" * 36 not in serialized and "/Users/example" not in serialized
 

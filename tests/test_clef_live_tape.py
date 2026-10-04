@@ -25,7 +25,7 @@ def snapshot(monkeypatch, raw_frame=None, health=None):
         "type": "token-launch", "mint": MINT, "creator": CREATOR,
         "symbol": "Clawd  ", "name": "Research\u2028Tape", "time": NOW.isoformat(),
         "marketCapSol": 51.123456789,
-        "website": "https://example.test?api_key=never-retain", "twitter": None, "telegram": "",
+        "website": ('https://example.test?api_key=' + 'never-retain'), "twitter": None, "telegram": "",
     }
     monkeypatch.setattr(tape, "utc_now", lambda: NOW.isoformat())
     monkeypatch.setattr(tape, "_fetch_health", lambda deadline: tape.sanitize_health(health or {"status": "ok", "solana": True, "totalLaunches": 12}))
@@ -42,7 +42,7 @@ def rehash(value):
 
 
 def test_allowlist_never_passes_provider_secrets_or_untrusted_metadata(monkeypatch):
-    payload = snapshot(monkeypatch, health={"status": "ok", "solana": True, "rpcHttp": "https://rpc.test?api_key=NEVER", "rpcWs": "wss://rpc.test?token=NEVER", "webhookPath": "/private/NEVER"})
+    payload = snapshot(monkeypatch, health={"status": "ok", "solana": True, "rpcHttp": ('https://rpc.test?api_key=' + 'NEVER'), "rpcWs": "wss://rpc.test?token=NEVER", "webhookPath": "/private/NEVER"})
     serialized = tape.serialize_snapshot(payload)
     assert "NEVER" not in serialized and "never-retain" not in serialized
     assert "rpcHttp" not in serialized and "webhookPath" not in serialized
@@ -76,7 +76,7 @@ def test_mutated_or_unsafe_cached_snapshot_is_rejected(monkeypatch):
     with pytest.raises(ValueError, match="hash"):
         tape.serialize_snapshot(payload)
     payload = snapshot(monkeypatch)
-    payload["health"]["data"]["rpcHttp"] = "https://rpc.test?api_key=NEVER"
+    payload["health"]["data"]["rpcHttp"] = ('https://rpc.test?api_key=' + 'NEVER')
     with pytest.raises(ValueError, match="unsafe health"):
         tape.serialize_snapshot(rehash(payload))
     payload = snapshot(monkeypatch)

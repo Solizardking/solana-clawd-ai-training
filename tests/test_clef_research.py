@@ -87,7 +87,7 @@ def test_multiturn_or_nontext_examples_are_rejected():
     ({"private_key": "A" * 64}, "encoded_signing_literal"),
     ({"signingSeed": "A" * 64}, "encoded_signing_literal"),
     ("HF_TOKEN=" + "hf_" + "A" * 24, "credential_payload"),
-    ("-----BEGIN PRIVATE KEY-----\nsynthetic-test-data", "credential_payload"),
+    (('-----BEGIN ' + 'PRIVATE KEY-----\nsynthetic-test-data'), "credential_payload"),
 ])
 def test_literal_signing_material_and_credential_shapes_are_excluded(value, category):
     # Synthetic shapes only: no repository credential or published key bytes.

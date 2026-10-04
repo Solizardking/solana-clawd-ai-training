@@ -1,4 +1,5 @@
 [project]
+license = { text = "MIT" }
 name = "solana-chat"
 version = "0.2.0"
 description = "Solana-native LLM training harness — fork of nanochat with ZK routing, Light Protocol compression, and Clawd constitution"

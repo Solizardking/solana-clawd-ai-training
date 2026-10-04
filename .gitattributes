@@ -4,7 +4,10 @@ artifacts export-ignore
 data export-ignore
 library export-ignore
 local export-ignore
-memory export-ignore
+memory/*.json export-ignore
+memory/*.jsonl export-ignore
+memory/*.sqlite* export-ignore
+memory/*.db export-ignore
 outputs export-ignore
 target export-ignore
 .venv* export-ignore

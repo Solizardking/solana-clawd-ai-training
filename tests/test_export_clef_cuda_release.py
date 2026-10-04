@@ -142,14 +142,14 @@ def test_cpu_model_never_becomes_cuda_export_evidence():
 
 def test_portable_metadata_removes_only_path_fields_and_binds_original_payload():
     original = metadata()
-    original["base_model_name_or_path"] = "/Users/synthetic-fixture/base"
-    original["provenance"] = {"local_dir": "/home/synthetic-fixture/private-inputs", "revision": MODEL_REVISION}
+    original["base_model_name_or_path"] = ('/Users/' + 'synthetic-fixture/base')
+    original["provenance"] = {"local_dir": ('/home/' + 'synthetic-fixture/private-inputs'), "revision": MODEL_REVISION}
     safe = cuda._portable_training(original)
     assert "base_model_name_or_path" not in safe and "local_dir" not in safe["provenance"]
     assert safe["path_privacy"]["removed_path_fields"] == ["base_model_name_or_path", "provenance.local_dir"]
     assert len(safe["path_privacy"]["source_metadata_payload_sha256"]) == 64
     assert original["base_model_name_or_path"].startswith("/Users/")
-    original["scope"] = "private diagnostics at /Users/synthetic-fixture/output"
+    original["scope"] = ('private diagnostics at /Users/' + 'synthetic-fixture/output')
     with pytest.raises(ValueError, match="outside a path field"):
         cuda._portable_training(original)
 

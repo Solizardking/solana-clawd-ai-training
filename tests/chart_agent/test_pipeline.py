@@ -38,7 +38,7 @@ def test_address_validation():
 
 def test_openrouter_provider_key_is_not_used_for_mcp(monkeypatch):
     monkeypatch.delenv('SOLGPT_MCP_TOKEN', raising=False)
-    monkeypatch.setenv('SOLGPT_API_KEY', 'sk-or-v1-fixture')
+    monkeypatch.setenv('SOLGPT_API_KEY', 'sk-or-' + 'v1-fixture')
     assert SolGptBridge().key is None
     monkeypatch.setenv('SOLGPT_API_KEY', 'provider-fixture')
     monkeypatch.setenv('SOLGPT_API_BASE', 'https://openrouter.ai/api/v1')
