@@ -126,6 +126,10 @@ def gitleaks(root: Path, report: Path, history: bool = False) -> list[dict]:
 
 
 def candidate_paths(root: Path) -> list[str]:
+    repository = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=root,
+                                capture_output=True, check=True)
+    if Path(repository.stdout.decode().strip()).resolve() != root.resolve():
+        raise RuntimeError("Source snapshot must have its own Git repository; parent repository refused")
     result = subprocess.run(["git", "ls-files", "--cached", "-z"], cwd=root,
                             capture_output=True, check=True)
     return sorted(set(p for p in result.stdout.decode().split("\0") if p))
@@ -158,10 +162,10 @@ def main() -> int:
             parser.error("output already exists; choose a new directory")
         if args.output.is_relative_to(ROOT) and not args.output.is_relative_to(ROOT / "local"):
             parser.error("release output must be outside the checkout or under ignored local/")
-    paths = candidate_paths(ROOT)
-    omitted = [p for p in paths if excluded(p, policy)]
-    findings = [{"file": p, "rule": "excluded-path-in-index"} for p in omitted] if args.check else []
     try:
+        paths = candidate_paths(ROOT)
+        omitted = [p for p in paths if excluded(p, policy)]
+        findings = [{"file": p, "rule": "excluded-path-in-index"} for p in omitted] if args.check else []
         with tempfile.TemporaryDirectory(prefix="clawd-public-review-") as temporary:
             stage = Path(temporary) / "source"
             stage.mkdir()
@@ -169,7 +173,8 @@ def main() -> int:
                 if relative in omitted:
                     continue
                 source = ROOT / relative
-                if source.is_symlink():
+                if source.is_symlink() or any(p.is_symlink() for p in source.parents
+                                              if p.is_relative_to(ROOT)):
                     findings.append({"file": relative, "rule": "symlink-not-permitted"})
                 elif not source.is_file():
                     findings.append({"file": relative, "rule": "missing-indexed-file"})

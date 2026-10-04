@@ -1,7 +1,9 @@
 """Release tests protect boundaries rather than assert implementation details."""
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 
@@ -13,6 +15,18 @@ POLICY = json.loads((ROOT / "configs/public_release_policy.json").read_text())
 
 
 class PublicReleaseTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("gitleaks"), "requires the release secret scanner")
+    def test_real_scanner_blocks_synthetic_credential_and_redacts_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "source"
+            source.mkdir()
+            token = "hf_" + hashlib.sha256(b"synthetic-public-release-test").hexdigest()[:34]
+            (source / "config.txt").write_text("HF_TOKEN=" + token + "\n")
+            report = root / "findings.json"
+            self.assertTrue(release.gitleaks(source, report))
+            self.assertNotIn(token, report.read_text())
+
     def test_private_material_and_fonts_are_excluded(self):
         paths = [".work/gateway.py", "artifacts/paper.pdf", "data/nested/train.jsonl",
                  ".venv-connect/lib/file.py", "nested/node_modules/lib.js",
