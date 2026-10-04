@@ -158,12 +158,12 @@ def test_tokenize_recorded_pump_frames(trained_tokenizer) -> None:
 
 
 def test_hauhau_sibling_embeds_pump_ws_and_tokenizer() -> None:
-    sibling = Path("/Users/8bit/sol-gpt/hauhau/nemotron-trading")
+    sibling = Path("/path/to/sol-gpt/hauhau/nemotron-trading")
     html = (sibling / "www" / "index.html").read_text()
     assert 'data-pump-ws-url="wss://clawd-ws.fly.dev/ws"' in html
     assert "ordlibrary/solana-clawd-nemotron-trading-tokenizer" in html
     assert "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-NVFP4" in html
-    original = Path("/Users/8bit/sol-gpt/hauhau/www/index.html").read_text()
+    original = Path("/path/to/sol-gpt/hauhau/www/index.html").read_text()
     assert 'data-pump-ws-url="wss://clawd-ws.fly.dev/ws"' in original
     fly = (sibling / "fly.toml").read_text()
     assert "hauhau-nemotron-trading" in fly

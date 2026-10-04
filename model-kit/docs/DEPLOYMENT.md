@@ -14,7 +14,7 @@ proxied through the Render API only when the page sends an explicit live request
 Use the blueprint in this folder:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd
+cd /path/to/Downloads/solana-clawd
 render blueprint launch ai-training/model-kit/render.yaml
 ```
 
@@ -87,7 +87,7 @@ window.MODEL_KIT_CONFIG = {
 Deploy:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training/model-kit
+cd /path/to/Downloads/solana-clawd/ai-training/model-kit
 npm run build
 vercel deploy --prod
 ```

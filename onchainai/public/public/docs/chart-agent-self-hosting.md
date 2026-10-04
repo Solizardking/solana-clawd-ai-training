@@ -304,8 +304,8 @@ SHA256 values against `configs/chart-agent-model.json`.
   --metadata outputs/chart-agent/assets/metadata.csv \
   --data-dir outputs/chart-agent/assets/data \
   --research \
-  /Users/8bit/Downloads/arvix \
-  /Users/8bit/Downloads/ChartDete-main/README.md \
+  /path/to/Downloads/arvix \
+  /path/to/Downloads/ChartDete-main/README.md \
   docs/solgpt-chart-tool-catalog.md \
   nvidia/blueprints/transaction-foundation-model/src/tokenizer/README.md
 ```

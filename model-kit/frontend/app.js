@@ -243,7 +243,7 @@ function buildCommand() {
   const modelRepo = $("#modelRepo").value.trim();
   const manifest = `${$("#outputPrefix").value.trim()}_manifest.json`;
   const lines = [
-    "cd /Users/8bit/Downloads/solana-clawd",
+    "cd /path/to/Downloads/solana-clawd",
     parts.join(" \\\n  "),
     "",
     "# Verify local artifacts",

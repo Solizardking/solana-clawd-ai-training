@@ -18,22 +18,22 @@ single place without breaking old scripts that still reference historical paths.
 The root-level output folder was moved into the training workspace:
 
 ```bash
-/Users/8bit/Downloads/solana-clawd/outputs
-  -> /Users/8bit/Downloads/solana-clawd/ai-training/outputs/imported-root-outputs-20260704
+/path/to/Downloads/solana-clawd/outputs
+  -> /path/to/Downloads/solana-clawd/ai-training/outputs/imported-root-outputs-20260704
 ```
 
 A compatibility symlink keeps the old path working:
 
 ```bash
-/Users/8bit/Downloads/solana-clawd/outputs
-  -> /Users/8bit/Downloads/solana-clawd/ai-training/outputs/imported-root-outputs-20260704
+/path/to/Downloads/solana-clawd/outputs
+  -> /path/to/Downloads/solana-clawd/ai-training/outputs/imported-root-outputs-20260704
 ```
 
 The fresh NVIDIA transaction-foundation 1.5B run was moved from the
 `traintoearn` working tree into the model output lane:
 
 ```bash
-/Users/8bit/Downloads/solana-clawd/ai-training/outputs/solana-tx-foundation-1.5b
+/path/to/Downloads/solana-clawd/ai-training/outputs/solana-tx-foundation-1.5b
 ```
 
 That run now carries the local CPT and SFT adapter checkpoints in the same

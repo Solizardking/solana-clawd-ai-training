@@ -25,7 +25,7 @@ The active handoff lane is the transaction foundation model:
 Start from a model-kit manifest if one exists:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 
 bash dao/register_model.sh \
   --dry-run \

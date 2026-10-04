@@ -63,7 +63,7 @@ CHART_MODEL_BACKEND=nemotron
 CHART_MODEL_NAME=clawd-nemotron
 LLAMA_URL=http://127.0.0.1:8091
 # CHART_MODEL_API_KEY must match the private NEMOTRON_API_KEY of the model server.
-CHART_ELEMENT_DETECTOR=/Users/8bit/solana-clawd-ai-training/outputs/chart-agent/chartdete/training/full/evaluation/chart-elements.onnx
+CHART_ELEMENT_DETECTOR=/path/to/solana-clawd-ai-training/outputs/chart-agent/chartdete/training/full/evaluation/chart-elements.onnx
 ```
 
 Keep model credentials separate from the chart API client key and SOLGPT MCP credentials. `/ready` reports the selected backend and model name. `/analyze` reports the actual configured model name and supplies local Tesseract OCR text, confidence, and original-image boxes while explicitly stating that raw images are not visible to Nemotron. OCR is uncertain evidence, not verified prices or mint identities. `/tokenize` uses the selected backend's native tokenizer. Existing llama.cpp deployments retain the default vision path until explicitly switched.

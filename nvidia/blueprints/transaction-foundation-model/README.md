@@ -45,7 +45,7 @@ Solana raw tx JSONL
 ## Quick start
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 
 # Check the full plan without training
 python3 nvidia/blueprints/transaction-foundation-model/pipeline.py --dry-run
@@ -78,7 +78,7 @@ python3 nvidia/blueprints/transaction-foundation-model/pipeline.py \
 Launch the CPT+SFT job on Hugging Face Jobs:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 bash scripts/launch_transaction_foundation_hf_job.sh a100-large 6h
 ```
 
@@ -106,7 +106,7 @@ Run the continuation command first. By default it writes local release metadata
 only; it does not upload, register live, or touch onchain state.
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 bash scripts/after_transaction_foundation_job.sh
 ```
 

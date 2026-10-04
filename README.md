@@ -55,7 +55,7 @@ Key paths:
 
 - Root legacy outputs now resolve through
   `outputs/imported-root-outputs-20260704`.
-- `/Users/8bit/Downloads/solana-clawd/outputs` is a compatibility symlink back
+- `/path/to/Downloads/solana-clawd/outputs` is a compatibility symlink back
   into `ai-training`.
 - The fresh NVIDIA 1.5B transaction-foundation run now lives at
   `outputs/solana-tx-foundation-1.5b`.

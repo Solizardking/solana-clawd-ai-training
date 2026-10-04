@@ -21,7 +21,7 @@ Gemini, and custom endpoints, with realtime results and X share links.
 | Registry manifest | https://onchain.x402.wtf/.well-known/clawd-registry.json |
 | GitHub training repo | https://github.com/solizardking/solana-clawd-ai-training |
 | Hugging Face org | https://huggingface.co/solanaclawd |
-| Local model kit | `/Users/8bit/Downloads/solana-clawd/ai-training/model-kit` |
+| Local model kit | `/path/to/Downloads/solana-clawd/ai-training/model-kit` |
 
 ## Latest Consolidation
 
@@ -39,7 +39,7 @@ The short version:
 
 - root legacy outputs are archived under
   `../outputs/imported-root-outputs-20260704`;
-- `/Users/8bit/Downloads/solana-clawd/outputs` remains available as a
+- `/path/to/Downloads/solana-clawd/outputs` remains available as a
   compatibility symlink;
 - the usable NVIDIA transaction-foundation 1.5B CPT/SFT adapter run is now under
   `../outputs/solana-tx-foundation-1.5b`;
@@ -49,7 +49,7 @@ The short version:
 ## Quick Start
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd
+cd /path/to/Downloads/solana-clawd
 python3 -m venv ai-training/.venv
 source ai-training/.venv/bin/activate
 python3 -m pip install -r ai-training/requirements.txt

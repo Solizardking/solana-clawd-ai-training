@@ -9,9 +9,9 @@ Implementation target: `onchain.x402.wtf`
 
 Local app roots:
 
-- Frontend: `/Users/8bit/Downloads/OnChain-Ai-main/frontend`
-- Backend: `/Users/8bit/Downloads/OnChain-Ai-main/backend`
-- Source model kit: `/Users/8bit/Downloads/solana-clawd/ai-training`
+- Frontend: `/path/to/Downloads/OnChain-Ai-main/frontend`
+- Backend: `/path/to/Downloads/OnChain-Ai-main/backend`
+- Source model kit: `/path/to/Downloads/solana-clawd/ai-training`
 
 This handoff is for wiring the Solana Clawd AI training/model kit into the
 existing OnChain-AI product. Do not copy API keys, OAuth client secrets,
@@ -63,7 +63,7 @@ Local model-kit files to reference:
 
 Existing backend entrypoint:
 
-- `/Users/8bit/Downloads/OnChain-Ai-main/backend/main.py`
+- `/path/to/Downloads/OnChain-Ai-main/backend/main.py`
 
 Already registered blueprints:
 
@@ -104,8 +104,8 @@ Registry constants already used by the backend:
 
 Existing frontend app:
 
-- `/Users/8bit/Downloads/OnChain-Ai-main/frontend/src/App.jsx`
-- API base: `/Users/8bit/Downloads/OnChain-Ai-main/frontend/src/lib/api.js`
+- `/path/to/Downloads/OnChain-Ai-main/frontend/src/App.jsx`
+- API base: `/path/to/Downloads/OnChain-Ai-main/frontend/src/lib/api.js`
 
 Existing routes/components:
 
@@ -218,7 +218,7 @@ page when the feature should be an operational model-kit screen.
    Suggested checks:
 
    ```bash
-   cd /Users/8bit/Downloads/OnChain-Ai-main/backend
+   cd /path/to/Downloads/OnChain-Ai-main/backend
    python3 -m py_compile main.py src/routes/registry.py src/routes/training_datasets.py src/routes/document_ai.py
    PORT=5001 python3 main.py
    curl -sS http://localhost:5001/api/health
@@ -346,7 +346,7 @@ reserves that type for oracle-verified models and returns `403`.
 Backend:
 
 ```bash
-cd /Users/8bit/Downloads/OnChain-Ai-main/backend
+cd /path/to/Downloads/OnChain-Ai-main/backend
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -r requirements.txt
@@ -356,7 +356,7 @@ PORT=5001 python3 main.py
 Frontend:
 
 ```bash
-cd /Users/8bit/Downloads/OnChain-Ai-main/frontend
+cd /path/to/Downloads/OnChain-Ai-main/frontend
 npm install
 VITE_API_BASE_URL=http://localhost:5001 npm run dev
 ```
@@ -364,7 +364,7 @@ VITE_API_BASE_URL=http://localhost:5001 npm run dev
 Production-style frontend build:
 
 ```bash
-cd /Users/8bit/Downloads/OnChain-Ai-main/frontend
+cd /path/to/Downloads/OnChain-Ai-main/frontend
 VITE_API_BASE_URL=https://onchain-ai-backend.onrender.com npm run build
 ```
 
@@ -405,17 +405,17 @@ Security:
 Run these before handing the implementation back:
 
 ```bash
-cd /Users/8bit/Downloads/OnChain-Ai-main/backend
+cd /path/to/Downloads/OnChain-Ai-main/backend
 python3 -m py_compile main.py src/routes/registry.py src/routes/training_datasets.py src/routes/document_ai.py
 
-cd /Users/8bit/Downloads/OnChain-Ai-main/frontend
+cd /path/to/Downloads/OnChain-Ai-main/frontend
 npm run build
 
-cd /Users/8bit/Downloads/solana-clawd
+cd /path/to/Downloads/solana-clawd
 rg "h[f]_[A-Za-z0-9]{30,}|wandb[_]v1[_][A-Za-z0-9_-]{20,}|nvapi[-][A-Za-z0-9_-]{20,}|client[_]secret[_][0-9].*\\.json|application[_]default[_]credentials\\.json|ya29\\.|BE[G]IN .*PRIVATE KEY" \
   README.md ai-training/onchain.md ai-training/README.md \
-  /Users/8bit/Downloads/OnChain-Ai-main/frontend/src \
-  /Users/8bit/Downloads/OnChain-Ai-main/backend/src
+  /path/to/Downloads/OnChain-Ai-main/frontend/src \
+  /path/to/Downloads/OnChain-Ai-main/backend/src
 ```
 
 The final `rg` command should produce no matches.

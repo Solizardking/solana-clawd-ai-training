@@ -4,7 +4,7 @@
 
 project:
   name: solana-clawd-custom
-  repo_root: /Users/8bit/Downloads/solana-clawd
+  repo_root: /path/to/Downloads/solana-clawd
   model_kit_dir: ai-training/model-kit
   registry_url: https://onchain.x402.wtf
   github_repo: https://github.com/solizardking/solana-clawd-ai-training

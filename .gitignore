@@ -23,6 +23,13 @@ node_modules/
 /deploy/nemotron/training/assistant-mask.jinja
 /deploy/nemotron/training/upstream-lora.yaml
 /configs/nemotron35_chat_template_genmask.jinja
+/onchainai/chart_agent
+/onchainai/deploy/chart-agent
+/onchainai/deploy/nemotron
+/onchainai/public/chart_agent
+/onchainai/public/deploy/chart-agent
+/onchainai/public/deploy/nemotron
+/trading_factory/cufolio/.agents/skills
 checkpoints/
 outputs/
 *.safetensors

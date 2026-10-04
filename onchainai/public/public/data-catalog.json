@@ -205,7 +205,7 @@
         "test": 978
       },
       "training_model": "solanaclawd/solana-tx-foundation-1.5b",
-      "local_model_path": "/Users/8bit/Downloads/solana-clawd/ai-training/outputs/solana-tx-foundation-1.5b/sft",
+      "local_model_path": "/path/to/Downloads/solana-clawd/ai-training/outputs/solana-tx-foundation-1.5b/sft",
       "local_model_present": false
     },
     {

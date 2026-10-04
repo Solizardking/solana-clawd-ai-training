@@ -38,7 +38,7 @@ HF_MODEL_ID="${CLAWD_HF_MODEL:-solanaclawd/solana-clawd-core-ai-1.5b-lora}"
 MODEL_ENDPOINT="${CLAWD_MODEL_ENDPOINT:-https://clawd-box-router.fly.dev/v1}"
 EVAL_ACCURACY="${CLAWD_EVAL_ACCURACY:-0.60}"
 DATASET_SIZE="${CLAWD_DATASET_SIZE:-35173}"
-ONCHAIN_AI_ROOT="${ONCHAIN_AI_ROOT:-/Users/8bit/Downloads/OnChain-Ai-main}"
+ONCHAIN_AI_ROOT="${ONCHAIN_AI_ROOT:-/path/to/Downloads/OnChain-Ai-main}"
 
 usage() {
   cat <<'EOF'

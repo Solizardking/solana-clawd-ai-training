@@ -40,7 +40,7 @@ from tokenizer.trading_tokens import (  # noqa: E402
 )
 
 DEFAULT_PUMP_MCP = Path(
-    "/Users/8bit/Downloads/solgpt---nl-trading-desk (5)/PUMP-MCP-main"
+    "/path/to/Downloads/solgpt---nl-trading-desk (5)/PUMP-MCP-main"
 )
 DEFAULT_OUTPUT = ROOT / "outputs" / "solana-trading-tokenizer"
 

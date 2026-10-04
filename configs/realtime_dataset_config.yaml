@@ -39,34 +39,34 @@ gemini_model: gemini-2.5-flash
 google_timeout_seconds: 120
 
 inputs:
-  - /Users/8bit/drive/pdfs/2410.21169v5.pdf
-  - /Users/8bit/drive/pdfs/2412.04913v3.pdf
-  - /Users/8bit/drive/pdfs/2412.07591v2.pdf
-  - /Users/8bit/drive/pdfs/2512.01112v3.pdf
-  - /Users/8bit/drive/pdfs/2512.06505v4.pdf
-  - /Users/8bit/drive/pdfs/2512.19113v2.pdf
-  - /Users/8bit/drive/pdfs/2512.22476v1.pdf
-  - /Users/8bit/drive/pdfs/2601.10812v1.pdf
-  - /Users/8bit/drive/pdfs/2601.17008v1.pdf
-  - /Users/8bit/drive/pdfs/2602.00776v1.pdf
-  - /Users/8bit/drive/pdfs/2602.14860v1.pdf
-  - /Users/8bit/drive/pdfs/2603.10092v1.pdf
-  - /Users/8bit/drive/pdfs/2604.01431v1.pdf
-  - /Users/8bit/drive/pdfs/2605.05089v1.pdf
-  - /Users/8bit/drive/pdfs/2605.05878v1.pdf
-  - /Users/8bit/drive/pdfs/2605.10400v1.pdf
-  - /Users/8bit/drive/pdfs/2605.10428v1.pdf
-  - /Users/8bit/drive/pdfs/2605.12151v2.pdf
-  - "/Users/8bit/drive/pdfs/2605.29174v1 (1).pdf"
-  - /Users/8bit/drive/pdfs/2605.29174v1.pdf
-  - "/Users/8bit/drive/pdfs/2606.08232v1 (1).pdf"
-  - /Users/8bit/drive/pdfs/2606.08232v1.pdf
-  - /Users/8bit/drive/solana_dataset/analysing-crypto-charts-like-pro.ipynb
-  - /Users/8bit/drive/solana_dataset/analysis-of-smart-contracts-in-blockchain.ipynb
-  - /Users/8bit/drive/solana_dataset/solana-prediction.ipynb
-  - /Users/8bit/drive/solana_dataset/test-00000-of-00001.parquet
-  - /Users/8bit/drive/solana_dataset/train-00000-of-00001.parquet
-  - /Users/8bit/.agents/skills/zk/SKILL.md
+  - /path/to/drive/pdfs/2410.21169v5.pdf
+  - /path/to/drive/pdfs/2412.04913v3.pdf
+  - /path/to/drive/pdfs/2412.07591v2.pdf
+  - /path/to/drive/pdfs/2512.01112v3.pdf
+  - /path/to/drive/pdfs/2512.06505v4.pdf
+  - /path/to/drive/pdfs/2512.19113v2.pdf
+  - /path/to/drive/pdfs/2512.22476v1.pdf
+  - /path/to/drive/pdfs/2601.10812v1.pdf
+  - /path/to/drive/pdfs/2601.17008v1.pdf
+  - /path/to/drive/pdfs/2602.00776v1.pdf
+  - /path/to/drive/pdfs/2602.14860v1.pdf
+  - /path/to/drive/pdfs/2603.10092v1.pdf
+  - /path/to/drive/pdfs/2604.01431v1.pdf
+  - /path/to/drive/pdfs/2605.05089v1.pdf
+  - /path/to/drive/pdfs/2605.05878v1.pdf
+  - /path/to/drive/pdfs/2605.10400v1.pdf
+  - /path/to/drive/pdfs/2605.10428v1.pdf
+  - /path/to/drive/pdfs/2605.12151v2.pdf
+  - "/path/to/drive/pdfs/2605.29174v1 (1).pdf"
+  - /path/to/drive/pdfs/2605.29174v1.pdf
+  - "/path/to/drive/pdfs/2606.08232v1 (1).pdf"
+  - /path/to/drive/pdfs/2606.08232v1.pdf
+  - /path/to/drive/solana_dataset/analysing-crypto-charts-like-pro.ipynb
+  - /path/to/drive/solana_dataset/analysis-of-smart-contracts-in-blockchain.ipynb
+  - /path/to/drive/solana_dataset/solana-prediction.ipynb
+  - /path/to/drive/solana_dataset/test-00000-of-00001.parquet
+  - /path/to/drive/solana_dataset/train-00000-of-00001.parquet
+  - /path/to/.agents/skills/zk/SKILL.md
 
 watch_dirs:
   - data/incoming

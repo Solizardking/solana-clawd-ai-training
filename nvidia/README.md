@@ -73,7 +73,7 @@ For an Apple Silicon local run that ties the blueprints, model-kit, trading
 factory, AIQ, transaction-foundation preflight, and optional RAG path together:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 python3 scripts/run_local_clawd_stack.py --best-effort
 ```
 

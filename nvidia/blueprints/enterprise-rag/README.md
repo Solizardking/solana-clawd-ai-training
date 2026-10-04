@@ -101,7 +101,7 @@ Deploy from the `ai-training/` directory so the Docker build context contains
 both the RAG source and `data/nvidia_rag_store`:
 
 ```bash
-cd /Users/8bit/Downloads/solana-clawd/ai-training
+cd /path/to/Downloads/solana-clawd/ai-training
 
 # First deploy or update
 flyctl deploy . \
