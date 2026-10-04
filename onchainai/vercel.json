@@ -20,59 +20,59 @@
     },
     {
       "source": "/models",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/datasets",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/data",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/data.html",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/studio",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/studio.html",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/trading-factory",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/model-kit",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/register",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/dashboard",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/chart-agent",
-      "destination": "/index.html"
+      "destination": "/index"
     },
     {
       "source": "/docs",
-      "destination": "/docs.html"
+      "destination": "/docs"
     },
     {
       "source": "/docs-index",
-      "destination": "/docs.html"
+      "destination": "/docs"
     },
     {
       "source": "/kit",
-      "destination": "/kit/index.html"
+      "destination": "/kit/index"
     }
   ],
   "headers": [

@@ -1,10 +1,13 @@
 import { hubCatalog, rpc, registryStatus, onchainRegistry, decodeRegistryAccount, complete, inferenceModels, publishDataset, PROGRAM_ID, MEMO_PROGRAM, sha256 } from '../server/service.mjs';
+import bs58 from 'bs58';
 
 async function readBody(req) {
   if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
   if (typeof req.body === 'string' && !(req.headers['content-type'] || '').includes('multipart')) return JSON.parse(req.body);
   const chunks = []; let size = 0;
-  for await (const chunk of req) { size += chunk.length; if (size > 3000000) throw Object.assign(new Error('Request exceeds 3 MB'), { status: 413 }); chunks.push(chunk); }
+  if (Buffer.isBuffer(req.body) || typeof req.body === 'string') { chunks.push(Buffer.from(req.body)); size = chunks[0].length; }
+  else for await (const chunk of req) { size += chunk.length; if (size > 3000000) throw Object.assign(new Error('Request exceeds 3 MB'), { status: 413 }); chunks.push(chunk); }
+  if (size > 3000000) throw Object.assign(new Error('Request exceeds 3 MB'), { status: 413 });
   const buffer = Buffer.concat(chunks);
   if ((req.headers['content-type'] || '').includes('multipart')) {
     const form = await new Request('https://localhost/', { method: 'POST', headers: { 'content-type': req.headers['content-type'] }, body: buffer }).formData();
@@ -45,6 +48,9 @@ export default async function handler(req, res) {
       const memos = result.transaction.message.instructions.filter(i => i.programId === MEMO_PROGRAM).map(i => i.parsed).filter(m => typeof m === 'string');
       const native = [];
       for (const instruction of result.transaction.message.instructions.filter(i => i.programId === PROGRAM_ID)) {
+        let initializesModel = false;
+        try { initializesModel = Buffer.from(bs58.decode(instruction.data)).subarray(0, 8).equals(Buffer.from([150, 196, 232, 118, 138, 43, 140, 244])); } catch { /* Unrecognized instruction is not a registration. */ }
+        if (!initializesModel) continue;
         const pda = instruction.accounts?.[0];
         if (pda) { const state = await rpc(cluster, 'getAccountInfo', [pda, { encoding: 'base64', commitment: 'confirmed' }]); const decoded = await decodeRegistryAccount(pda, state.value); if (decoded) native.push({ ...decoded, cluster }); }
       }

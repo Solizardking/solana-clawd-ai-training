@@ -17,6 +17,17 @@ export function normalizeRow(row) {
   if (typeof prompt === 'string' && typeof answer === 'string' && prompt.trim() && answer.trim()) return { messages: [{ role: 'user', content: prompt + (row.input ? '\n' + row.input : '') }, { role: 'assistant', content: answer }] };
   throw new Error('Row needs messages or a prompt/answer pair');
 }
+export function inspectCandles(text) {
+  const parsed = Papa.parse(text, { header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() });
+  if (parsed.errors.length) throw new Error(`CSV: ${parsed.errors[0].message}`);
+  if (!parsed.data.length || parsed.data.length > 10000) throw new Error('Use 1 to 10,000 OHLCV rows.');
+  const candles = parsed.data.map((row, index) => {
+    const item = { time: row.time || row.timestamp || row.date || String(index + 1), open: Number(row.open), high: Number(row.high), low: Number(row.low), close: Number(row.close), volume: row.volume === undefined ? null : Number(row.volume) };
+    if (['open', 'high', 'low', 'close'].some(k => !Number.isFinite(item[k]) || item[k] <= 0) || item.high < Math.max(item.open, item.close, item.low) || item.low > Math.min(item.open, item.close, item.high) || item.volume !== null && (!Number.isFinite(item.volume) || item.volume < 0)) throw new Error(`Invalid OHLCV values at row ${index + 1}.`);
+    return item;
+  });
+  return { schema: 'clawd.chart-inspection.v1', source: 'user-supplied CSV; not a live price feed', rows: candles.length, first: candles[0], last: candles.at(-1), change_percent: (candles.at(-1).close / candles[0].close - 1) * 100, high: Math.max(...candles.map(c => c.high)), low: Math.min(...candles.map(c => c.low)), candles };
+}
 function textRows(text, source) {
   return text.match(/[\s\S]{1,4500}/g)?.map(chunk => ({ messages: [{ role: 'user', content: `Read the source excerpt from ${source}.` }, { role: 'assistant', content: chunk.trim() }] })).filter(r => r.messages[1].content) || [];
 }
@@ -29,11 +40,12 @@ export async function buildDataset(files, name, wallet) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     let text = new TextDecoder().decode(bytes); let records = [];
     if (extension === 'pdf') {
-      const doc = await pdfjs.getDocument({ data: bytes.slice() }).promise;
+      const loadingTask = pdfjs.getDocument({ data: bytes.slice() });
+      const doc = await loadingTask.promise;
       if (doc.numPages > 200) throw new Error('PDF exceeds the 200 page limit');
       text = '';
       for (let i = 1; i <= doc.numPages; i++) text += (await (await doc.getPage(i)).getTextContent()).items.map(item => item.str || '').join(' ') + '\n';
-      await doc.destroy();
+      await loadingTask.destroy();
       if (!text.trim()) throw new Error('PDF has no extractable text; OCR is required for scanned pages');
       records = textRows(text, file.name); warnings.push(`${file.name}: source-reproduction examples; curate questions before training.`);
     } else if (['jsonl', 'ndjson'].includes(extension)) records = text.trim().split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line));

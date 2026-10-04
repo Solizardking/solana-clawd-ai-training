@@ -16,11 +16,14 @@ export async function hubCatalog() {
   const snapshot = JSON.parse(await readFile(new URL('../hub-catalog.json', import.meta.url), 'utf8'));
   try {
     const responses = await Promise.all(['models', 'datasets', 'spaces'].map(async kind => {
-      const r = await fetch(`https://huggingface.co/api/${kind}?author=solanaclawd&limit=1000&full=true`, { signal: AbortSignal.timeout(12000) });
-      if (!r.ok) throw new Error(`Hub ${kind}: HTTP ${r.status}`);
-      return [kind, (await r.json()).map(item => ({ id: item.id, kind: kind.slice(0, -1), sha: item.sha || null, downloads: item.downloads || 0, likes: item.likes || 0, pipeline_tag: item.pipeline_tag || null, tags: item.tags || [], url: `https://huggingface.co/${kind === 'models' ? '' : `${kind}/`}${item.id}`, files: (item.siblings || []).map(f => f.rfilename), card: { license: item.cardData?.license || null, base_model: item.cardData?.base_model || null } }))];
+      const inventories = await Promise.all(['solanaclawd', 'ordlibrary'].map(async author => {
+        const r = await fetch(`https://huggingface.co/api/${kind}?author=${author}&limit=1000&full=true`, { signal: AbortSignal.timeout(12000) });
+        if (!r.ok) throw new Error(`Hub ${kind}: HTTP ${r.status}`);
+        return r.json();
+      }));
+      return [kind, inventories.flat().map(item => ({ id: item.id, kind: kind.slice(0, -1), sha: item.sha || null, downloads: item.downloads || 0, likes: item.likes || 0, pipeline_tag: item.pipeline_tag || null, tags: item.tags || [], url: `https://huggingface.co/${kind === 'models' ? '' : `${kind}/`}${item.id}`, files: (item.siblings || []).map(f => f.rfilename), card: { license: item.cardData?.license || null, base_model: item.cardData?.base_model || null } }))];
     }));
-    const data = { ...Object.fromEntries(responses), updated_at: new Date().toISOString(), source: 'Hugging Face public organization API', live: true, degraded: false };
+    const data = { ...Object.fromEntries(responses), updated_at: new Date().toISOString(), source: 'Hugging Face public APIs: solanaclawd and ordlibrary', live: true, degraded: false };
     hubCache = { at: Date.now(), data }; return data;
   } catch {
     return { ...snapshot, live: false, degraded: true, error: 'Hub metadata temporarily unavailable; showing the dated release snapshot.' };
@@ -98,22 +101,31 @@ export async function publishDataset(body) {
     const commit = await uploadFiles({ repo: { type: 'dataset', name: repo_id }, accessToken: token, commitTitle: 'Publish wallet-authored Onchain AI dataset', files: [
       { path: 'data/train.jsonl', content: new Blob([train_jsonl]) },
       { path: 'manifest.json', content: new Blob([JSON.stringify(normalizedManifest, null, 2)]) },
-      { path: 'README.md', content: new Blob([`---\nlicense: mit\ntask_categories:\n- text-generation\n---\n# ${repo_id}\n\nWallet-authored SFT dataset published from Onchain AI.\n\nExamples: ${lines.length}\n\nSHA-256: ${normalizedManifest.dataset_sha256}\n\nPublisher wallet: ${body.wallet}\n\nPublication is not an onchain registration or quality attestation.\n`]) },
+      { path: 'README.md', content: new Blob([`---\ntask_categories:\n- text-generation\n---\n# ${repo_id}\n\nWallet-authored SFT dataset published from Onchain AI.\n\nExamples: ${lines.length}\n\nSHA-256: ${normalizedManifest.dataset_sha256}\n\nPublisher wallet: ${body.wallet}\n\nPublication is not an onchain registration or quality attestation.\n`]) },
     ] });
     return { ok: true, repo_id, commit, manifest: normalizedManifest, manifest_sha256: sha256(JSON.stringify(normalizedManifest)), url: `https://huggingface.co/datasets/${repo_id}` };
   } finally { token = undefined; }
 }
 const routerBase = () => (process.env.INFERENCE_BASE_URL || 'https://clawdrouter-zk.fly.dev/v1').replace(/\/$/, '');
+const CORE_SPACE = 'https://solanaclawd-clawd-free-chat.hf.space';
+const CORE_MODEL = 'solanaclawd/solana-clawd-core-ai-1.5b-lora';
 export async function inferenceModels() {
   if (inferenceCache && Date.now() - inferenceCache.at < 60000) return inferenceCache.data;
+  const models = []; const errors = [];
   try {
     const response = await fetch(`${routerBase()}/models`, { signal: AbortSignal.timeout(10000), headers: { 'User-Agent': 'OnchainAI/0.2', ...(process.env.INFERENCE_API_KEY ? { Authorization: `Bearer ${process.env.INFERENCE_API_KEY}` } : {}) } });
     if (!response.ok) throw new Error();
     const result = await response.json();
-    const models = (result.data || result.models || []).map(m => ({ id: m.id || m.name, free: m.id === 'zkrouter/auto' || m.free === true || m.cost_class === 'free' || m.pricing && Number(m.pricing.prompt) === 0 && Number(m.pricing.completion) === 0 })).filter(m => m.id);
-    const data = { ok: true, provider: 'ClawdRouter', base_url: routerBase(), models, timestamp: new Date().toISOString() };
-    inferenceCache = { at: Date.now(), data }; return data;
-  } catch { return { ok: false, provider: 'ClawdRouter', models: [], error: 'The inference router is unavailable. Catalog artifacts remain accessible; try local Model Kit or a Hugging Face Space.', timestamp: new Date().toISOString() }; }
+    models.push(...(result.data || result.models || []).map(m => ({ id: m.id || m.name, provider: 'ClawdRouter', base_url: routerBase(), free: m.id === 'zkrouter/auto' || m.free === true || m.cost_class === 'free' || m.pricing && Number(m.pricing.prompt) === 0 && Number(m.pricing.completion) === 0 })).filter(m => m.id));
+  } catch { errors.push('ClawdRouter is unavailable.'); }
+  try {
+    const response = await fetch(`${CORE_SPACE}/healthz`, { signal: AbortSignal.timeout(10000) });
+    const health = await response.json();
+    if (response.ok && health.status === 'ok' && health.core_ai_model === CORE_MODEL) models.push({ id: CORE_MODEL, label: 'Clawd Core AI 1.5B · HF Space · free', provider: 'Hugging Face Core AI Space', base_url: `${CORE_SPACE}/api/free/chat`, free: true, loaded: health.core_ai_loaded });
+    else errors.push('Core AI Space is unavailable.');
+  } catch { errors.push('Core AI Space is unavailable.'); }
+  const data = { ok: models.some(m => m.free), models, errors, error: errors.join(' '), timestamp: new Date().toISOString() };
+  inferenceCache = { at: Date.now(), data }; return data;
 }
 export async function complete(body) {
   if (!Array.isArray(body.messages) || body.messages.length > 30 || JSON.stringify(body.messages).length > 24000 || body.messages.some(m => !['user', 'system', 'assistant'].includes(m.role) || typeof m.content !== 'string')) throw Object.assign(new Error('Invalid chat messages'), { status: 400 });
@@ -121,9 +133,29 @@ export async function complete(body) {
   if (!inventory.ok) throw Object.assign(new Error(inventory.error), { status: 503 });
   const model = inventory.models.find(m => m.id === body.model);
   if (!model?.free) throw Object.assign(new Error('Only verified free routes are enabled. This request will not fall back to a paid model.'), { status: 403 });
+  if (model.provider === 'Hugging Face Core AI Space') {
+    const response = await fetch(model.base_url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: model.id, messages: body.messages, max_tokens: Math.max(8, Math.min(Number(body.max_tokens) || 64, 128)), stream: true }), signal: AbortSignal.timeout(50000) });
+    if (!response.ok) throw Object.assign(new Error(`Core AI Space failed (HTTP ${response.status})`), { status: 502 });
+    let text = '', pending = '', done = false, reportedModel = null;
+    const reader = response.body.getReader(), decoder = new TextDecoder();
+    while (true) {
+      const chunk = await reader.read(); if (chunk.done) break;
+      pending += decoder.decode(chunk.value, { stream: true });
+      const lines = pending.split('\n'); pending = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        const value = line.slice(5).trim(); if (value === '[DONE]') { done = true; continue; }
+        let item; try { item = JSON.parse(value); } catch { throw Object.assign(new Error('Core AI Space returned malformed streaming data'), { status: 502 }); }
+        if (item.error) throw Object.assign(new Error('Core AI Space reported an inference error'), { status: 502 });
+        text += item.choices?.[0]?.delta?.content || ''; reportedModel = item.model || reportedModel;
+      }
+    }
+    if (!done || !text.trim() || /preview is temporarily unavailable|model returned an empty response/i.test(text)) throw Object.assign(new Error('Core AI Space failed to complete generation. Try again after the model warms.'), { status: 503 });
+    return { choices: [{ message: { role: 'assistant', content: text } }], model: reportedModel, evidence: { provider: model.provider, requested_model: model.id, configured_model: model.id, model: reportedModel, model_identity_source: reportedModel ? 'response' : 'Space health endpoint and public app configuration; response has no model field', base_url: model.base_url, receipt_present: false, receipt: null, cost_class: 'free', fallback_used: false, provider_errors: inventory.errors, timestamp: new Date().toISOString() } };
+  }
   const response = await fetch(`${routerBase()}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(process.env.INFERENCE_API_KEY ? { Authorization: `Bearer ${process.env.INFERENCE_API_KEY}` } : {}) }, body: JSON.stringify({ model: body.model, messages: body.messages, max_tokens: Math.max(32, Math.min(Number(body.max_tokens) || 512, 2048)), stream: false }), signal: AbortSignal.timeout(50000) });
   if (!response.ok) throw Object.assign(new Error(`Inference failed (HTTP ${response.status})`), { status: 502 });
   const result = await response.json();
   if (typeof result.choices?.[0]?.message?.content !== 'string') throw Object.assign(new Error('Router returned a malformed completion'), { status: 502 });
-  return { ...result, evidence: { provider: inventory.provider, requested_model: body.model, model: result.model || null, base_url: inventory.base_url, receipt_present: !!(result.receipt || result.zk_receipt), receipt: result.receipt || result.zk_receipt || null, cost_class: 'free', fallback_used: !!result.model && result.model !== body.model, timestamp: new Date().toISOString() } };
+  return { ...result, evidence: { provider: model.provider, requested_model: body.model, model: result.model || null, base_url: model.base_url, receipt_present: !!(result.receipt || result.zk_receipt), receipt: result.receipt || result.zk_receipt || null, cost_class: 'free', fallback_used: !!result.model && result.model !== body.model, timestamp: new Date().toISOString() } };
 }

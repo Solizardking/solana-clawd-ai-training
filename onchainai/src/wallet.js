@@ -1,5 +1,5 @@
 import { getWallets } from '@wallet-standard/app';
-import { address, createTransactionMessage, setTransactionMessageFeePayer, setTransactionMessageLifetimeUsingBlockhash, appendTransactionMessageInstruction, compileTransaction, getTransactionEncoder, getBase64Decoder, getProgramDerivedAddress, getAddressEncoder, AccountRole } from '@solana/kit';
+import { address, createTransactionMessage, setTransactionMessageFeePayer, setTransactionMessageLifetimeUsingBlockhash, appendTransactionMessageInstruction, compileTransaction, getTransactionEncoder, getTransactionDecoder, getBase64Decoder, getProgramDerivedAddress, getAddressEncoder, AccountRole } from '@solana/kit';
 import bs58 from 'bs58';
 import { digest } from './datasets.js';
 export const MEMO_PROGRAM = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
@@ -75,6 +75,8 @@ export async function prepareCommitment({ cluster, hash, kind, mode = 'memo', en
 export async function submitCommitment(prepared) {
   if (!account || prepared.wallet !== account.address || Date.now() - prepared.prepared_at > 45000) throw new Error('Wallet changed or preview expired. Simulate again.');
   const [result] = await connected.features['solana:signTransaction'].signTransaction({ account, transaction: prepared.wire, chain: prepared.chain });
+  const expected = getTransactionDecoder().decode(prepared.wire), signed = getTransactionDecoder().decode(result.signedTransaction);
+  if (getBase64Decoder().decode(expected.messageBytes) !== getBase64Decoder().decode(signed.messageBytes) || !signed.signatures[address(prepared.wallet)]) throw new Error('Wallet returned a changed or unsigned transaction. Preview again.');
   const signature = await rpc(prepared.cluster, 'sendTransaction', [getBase64Decoder().decode(result.signedTransaction), { encoding: 'base64', skipPreflight: false, preflightCommitment: 'confirmed', maxRetries: 3 }]);
   return signature;
 }
