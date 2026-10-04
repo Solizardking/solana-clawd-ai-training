@@ -1,50 +1,81 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/router.mjs": {
+      "maxDuration": 60,
+      "includeFiles": "{hub-catalog.json,registry-idl.json}"
+    }
+  },
   "rewrites": [
     {
-      "source": "/studio",
-      "destination": "/studio.html"
+      "source": "/api/:path*",
+      "destination": "/api/router?path=:path*"
     },
     {
-      "source": "/data",
-      "destination": "/data.html"
-    },
-    {
-      "source": "/docs-index",
-      "destination": "/docs.html"
+      "source": "/.well-known/clawd-registry.json",
+      "destination": "/api/router?path=registry"
     },
     {
       "source": "/models",
       "destination": "/index.html"
     },
     {
-      "source": "/model-kit",
-      "destination": "/kit/index.html"
+      "source": "/datasets",
+      "destination": "/index.html"
     },
     {
-      "source": "/model-kit/",
-      "destination": "/kit/index.html"
+      "source": "/data",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/data.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/studio",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/studio.html",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/trading-factory",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/model-kit",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/chart-agent",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/docs",
+      "destination": "/docs.html"
+    },
+    {
+      "source": "/docs-index",
+      "destination": "/docs.html"
     },
     {
       "source": "/kit",
       "destination": "/kit/index.html"
-    },
-    {
-      "source": "/register",
-      "destination": "/kit/register.html"
     }
   ],
   "headers": [
-    {
-      "source": "/docs/(.*).md",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "text/markdown; charset=utf-8"
-        }
-      ]
-    },
     {
       "source": "/(.*)",
       "headers": [
@@ -55,6 +86,10 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
         }
       ]
     }

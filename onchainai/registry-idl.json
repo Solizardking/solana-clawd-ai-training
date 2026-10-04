@@ -1,0 +1,1161 @@
+{
+  "address": "3dLst2E3djtCSwG19mFS3REHxtZPngjyga7iYZLDL5xj",
+  "metadata": {
+    "name": "solana_ai_inference",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "become_validator",
+      "discriminator": [
+        43,
+        186,
+        221,
+        243,
+        164,
+        100,
+        91,
+        191
+      ],
+      "accounts": [
+        {
+          "name": "validator_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  108,
+                  105,
+                  100,
+                  97,
+                  116,
+                  111,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "validator"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "validator_token_account",
+          "writable": true
+        },
+        {
+          "name": "validator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "stake_amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_stake_rewards",
+      "discriminator": [
+        107,
+        91,
+        233,
+        196,
+        211,
+        47,
+        218,
+        21
+      ],
+      "accounts": [
+        {
+          "name": "stake_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_account.staker",
+                "account": "StakeAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_model",
+      "discriminator": [
+        150,
+        196,
+        232,
+        118,
+        138,
+        43,
+        140,
+        244
+      ],
+      "accounts": [
+        {
+          "name": "model_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  111,
+                  100,
+                  101,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "model_hash",
+          "type": "string"
+        },
+        {
+          "name": "model_type",
+          "type": {
+            "defined": {
+              "name": "ModelType"
+            }
+          }
+        },
+        {
+          "name": "api_endpoint",
+          "type": "string"
+        },
+        {
+          "name": "term_reward_rate",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "make_inference",
+      "discriminator": [
+        16,
+        51,
+        110,
+        84,
+        50,
+        151,
+        128,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "inference_request",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  102,
+                  101,
+                  114,
+                  101,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "requester"
+              }
+            ]
+          }
+        },
+        {
+          "name": "model_registry"
+        },
+        {
+          "name": "requester",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "input_data",
+          "type": "string"
+        },
+        {
+          "name": "confidence_threshold",
+          "type": "f64"
+        }
+      ]
+    },
+    {
+      "name": "rate_data",
+      "discriminator": [
+        187,
+        184,
+        64,
+        229,
+        177,
+        90,
+        16,
+        78
+      ],
+      "accounts": [
+        {
+          "name": "data_submission",
+          "writable": true
+        },
+        {
+          "name": "validator_account",
+          "writable": true
+        },
+        {
+          "name": "validator",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "quality_score",
+          "type": "u8"
+        },
+        {
+          "name": "term_reward",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "stake_term_tokens",
+      "discriminator": [
+        84,
+        225,
+        56,
+        33,
+        83,
+        79,
+        22,
+        131
+      ],
+      "accounts": [
+        {
+          "name": "stake_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  107,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_token_account",
+          "writable": true
+        },
+        {
+          "name": "stake_token_account",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "lock_duration",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "submit_data",
+      "discriminator": [
+        20,
+        46,
+        227,
+        3,
+        131,
+        99,
+        65,
+        77
+      ],
+      "accounts": [
+        {
+          "name": "data_submission",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "submitter"
+              }
+            ]
+          }
+        },
+        {
+          "name": "submitter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "data_hash",
+          "type": "string"
+        },
+        {
+          "name": "data_type",
+          "type": {
+            "defined": {
+              "name": "DataType"
+            }
+          }
+        },
+        {
+          "name": "data_size",
+          "type": "u64"
+        },
+        {
+          "name": "metadata",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "submit_inference_result",
+      "discriminator": [
+        127,
+        121,
+        88,
+        100,
+        42,
+        67,
+        177,
+        19
+      ],
+      "accounts": [
+        {
+          "name": "inference_request",
+          "writable": true
+        },
+        {
+          "name": "model_registry"
+        },
+        {
+          "name": "validator_account"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "prediction",
+          "type": "string"
+        },
+        {
+          "name": "confidence",
+          "type": "f64"
+        },
+        {
+          "name": "processing_time_ms",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "DataSubmission",
+      "discriminator": [
+        176,
+        200,
+        246,
+        52,
+        235,
+        240,
+        102,
+        66
+      ]
+    },
+    {
+      "name": "InferenceRequest",
+      "discriminator": [
+        1,
+        138,
+        18,
+        69,
+        211,
+        40,
+        106,
+        18
+      ]
+    },
+    {
+      "name": "ModelRegistry",
+      "discriminator": [
+        174,
+        72,
+        180,
+        46,
+        185,
+        165,
+        246,
+        200
+      ]
+    },
+    {
+      "name": "StakeAccount",
+      "discriminator": [
+        80,
+        158,
+        67,
+        124,
+        50,
+        189,
+        192,
+        255
+      ]
+    },
+    {
+      "name": "ValidatorAccount",
+      "discriminator": [
+        32,
+        144,
+        229,
+        203,
+        9,
+        154,
+        158,
+        255
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "DataRated",
+      "discriminator": [
+        190,
+        179,
+        0,
+        45,
+        18,
+        134,
+        139,
+        131
+      ]
+    },
+    {
+      "name": "DataSubmitted",
+      "discriminator": [
+        99,
+        51,
+        99,
+        39,
+        98,
+        75,
+        249,
+        14
+      ]
+    },
+    {
+      "name": "InferenceCompleted",
+      "discriminator": [
+        110,
+        82,
+        13,
+        91,
+        70,
+        77,
+        180,
+        51
+      ]
+    },
+    {
+      "name": "InferenceRequested",
+      "discriminator": [
+        221,
+        6,
+        41,
+        160,
+        184,
+        105,
+        114,
+        15
+      ]
+    },
+    {
+      "name": "ModelInitialized",
+      "discriminator": [
+        118,
+        242,
+        18,
+        43,
+        87,
+        209,
+        169,
+        101
+      ]
+    },
+    {
+      "name": "RewardsClaimed",
+      "discriminator": [
+        75,
+        98,
+        88,
+        18,
+        219,
+        112,
+        88,
+        121
+      ]
+    },
+    {
+      "name": "TokensStaked",
+      "discriminator": [
+        220,
+        130,
+        145,
+        142,
+        109,
+        123,
+        38,
+        100
+      ]
+    },
+    {
+      "name": "ValidatorRegistered",
+      "discriminator": [
+        20,
+        20,
+        190,
+        191,
+        53,
+        174,
+        95,
+        72
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidQualityScore",
+      "msg": "Invalid quality score. Must be between 0 and 100."
+    },
+    {
+      "code": 6001,
+      "name": "UnauthorizedValidator",
+      "msg": "Unauthorized validator."
+    },
+    {
+      "code": 6002,
+      "name": "UnauthorizedOracle",
+      "msg": "Unauthorized oracle."
+    },
+    {
+      "code": 6003,
+      "name": "NoRewardsAvailable",
+      "msg": "No rewards available to claim."
+    },
+    {
+      "code": 6004,
+      "name": "InsufficientStake",
+      "msg": "Insufficient stake amount."
+    }
+  ],
+  "types": [
+    {
+      "name": "DataRated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "submission_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "validator",
+            "type": "pubkey"
+          },
+          {
+            "name": "quality_score",
+            "type": "u8"
+          },
+          {
+            "name": "term_reward",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataSubmission",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "submitter",
+            "type": "pubkey"
+          },
+          {
+            "name": "data_hash",
+            "type": "string"
+          },
+          {
+            "name": "data_type",
+            "type": {
+              "defined": {
+                "name": "DataType"
+              }
+            }
+          },
+          {
+            "name": "data_size",
+            "type": "u64"
+          },
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "quality_score",
+            "type": "u8"
+          },
+          {
+            "name": "term_reward",
+            "type": "u64"
+          },
+          {
+            "name": "validated",
+            "type": "bool"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "validated_at",
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "submission_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "submitter",
+            "type": "pubkey"
+          },
+          {
+            "name": "data_type",
+            "type": {
+              "defined": {
+                "name": "DataType"
+              }
+            }
+          },
+          {
+            "name": "data_size",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DataType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Text"
+          },
+          {
+            "name": "Image"
+          },
+          {
+            "name": "Audio"
+          },
+          {
+            "name": "Video"
+          },
+          {
+            "name": "TradingData"
+          },
+          {
+            "name": "SolanaTransactions"
+          },
+          {
+            "name": "NFTMetadata"
+          },
+          {
+            "name": "DeFiData"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InferenceCompleted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "prediction",
+            "type": "string"
+          },
+          {
+            "name": "confidence",
+            "type": "f64"
+          },
+          {
+            "name": "quality_score",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InferenceRequest",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "requester",
+            "type": "pubkey"
+          },
+          {
+            "name": "model_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "input_data",
+            "type": "string"
+          },
+          {
+            "name": "confidence_threshold",
+            "type": "f64"
+          },
+          {
+            "name": "prediction",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "confidence",
+            "type": {
+              "option": "f64"
+            }
+          },
+          {
+            "name": "processing_time_ms",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "quality_score",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "InferenceStatus"
+              }
+            }
+          },
+          {
+            "name": "requested_at",
+            "type": "i64"
+          },
+          {
+            "name": "completed_at",
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InferenceRequested",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "request_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "requester",
+            "type": "pubkey"
+          },
+          {
+            "name": "model_id",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InferenceStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Processing"
+          },
+          {
+            "name": "Completed"
+          },
+          {
+            "name": "Failed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ModelInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "model_id",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "model_type",
+            "type": {
+              "defined": {
+                "name": "ModelType"
+              }
+            }
+          },
+          {
+            "name": "reward_rate",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ModelRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "model_cid",
+            "type": "string"
+          },
+          {
+            "name": "model_type",
+            "type": {
+              "defined": {
+                "name": "ModelType"
+              }
+            }
+          },
+          {
+            "name": "api_endpoint",
+            "type": "string"
+          },
+          {
+            "name": "term_reward_rate",
+            "type": "u64"
+          },
+          {
+            "name": "accuracy",
+            "type": "f64"
+          },
+          {
+            "name": "training_complete",
+            "type": "bool"
+          },
+          {
+            "name": "validation_count",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ModelType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "SentimentAnalysis"
+          },
+          {
+            "name": "TextGeneration"
+          },
+          {
+            "name": "ImageClassification"
+          },
+          {
+            "name": "PricePrediction"
+          },
+          {
+            "name": "DocumentUnderstanding"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RewardsClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "lock_duration",
+            "type": "u64"
+          },
+          {
+            "name": "staked_at",
+            "type": "i64"
+          },
+          {
+            "name": "unlock_at",
+            "type": "i64"
+          },
+          {
+            "name": "rewards_claimed",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokensStaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "lock_duration",
+            "type": "u64"
+          },
+          {
+            "name": "unlock_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ValidatorAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "validator",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokens_staked",
+            "type": "u64"
+          },
+          {
+            "name": "validations_performed",
+            "type": "u64"
+          },
+          {
+            "name": "reputation_score",
+            "type": "u64"
+          },
+          {
+            "name": "joined_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ValidatorRegistered",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "validator",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}
