@@ -1,35 +1,3 @@
-@font-face {
-  font-family: "Solana Sans";
-  src: url("./regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Solana Sans";
-  src: url("./medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Solana Sans";
-  src: url("./bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Solana Mono";
-  src: url("./mono.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Solana Mono";
-  src: url("./mono-medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
+/* System fonts: no third-party font binaries are redistributed. */
+@font-face { font-family: "Solana Sans"; src: local("Arial"); font-weight: 100 900; font-style: normal; }
+@font-face { font-family: "Solana Mono"; src: local("Courier New"); font-weight: 100 900; font-style: normal; }

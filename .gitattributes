@@ -1,0 +1,24 @@
+# Defense in depth for git archive. Historical commits are NOT sanitized by this.
+.work export-ignore
+artifacts export-ignore
+data export-ignore
+library export-ignore
+local export-ignore
+memory export-ignore
+outputs export-ignore
+target export-ignore
+.venv* export-ignore
+.pytest_cache export-ignore
+.git export-ignore
+*.ses export-ignore
+*.pkg export-ignore
+*.otf export-ignore
+*.ttf export-ignore
+*.woff* export-ignore
+solana1_yourgpt.jsonl export-ignore
+trainingday.jsonl export-ignore
+docs/SESSIONS.md export-ignore
+docs/2026-07-04-ai-training-consolidation.md export-ignore
+deploy/nemotron/training/assistant-mask.jinja export-ignore
+deploy/nemotron/training/upstream-lora.yaml export-ignore
+configs/nemotron35_chat_template_genmask.jinja export-ignore
