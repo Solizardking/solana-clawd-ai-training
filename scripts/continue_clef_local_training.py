@@ -355,6 +355,27 @@ class Coordinator:
                 "--checkpoint-steps", "128", "--export-release", self.config["release"]]
         return command
 
+    def observe_child(self, child, mismatch_error):
+        # Reap our own child first. macOS can replace a zombie's command with
+        # a short defunct name, and the PID may already belong to another
+        # process after poll() reaps it. A confirmed exit code belongs to the
+        # original Popen child; do not inspect or signal the current PID.
+        code = self.backend.returncode(child)
+        if code is not None:
+            return None, code
+        observed = self.backend.snapshot(child["pid"])
+        if observed is not None and not identity_matches(child, observed):
+            # A restarted coordinator cannot poll an attached child. Only a
+            # zombie with the same PID and start time may have rewritten argv;
+            # all live identities still require an exact command match.
+            same_zombie = (
+                "Z" in observed.get("state", "")
+                and all(child.get(key) == observed.get(key) for key in ("pid", "started"))
+            )
+            if not same_zombie:
+                raise PipelineFailure(mismatch_error)
+        return observed, code
+
     def tick(self):
         self.progress()
         base = Path(self.config["base"])
@@ -399,10 +420,8 @@ class Coordinator:
                 raise PipelineFailure("Training output is not an empty directory; preserve existing files")
             child = self.state["children"].get(phase)
             if child:
-                observed = self.backend.snapshot(child["pid"])
-                code = self.backend.returncode(child)
-                if observed is not None and not identity_matches(child, observed):
-                    raise PipelineFailure("Trainer PID was reused or its exact identity changed; no duplicate or signal is allowed")
+                observed, code = self.observe_child(child,
+                    "Trainer PID was reused or its exact identity changed; no duplicate or signal is allowed")
                 if observed is not None and code is None and "Z" not in observed["state"]:
                     if "T" in observed["state"]:
                         if not child.get("paused_by_coordinator"):
@@ -419,7 +438,7 @@ class Coordinator:
             if child or (output.exists() and any(output.iterdir())):
                 proof = self.backend.verify_phase(output, phase, base, self.config["max_length"])
                 self.state["verified_phases"][phase] = proof
-                self.state["stage"] = phase + "_trained_and_reload_verified"
+                self.state.update(stage=phase + "_trained_and_reload_verified", action_needed=None)
                 self.save()
                 return False
             if phase == "full" and Path(self.config["release"]).exists() and (not Path(self.config["release"]).is_dir() or any(Path(self.config["release"]).iterdir())):
@@ -458,10 +477,8 @@ class Coordinator:
         self.state["active_phase"] = "runtime"
         child = self.state["children"].get("runtime")
         if child:
-            observed = self.backend.snapshot(child["pid"])
-            code = self.backend.returncode(child)
-            if observed is not None and not identity_matches(child, observed):
-                raise PipelineFailure("Runtime PID identity changed; no duplicate or signal is allowed")
+            observed, code = self.observe_child(child,
+                "Runtime PID identity changed; no duplicate or signal is allowed")
             if observed is not None and code is None and "Z" not in observed["state"]:
                 if "T" in observed["state"]:
                     if not child.get("paused_by_coordinator"):

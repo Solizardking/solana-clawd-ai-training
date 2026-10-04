@@ -263,6 +263,122 @@ def test_interrupt_pauses_only_owned_trainer_and_restart_resumes_same_identity(t
     assert backend.resumed == [100] and len(backend.spawned) == 1
 
 
+def child_phase_fixture(tmp_path, phase):
+    if phase == "runtime":
+        coordinator, backend = advance_to_runtime(tmp_path)
+        write_runtime(coordinator)
+    else:
+        config, converter = setup_pipeline(tmp_path)
+        complete_base(config)
+        backend = FakeBackend(config, converter)
+        backend.processes.clear()
+        coordinator = Coordinator(config, tmp_path / "state.json", backend)
+        assert coordinator.tick() is False
+        output = Path(config["pilot"])
+        output.mkdir()
+        persist(output / "training.json", metadata(16))
+    backend.resumed.clear()
+    backend.paused.clear()
+    return coordinator, backend, coordinator.state["children"][phase]
+
+
+@pytest.mark.parametrize("phase", ["pilot", "runtime"])
+@pytest.mark.parametrize("owned", [True, False])
+def test_zombie_command_rewrite_advances_only_after_saved_artifact_verification(tmp_path, phase, owned):
+    coordinator, backend, child = child_phase_fixture(tmp_path, phase)
+    backend.processes[child["pid"]] = {**child, "state": "Zs", "command": "(Python)"}
+    if owned:
+        backend.codes[child["pid"]] = 0
+    events = []
+    old_poll, old_snapshot = backend.returncode, backend.snapshot
+
+    def poll(identity):
+        events.append(("poll", identity["pid"]))
+        return old_poll(identity)
+
+    def snapshot(pid):
+        events.append(("snapshot", pid))
+        return old_snapshot(pid)
+    backend.returncode, backend.snapshot = poll, snapshot
+    expected_spawns = len(backend.spawned)
+    result = coordinator.tick()
+    child_events = [event for event in events if event[1] == child["pid"]]
+    assert child_events[0] == ("poll", child["pid"])
+    if owned:
+        assert child_events == [("poll", child["pid"])]
+    else:
+        assert child_events == [("poll", child["pid"]), ("snapshot", child["pid"])]
+    assert not backend.resumed and not backend.paused and len(backend.spawned) == expected_spawns
+    if phase == "pilot":
+        assert result is False and "pilot" in coordinator.state["verified_phases"]
+        assert backend.verified == ["pilot"]
+        assert coordinator.state["stage"] == "pilot_trained_and_reload_verified"
+    else:
+        assert result is True and coordinator.state["stage"] == "full_training_standalone_and_live_runtime_verified"
+        assert backend.verified[-1] == "release"
+
+
+@pytest.mark.parametrize("phase", ["pilot", "runtime"])
+def test_nonzero_owned_exit_is_failure_even_with_zombie_and_saved_outputs(tmp_path, phase):
+    coordinator, backend, child = child_phase_fixture(tmp_path, phase)
+    backend.processes[child["pid"]] = {**child, "state": "Z", "command": "(Python)"}
+    backend.codes[child["pid"]] = 7
+    old_verified, old_spawns = list(backend.verified), len(backend.spawned)
+    with pytest.raises(PipelineFailure, match="code 7"):
+        coordinator.tick()
+    assert backend.verified == old_verified and len(backend.spawned) == old_spawns
+    assert not backend.resumed and not backend.paused
+
+
+@pytest.mark.parametrize("phase", ["pilot", "runtime"])
+def test_confirmed_reaped_child_does_not_inspect_or_signal_reused_pid(tmp_path, phase):
+    coordinator, backend, child = child_phase_fixture(tmp_path, phase)
+    backend.codes[child["pid"]] = 0
+    backend.processes[child["pid"]] = {**child, "started": "new unrelated process", "state": "R", "command": "unrelated-command"}
+    old_snapshot = backend.snapshot
+
+    def snapshot(pid):
+        if pid == child["pid"]:
+            pytest.fail("A reaped child's PID must not be inspected during phase completion")
+        return old_snapshot(pid)
+    backend.snapshot = snapshot
+    coordinator.tick()
+    assert not backend.resumed and not backend.paused
+    backend.snapshot = old_snapshot
+    coordinator.stop()
+    assert not backend.resumed and not backend.paused
+    assert backend.processes[child["pid"]]["command"] == "unrelated-command"
+
+
+@pytest.mark.parametrize("phase", ["pilot", "runtime"])
+@pytest.mark.parametrize("state,changed", [("R", "command"), ("T", "command"), ("R", "pid"),
+                                           ("R", "started"), ("Z", "pid"), ("Z", "started")])
+def test_unknown_live_identity_and_unmatched_zombies_block_without_signals(tmp_path, phase, state, changed):
+    coordinator, backend, child = child_phase_fixture(tmp_path, phase)
+    observed = {**child, "state": state, "command": "(Python)" if state == "Z" else child["command"]}
+    observed[changed] = child["pid"] + 1 if changed == "pid" else "different process identity"
+    backend.processes[child["pid"]] = observed
+    old_verified, old_spawns = list(backend.verified), len(backend.spawned)
+    with pytest.raises(PipelineFailure, match="identity"):
+        coordinator.tick()
+    assert backend.verified == old_verified and len(backend.spawned) == old_spawns
+    assert not backend.resumed and not backend.paused
+
+
+def test_completed_pilot_can_recover_terminal_handoff_without_retraining(tmp_path):
+    coordinator, backend, child = child_phase_fixture(tmp_path, "pilot")
+    backend.finish(child)
+    coordinator.state.update(stage="terminal_failure", failure_stage="pilot", action_needed="old zombie command mismatch")
+    coordinator.save()
+    restored = Coordinator(coordinator.config, coordinator.path, backend)
+    assert restored.tick() is False
+    assert restored.state["stage"] == "pilot_trained_and_reload_verified" and restored.state["action_needed"] is None
+    assert backend.verified == ["pilot"] and len(backend.spawned) == 1
+    assert restored.tick() is False
+    assert len(backend.spawned) == 2 and "--init-adapter" in backend.spawned[-1]
+    assert backend.spawned[-1][backend.spawned[-1].index("--mode") + 1] == "full"
+
+
 def test_stale_runtime_fails_then_explicit_retry_preserves_output_and_never_retrains(tmp_path):
     coordinator, backend = advance_to_runtime(tmp_path)
     original = write_runtime(coordinator, stale=True)
