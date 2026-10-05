@@ -1,0 +1,280 @@
+- generic [ref=f12e1]:
+  - banner [ref=f12e2]:
+    - link "🦞 clawd.ai" [ref=f12e3] [cursor=pointer]:
+      - /url: /
+    - navigation [ref=f12e4]:
+      - link "Explore artifacts" [ref=f12e5] [cursor=pointer]:
+        - /url: "#catalog"
+      - link "Source ↗" [ref=f12e6] [cursor=pointer]:
+        - /url: https://github.com/Solizardking/solana-clawd
+      - link "Hugging Face ↗" [ref=f12e7] [cursor=pointer]:
+        - /url: https://huggingface.co/solanaclawd
+    - generic [ref=f12e8]: Official ecosystem hub
+  - main [ref=f12e9]:
+    - generic [ref=f12e10]:
+      - generic [ref=f12e11]:
+        - generic [ref=f12e12]: Solana Clawd / Open intelligence
+        - heading [level=1] [ref=f12e13]:
+          - text: Sovereign agents.
+          - emphasis [ref=f12e14]: Solana-native AI.
+        - paragraph [ref=f12e15]: Models that understand the ecosystem they operate in. Explore the Clawd model family, training datasets, and research — reproducible, tool-capable, and grounded in Solana.
+        - generic [ref=f12e16]:
+          - link "Explore the stack ↓" [ref=f12e17] [cursor=pointer]:
+            - /url: "#catalog"
+          - link "Open Model Kit ↗" [ref=f12e18] [cursor=pointer]:
+            - /url: https://huggingface.co/spaces/solanaclawd/clawd-model-kit
+          - link "Read the whitepaper ↗" [ref=f12e19] [cursor=pointer]:
+            - /url: https://huggingface.co/datasets/ordlibrary/clawd-agentic-layer-whitepaper
+      - generic [aria-hidden] [ref=f12e20]:
+        - generic [ref=f12e23]: 🦞
+        - generic [ref=f12e24]: 01 / IDENTITY
+        - generic [ref=f12e25]: 02 / INTELLIGENCE
+        - generic [ref=f12e26]: 03 / SOLANA
+    - region "Hugging Face statistics" [ref=f12e27]:
+      - generic [ref=f12e28]:
+        - generic [ref=f12e29]: Model downloads / 30d
+        - strong [ref=f12e30]: 2,453
+        - paragraph [ref=f12e31]: Reported by Hugging Face
+      - generic [ref=f12e32]:
+        - generic [ref=f12e33]: Dataset downloads / 30d
+        - strong [ref=f12e34]: 2,316
+        - paragraph [ref=f12e35]: Reported by Hugging Face
+      - generic [ref=f12e36]:
+        - generic [ref=f12e37]: Published models
+        - strong [ref=f12e38]: "19"
+        - paragraph [ref=f12e39]: Public Clawd model repositories
+      - generic [ref=f12e40]:
+        - generic [ref=f12e41]: Published datasets
+        - strong [ref=f12e42]: "12"
+        - paragraph [ref=f12e43]: Training, live data & research
+    - status [ref=f12e44]:
+      - generic [ref=f12e45]: Live Hub metadata · Checked 10:33:02 AM · refreshes every 60s
+      - button "Refresh ↻" [ref=f12e46] [cursor=pointer]
+    - generic [ref=f12e47]:
+      - generic [ref=f12e48]:
+        - heading "The Clawd ecosystem" [level=2] [ref=f12e49]
+        - paragraph [ref=f12e50]: Models, data, and the tools to build with them.
+      - generic [ref=f12e51]:
+        - group "Artifact type" [ref=f12e52]:
+          - button "All artifacts" [ref=f12e53] [cursor=pointer]
+          - button "Models" [active] [pressed] [ref=f12e54] [cursor=pointer]
+          - button "Datasets" [ref=f12e55] [cursor=pointer]
+          - button "Spaces" [ref=f12e56] [cursor=pointer]
+        - searchbox "Search artifacts" [ref=f12e57]
+        - combobox "Sort artifacts" [ref=f12e58]:
+          - option "Featured first" [selected]
+          - option "Most downloads"
+          - option "Name A–Z"
+      - generic [ref=f12e84]: 19 artifacts
+      - generic [ref=f12e59]:
+        - link "model FEATURED solana-nvidia-trading-factory-8b solanaclawd The full trading-factory model release. Weights, configuration, and model card. 777 downloads / 30d ↗" [ref=f12e463] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b
+          - generic [ref=f12e464]:
+            - generic [ref=f12e465]: model
+            - generic [ref=f12e466]: FEATURED
+          - heading "solana-nvidia-trading-factory-8b" [level=3] [ref=f12e467]
+          - generic [ref=f12e468]: solanaclawd
+          - paragraph [ref=f12e469]: The full trading-factory model release. Weights, configuration, and model card.
+          - generic [ref=f12e470]:
+            - generic [ref=f12e471]: 777 downloads / 30d
+            - generic [ref=f12e472]: ↗
+        - link "model FEATURED hauhau-qwen36-uncensored ordlibrary Hauhau model release. Review the source card for lineage and usage conditions. 741 downloads / 30d ↗" [ref=f12e473] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/hauhau-qwen36-uncensored
+          - generic [ref=f12e474]:
+            - generic [ref=f12e475]: model
+            - generic [ref=f12e476]: FEATURED
+          - heading "hauhau-qwen36-uncensored" [level=3] [ref=f12e477]
+          - generic [ref=f12e478]: ordlibrary
+          - paragraph [ref=f12e479]: Hauhau model release. Review the source card for lineage and usage conditions.
+          - generic [ref=f12e480]:
+            - generic [ref=f12e481]: 741 downloads / 30d
+            - generic [ref=f12e482]: ↗
+        - link "model FEATURED solana-nvidia-trading-factory-8b-GGUF solanaclawd Quantized trading-factory weights for llama.cpp and compatible local runtimes. 509 downloads / 30d ↗" [ref=f12e483] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-GGUF
+          - generic [ref=f12e484]:
+            - generic [ref=f12e485]: model
+            - generic [ref=f12e486]: FEATURED
+          - heading "solana-nvidia-trading-factory-8b-GGUF" [level=3] [ref=f12e487]
+          - generic [ref=f12e488]: solanaclawd
+          - paragraph [ref=f12e489]: Quantized trading-factory weights for llama.cpp and compatible local runtimes.
+          - generic [ref=f12e490]:
+            - generic [ref=f12e491]: 509 downloads / 30d
+            - generic [ref=f12e492]: ↗
+        - link "model FEATURED deepsol-clawd-code ordlibrary Solana-focused code model. Inspect the model card and download artifacts. 229 downloads / 30d ↗" [ref=f12e493] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/deepsol-clawd-code
+          - generic [ref=f12e494]:
+            - generic [ref=f12e495]: model
+            - generic [ref=f12e496]: FEATURED
+          - heading "deepsol-clawd-code" [level=3] [ref=f12e497]
+          - generic [ref=f12e498]: ordlibrary
+          - paragraph [ref=f12e499]: Solana-focused code model. Inspect the model card and download artifacts.
+          - generic [ref=f12e500]:
+            - generic [ref=f12e501]: 229 downloads / 30d
+            - generic [ref=f12e502]: ↗
+        - link "model solana-nvidia-trading-factory-8b-lora solanaclawd Explore the text-generation artifact and its source card. 47 downloads / 30d ↗" [ref=f12e503] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-nvidia-trading-factory-8b-lora
+          - generic [ref=f12e504]: model
+          - heading "solana-nvidia-trading-factory-8b-lora" [level=3] [ref=f12e506]
+          - generic [ref=f12e507]: solanaclawd
+          - paragraph [ref=f12e508]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e509]:
+            - generic [ref=f12e510]: 47 downloads / 30d
+            - generic [ref=f12e511]: ↗
+        - link "model solana-clawd-core-ai-1.5b-lora solanaclawd Explore the text-generation artifact and its source card. 36 downloads / 30d ↗" [ref=f12e512] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-clawd-core-ai-1.5b-lora
+          - generic [ref=f12e513]: model
+          - heading "solana-clawd-core-ai-1.5b-lora" [level=3] [ref=f12e515]
+          - generic [ref=f12e516]: solanaclawd
+          - paragraph [ref=f12e517]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e518]:
+            - generic [ref=f12e519]: 36 downloads / 30d
+            - generic [ref=f12e520]: ↗
+        - link "model clawd-spark-4b-lora-pilot ordlibrary Explore the Solana Clawd artifact and its source card. 34 downloads / 30d ↗" [ref=f12e521] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/clawd-spark-4b-lora-pilot
+          - generic [ref=f12e522]: model
+          - heading "clawd-spark-4b-lora-pilot" [level=3] [ref=f12e524]
+          - generic [ref=f12e525]: ordlibrary
+          - paragraph [ref=f12e526]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e527]:
+            - generic [ref=f12e528]: 34 downloads / 30d
+            - generic [ref=f12e529]: ↗
+        - link "model hauhau-qwen36-onchain ordlibrary Explore the text-generation artifact and its source card. 26 downloads / 30d ↗" [ref=f12e530] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/hauhau-qwen36-onchain
+          - generic [ref=f12e531]: model
+          - heading "hauhau-qwen36-onchain" [level=3] [ref=f12e533]
+          - generic [ref=f12e534]: ordlibrary
+          - paragraph [ref=f12e535]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e536]:
+            - generic [ref=f12e537]: 26 downloads / 30d
+            - generic [ref=f12e538]: ↗
+        - link "model clawd-solana-masterpiece-qwen15-lora solanaclawd Explore the text-generation artifact and its source card. 23 downloads / 30d ↗" [ref=f12e539] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/clawd-solana-masterpiece-qwen15-lora
+          - generic [ref=f12e540]: model
+          - heading "clawd-solana-masterpiece-qwen15-lora" [level=3] [ref=f12e542]
+          - generic [ref=f12e543]: solanaclawd
+          - paragraph [ref=f12e544]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e545]:
+            - generic [ref=f12e546]: 23 downloads / 30d
+            - generic [ref=f12e547]: ↗
+        - link "model core-ai-clawd-1.5b ordlibrary Explore the text-generation artifact and its source card. 18 downloads / 30d ↗" [ref=f12e548] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/core-ai-clawd-1.5b
+          - generic [ref=f12e549]: model
+          - heading "core-ai-clawd-1.5b" [level=3] [ref=f12e551]
+          - generic [ref=f12e552]: ordlibrary
+          - paragraph [ref=f12e553]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e554]:
+            - generic [ref=f12e555]: 18 downloads / 30d
+            - generic [ref=f12e556]: ↗
+        - link "model clawd-chart-foundation-27b-smoke ordlibrary Explore the text-generation artifact and its source card. 13 downloads / 30d ↗" [ref=f12e557] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/clawd-chart-foundation-27b-smoke
+          - generic [ref=f12e558]: model
+          - heading "clawd-chart-foundation-27b-smoke" [level=3] [ref=f12e560]
+          - generic [ref=f12e561]: ordlibrary
+          - paragraph [ref=f12e562]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e563]:
+            - generic [ref=f12e564]: 13 downloads / 30d
+            - generic [ref=f12e565]: ↗
+        - link "model clef-solana-research solanaclawd Explore the Solana Clawd artifact and its source card. 0 downloads / 30d ↗" [ref=f12e566] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/clef-solana-research
+          - generic [ref=f12e567]: model
+          - heading "clef-solana-research" [level=3] [ref=f12e569]
+          - generic [ref=f12e570]: solanaclawd
+          - paragraph [ref=f12e571]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e572]:
+            - generic [ref=f12e573]: 0 downloads / 30d
+            - generic [ref=f12e574]: ↗
+        - link "model solana-clawd-1.5b-lora solanaclawd Explore the text-generation artifact and its source card. 0 downloads / 30d ↗" [ref=f12e575] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-clawd-1.5b-lora
+          - generic [ref=f12e576]: model
+          - heading "solana-clawd-1.5b-lora" [level=3] [ref=f12e578]
+          - generic [ref=f12e579]: solanaclawd
+          - paragraph [ref=f12e580]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e581]:
+            - generic [ref=f12e582]: 0 downloads / 30d
+            - generic [ref=f12e583]: ↗
+        - link "model solana-clawd-1.5b solanaclawd Explore the Solana Clawd artifact and its source card. 0 downloads / 30d ↗" [ref=f12e584] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/solana-clawd-1.5b
+          - generic [ref=f12e585]: model
+          - heading "solana-clawd-1.5b" [level=3] [ref=f12e587]
+          - generic [ref=f12e588]: solanaclawd
+          - paragraph [ref=f12e589]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e590]:
+            - generic [ref=f12e591]: 0 downloads / 30d
+            - generic [ref=f12e592]: ↗
+        - link "model clawd-fable solanaclawd Explore the Solana Clawd artifact and its source card. 0 downloads / 30d ↗" [ref=f12e593] [cursor=pointer]:
+          - /url: https://huggingface.co/solanaclawd/clawd-fable
+          - generic [ref=f12e594]: model
+          - heading "clawd-fable" [level=3] [ref=f12e596]
+          - generic [ref=f12e597]: solanaclawd
+          - paragraph [ref=f12e598]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e599]:
+            - generic [ref=f12e600]: 0 downloads / 30d
+            - generic [ref=f12e601]: ↗
+        - link "model Clawd-GLM-5.2 ordlibrary Explore the text-generation artifact and its source card. 0 downloads / 30d ↗" [ref=f12e602] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/Clawd-GLM-5.2
+          - generic [ref=f12e603]: model
+          - heading "Clawd-GLM-5.2" [level=3] [ref=f12e605]
+          - generic [ref=f12e606]: ordlibrary
+          - paragraph [ref=f12e607]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e608]:
+            - generic [ref=f12e609]: 0 downloads / 30d
+            - generic [ref=f12e610]: ↗
+        - link "model core-ai-clawd-1.5b-lora ordlibrary Explore the Solana Clawd artifact and its source card. 0 downloads / 30d ↗" [ref=f12e611] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/core-ai-clawd-1.5b-lora
+          - generic [ref=f12e612]: model
+          - heading "core-ai-clawd-1.5b-lora" [level=3] [ref=f12e614]
+          - generic [ref=f12e615]: ordlibrary
+          - paragraph [ref=f12e616]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e617]:
+            - generic [ref=f12e618]: 0 downloads / 30d
+            - generic [ref=f12e619]: ↗
+        - link "model clawd-trading-wallet ordlibrary Explore the text-generation artifact and its source card. 0 downloads / 30d ↗" [ref=f12e620] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/clawd-trading-wallet
+          - generic [ref=f12e621]: model
+          - heading "clawd-trading-wallet" [level=3] [ref=f12e623]
+          - generic [ref=f12e624]: ordlibrary
+          - paragraph [ref=f12e625]: Explore the text-generation artifact and its source card.
+          - generic [ref=f12e626]:
+            - generic [ref=f12e627]: 0 downloads / 30d
+            - generic [ref=f12e628]: ↗
+        - link "model Qwen-Clawd-3.8-27B-Unsloth-Lobster-onchain-edition ordlibrary Explore the Solana Clawd artifact and its source card. 0 downloads / 30d ↗" [ref=f12e629] [cursor=pointer]:
+          - /url: https://huggingface.co/ordlibrary/Qwen-Clawd-3.8-27B-Unsloth-Lobster-onchain-edition
+          - generic [ref=f12e630]: model
+          - heading "Qwen-Clawd-3.8-27B-Unsloth-Lobster-onchain-edition" [level=3] [ref=f12e632]
+          - generic [ref=f12e633]: ordlibrary
+          - paragraph [ref=f12e634]: Explore the Solana Clawd artifact and its source card.
+          - generic [ref=f12e635]:
+            - generic [ref=f12e636]: 0 downloads / 30d
+            - generic [ref=f12e637]: ↗
+    - generic [ref=f12e61]:
+      - generic [ref=f12e62]:
+        - generic [ref=f12e63]: 01 / Ecosystem-native
+        - heading "Built around Solana mechanics" [level=3] [ref=f12e64]
+        - paragraph [ref=f12e65]: Accounts, PDAs, versioned transactions, address lookup tables, Pump.fun graduation, and RPC failure modes. Domain knowledge is part of the model.
+      - generic [ref=f12e66]:
+        - generic [ref=f12e67]: 02 / Sovereign by design
+        - heading "The brain never holds the keys" [level=3] [ref=f12e68]
+        - paragraph [ref=f12e69]: Brain/Hands separation keeps signing authority outside the model. Identity, scoped permissions, constitutional bounds, and owner-reviewed actions define the stack.
+      - generic [ref=f12e70]:
+        - generic [ref=f12e71]: 03 / Open artifacts
+        - heading "Inspect. Reproduce. Build." [level=3] [ref=f12e72]
+        - paragraph [ref=f12e73]: Weights, adapters, datasets, and research stay in their source repositories. Read each model card for compatibility, licensing, and evaluation evidence.
+    - paragraph [ref=f12e74]:
+      - text: "Coverage: public non-profile repositories from solanaclawd, plus Clawd/Hauhau artifacts from ordlibrary. Newly published matching repositories appear automatically. Counts refresh every 60 seconds using the Hub API; Hugging Face may update its statistics on a different schedule. These are last-30-days downloads, not unique users or lifetime counts."
+      - link "Model methodology" [ref=f12e75] [cursor=pointer]:
+        - /url: https://huggingface.co/docs/hub/models-download-stats
+      - text: ·
+      - link "Dataset methodology" [ref=f12e76] [cursor=pointer]:
+        - /url: https://huggingface.co/docs/hub/datasets-download-stats
+      - text: . Spaces have no download metric. Artifact publication does not imply a running inference service.
+  - contentinfo [ref=f12e77]:
+    - generic [ref=f12e78]: 🦞 Solana Clawd · The Sovereign Agent Stack$CLAWD · 8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump
+    - generic [ref=f12e79]:
+      - link "Musebook ↗" [ref=f12e80] [cursor=pointer]:
+        - /url: https://musebook.trade
+      - text: ·
+      - link "Homebase ↗" [ref=f12e81] [cursor=pointer]:
+        - /url: https://huggingface.co/spaces/solanaclawd/homebase
+      - text: ·
+      - link "Clawd Zoo ↗" [ref=f12e82] [cursor=pointer]:
+        - /url: https://huggingface.co/spaces/solanaclawd/clawd-zoo
