@@ -1,0 +1,100 @@
+- generic [active] [ref=f13e1]:
+  - banner [ref=f13e2]:
+    - link "🦞 clawd.ai" [ref=f13e3] [cursor=pointer]:
+      - /url: /
+    - navigation [ref=f13e4]:
+      - link "Explore artifacts" [ref=f13e5] [cursor=pointer]:
+        - /url: "#catalog"
+      - link "Source ↗" [ref=f13e6] [cursor=pointer]:
+        - /url: https://github.com/Solizardking/solana-clawd
+      - link "Hugging Face ↗" [ref=f13e7] [cursor=pointer]:
+        - /url: https://huggingface.co/solanaclawd
+    - generic [ref=f13e8]: Official ecosystem hub
+  - main [ref=f13e9]:
+    - generic [ref=f13e10]:
+      - generic [ref=f13e11]:
+        - generic [ref=f13e12]: Solana Clawd / Open intelligence
+        - heading [level=1] [ref=f13e13]:
+          - text: Sovereign agents.
+          - emphasis [ref=f13e14]: Solana-native AI.
+        - paragraph [ref=f13e15]: Models that understand the ecosystem they operate in. Explore the Clawd model family, training datasets, and research — reproducible, tool-capable, and grounded in Solana.
+        - generic [ref=f13e16]:
+          - link "Explore the stack ↓" [ref=f13e17] [cursor=pointer]:
+            - /url: "#catalog"
+          - link "Open Model Kit ↗" [ref=f13e18] [cursor=pointer]:
+            - /url: https://huggingface.co/spaces/solanaclawd/clawd-model-kit
+          - link "Read the whitepaper ↗" [ref=f13e19] [cursor=pointer]:
+            - /url: https://huggingface.co/datasets/ordlibrary/clawd-agentic-layer-whitepaper
+      - generic [aria-hidden] [ref=f13e20]:
+        - generic [ref=f13e23]: 🦞
+        - generic [ref=f13e24]: 01 / IDENTITY
+        - generic [ref=f13e25]: 02 / INTELLIGENCE
+        - generic [ref=f13e26]: 03 / SOLANA
+    - region "Hugging Face statistics" [ref=f13e27]:
+      - generic [ref=f13e28]:
+        - generic [ref=f13e29]: Model downloads / 30d
+        - strong [ref=f13e30]: —
+        - paragraph [ref=f13e31]: Reported by Hugging Face
+      - generic [ref=f13e32]:
+        - generic [ref=f13e33]: Dataset downloads / 30d
+        - strong [ref=f13e34]: —
+        - paragraph [ref=f13e35]: Reported by Hugging Face
+      - generic [ref=f13e36]:
+        - generic [ref=f13e37]: Published models
+        - strong [ref=f13e38]: —
+        - paragraph [ref=f13e39]: Public Clawd model repositories
+      - generic [ref=f13e40]:
+        - generic [ref=f13e41]: Published datasets
+        - strong [ref=f13e42]: —
+        - paragraph [ref=f13e43]: Training, live data & research
+    - status [ref=f13e44]:
+      - generic [ref=f13e45]: Connecting to Hugging Face…
+      - button "Refresh ↻" [disabled] [ref=f13e46] [cursor=pointer]
+    - generic [ref=f13e47]:
+      - generic [ref=f13e48]:
+        - heading "The Clawd ecosystem" [level=2] [ref=f13e49]
+        - paragraph [ref=f13e50]: Models, data, and the tools to build with them.
+      - generic [ref=f13e51]:
+        - group "Artifact type" [ref=f13e52]:
+          - button "All artifacts" [pressed] [ref=f13e53] [cursor=pointer]
+          - button "Models" [ref=f13e54] [cursor=pointer]
+          - button "Datasets" [ref=f13e55] [cursor=pointer]
+          - button "Spaces" [ref=f13e56] [cursor=pointer]
+        - searchbox "Search artifacts" [ref=f13e57]
+        - combobox "Sort artifacts" [ref=f13e58]:
+          - option "Featured first" [selected]
+          - option "Most downloads"
+          - option "Name A–Z"
+      - generic [ref=f13e59]: Loading the public Clawd catalog…
+    - generic [ref=f13e61]:
+      - generic [ref=f13e62]:
+        - generic [ref=f13e63]: 01 / Ecosystem-native
+        - heading "Built around Solana mechanics" [level=3] [ref=f13e64]
+        - paragraph [ref=f13e65]: Accounts, PDAs, versioned transactions, address lookup tables, Pump.fun graduation, and RPC failure modes. Domain knowledge is part of the model.
+      - generic [ref=f13e66]:
+        - generic [ref=f13e67]: 02 / Sovereign by design
+        - heading "The brain never holds the keys" [level=3] [ref=f13e68]
+        - paragraph [ref=f13e69]: Brain/Hands separation keeps signing authority outside the model. Identity, scoped permissions, constitutional bounds, and owner-reviewed actions define the stack.
+      - generic [ref=f13e70]:
+        - generic [ref=f13e71]: 03 / Open artifacts
+        - heading "Inspect. Reproduce. Build." [level=3] [ref=f13e72]
+        - paragraph [ref=f13e73]: Weights, adapters, datasets, and research stay in their source repositories. Read each model card for compatibility, licensing, and evaluation evidence.
+    - paragraph [ref=f13e74]:
+      - text: "Coverage: public non-profile repositories from solanaclawd, plus Clawd/Hauhau artifacts from ordlibrary. Newly published matching repositories appear automatically. Counts refresh every 60 seconds using the Hub API; Hugging Face may update its statistics on a different schedule. These are last-30-days downloads, not unique users or lifetime counts."
+      - link "Model methodology" [ref=f13e75] [cursor=pointer]:
+        - /url: https://huggingface.co/docs/hub/models-download-stats
+      - text: ·
+      - link "Dataset methodology" [ref=f13e76] [cursor=pointer]:
+        - /url: https://huggingface.co/docs/hub/datasets-download-stats
+      - text: . Spaces have no download metric. Artifact publication does not imply a running inference service.
+  - contentinfo [ref=f13e77]:
+    - generic [ref=f13e78]: 🦞 Solana Clawd · The Sovereign Agent Stack$CLAWD · 8cHzQHUS2s2h8TzCmfqPKYiM4dSt4roa3n7MyRLApump
+    - generic [ref=f13e79]:
+      - link "Musebook ↗" [ref=f13e80] [cursor=pointer]:
+        - /url: https://musebook.trade
+      - text: ·
+      - link "Homebase ↗" [ref=f13e81] [cursor=pointer]:
+        - /url: https://huggingface.co/spaces/solanaclawd/homebase
+      - text: ·
+      - link "Clawd Zoo ↗" [ref=f13e82] [cursor=pointer]:
+        - /url: https://huggingface.co/spaces/solanaclawd/clawd-zoo
