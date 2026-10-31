@@ -1,0 +1,25 @@
+name: Fly model-kit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "model-kit/backend/**"
+      - "model-kit/frontend/**"
+      - "model-kit/fly.toml"
+      - "model-kit/Dockerfile.fly"
+      - "model-kit/.dockerignore"
+      - ".github/workflows/fly-model-kit.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy Model Kit to Fly Machines
+        working-directory: model-kit
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --ha=false --yes
