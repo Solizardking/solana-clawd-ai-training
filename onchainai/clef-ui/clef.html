@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clef · live 27B decisions</title>
+  <meta name="description" content="Ask live Clef 27B typed questions over a state. Research only.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/clef-ui/style.css">
+</head>
+<body data-page="clef">
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">🎼</div>
+        <div>
+          <h1>Clef playground</h1>
+          <p>Live 27B decisions · Noul / Choice / Score · no free-form generation</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <span id="engine-badge" class="badge">Checking engine…</span>
+        <a href="/decision-index">Decision index</a>
+        <a href="https://onchainai.fund">Onchain AI</a>
+        <a href="https://clef.musebook.trade">clef.musebook.trade</a>
+      </nav>
+    </header>
+    <p class="lede">This playground calls live Clef 27B on Cloudflare Workers AI. Unlike a fixed public demo, you can load a token's live market state or paste your own JSON and get a full joint pass over the default research questions — or, via the API, a custom question set. Research only, not financial advice.</p>
+    <div class="grid split">
+      <section class="panel">
+        <h2>State</h2>
+        <div class="toolbar">
+          <input id="mint" type="text" spellcheck="false" placeholder="Solana mint">
+          <button class="btn" id="load-state" type="button">Load live state</button>
+          <button class="btn primary" id="run" type="button">Ask Clef</button>
+        </div>
+        <textarea id="state" spellcheck="false"></textarea>
+        <p class="note">POST /api/clef/ask · default questions are safety, liquidity, momentum, distribution, and verdict.</p>
+      </section>
+      <section class="panel">
+        <h2>Answers</h2>
+        <div id="results"><p class="note">Load a state, then ask the live model.</p></div>
+      </section>
+    </div>
+    <p class="disclaimer">No heuristic fallback. If the engine is down, you will see an error rather than a simulated answer. Not affiliated with Solana Labs, Anatoly Yakovenko, or pump.fun. Contact <a href="mailto:toly@mail.grokbot.com">toly@mail.grokbot.com</a>.</p>
+    <footer>
+      <span>Built on Solana · Musebook / Clawd</span>
+      <span><a href="https://clef.musebook.trade">clef.musebook.trade</a></span>
+    </footer>
+  </div>
+  <script src="/clef-ui/app.js" type="module"></script>
+</body>
+</html>

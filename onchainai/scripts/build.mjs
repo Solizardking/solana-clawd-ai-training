@@ -28,10 +28,17 @@ await cp(path.join(root, 'src/index.html'), path.join(out, 'index.html'));
 await build({ entryPoints: [path.join(root, 'src/app.js')], bundle: true, format: 'esm', outfile: path.join(out, 'app.js'), minify: true, target: 'es2022' });
 await build({ entryPoints: [path.join(root, 'src/docs-renderer.js')], bundle: true, format: 'iife', outfile: path.join(out, 'docs-renderer.js'), minify: true, target: 'es2022' });
 await cp(path.join(root, 'src/style.css'), path.join(out, 'style.css'));
+await mkdir(path.join(out, 'clef'), { recursive: true });
+await mkdir(path.join(out, 'decision-index'), { recursive: true });
+await mkdir(path.join(out, 'clef-ui'), { recursive: true });
+await cp(path.join(root, 'clef-ui/clef.html'), path.join(out, 'clef/index.html'));
+await cp(path.join(root, 'clef-ui/index.html'), path.join(out, 'decision-index/index.html'));
+await cp(path.join(root, 'clef-ui/style.css'), path.join(out, 'clef-ui/style.css'));
+await cp(path.join(root, 'clef-ui/app.js'), path.join(out, 'clef-ui/app.js'));
 try { await cp(path.join(root, 'downloads'), path.join(out, 'downloads'), { recursive: true }); } catch { /* Source download is optional for a minimal fork. */ }
 await cp(path.join(root, 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs'), path.join(out, 'pdf.worker.min.mjs'));
 const catalog = JSON.parse(await readFile(path.join(root, 'hub-catalog.json'), 'utf8'));
 const files = {};
 for (const filename of ['app.js', 'style.css', 'kit/app.js', 'docs-renderer.js', 'registry-idl.json']) files[filename] = createHash('sha256').update(await readFile(path.join(out, filename))).digest('hex');
-await writeFile(path.join(out, 'release.json'), JSON.stringify({ version: '0.2.0', built_at: new Date().toISOString(), catalog_updated_at: catalog.updated_at, files, routes: ['/', '/models', '/datasets', '/studio', '/trading-factory', '/chart-agent', '/model-kit', '/register', '/docs'] }));
+await writeFile(path.join(out, 'release.json'), JSON.stringify({ version: '0.2.0', built_at: new Date().toISOString(), catalog_updated_at: catalog.updated_at, files, routes: ['/', '/models', '/datasets', '/studio', '/trading-factory', '/chart-agent', '/model-kit', '/register', '/docs', '/clef', '/decision-index'] }));
 console.log('Built hub, Studio, dataset builder, Trading Factory, onchain flow and canonical Model Kit frontend.');

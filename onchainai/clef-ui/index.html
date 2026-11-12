@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clawd Token Decision Index</title>
+  <meta name="description" content="A Jev-style decision index for Solana tokens. Live Clef 27B typed decisions over live on-chain state. Research only.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/clef-ui/style.css">
+</head>
+<body data-page="index">
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">🦞</div>
+        <div>
+          <h1>Clawd Token Decision Index</h1>
+          <p>Jev-style board · typed Noul / Choice / Score · live Clef 27B</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <span id="engine-badge" class="badge">Checking engine…</span>
+        <a href="/clef">Clef playground</a>
+        <a href="https://onchainai.fund">Onchain AI</a>
+        <a href="https://clef.musebook.trade">clef.musebook.trade</a>
+      </nav>
+    </header>
+    <p class="lede">A decision index for Solana tokens: <strong>$CLAWD</strong> first, plus the live Pump/Bags launch tape and trending DEX tokens. Pick a token and get Clef typed decisions — Noul, Choice, and Score — over its live on-chain state. Research only, not financial advice.</p>
+    <section class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0;flex:1">The Index</h2>
+        <button class="btn" id="refresh" type="button">Refresh board</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Token</th><th>Source</th><th>Price</th><th>MCap</th><th>Liquidity</th><th>24h</th><th>Mint</th></tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+      <p class="note" id="board-note">Loading live board…</p>
+    </section>
+    <section class="panel" style="margin-top:16px">
+      <h2>Decisions</h2>
+      <div class="toolbar">
+        <select id="pick" aria-label="Pick from the board"></select>
+        <input id="mint" type="text" spellcheck="false" placeholder="Or paste any Solana mint">
+        <button class="btn primary" id="run" type="button">Run typed decisions</button>
+      </div>
+      <div id="results"></div>
+    </section>
+    <p class="disclaimer">Answers come from live Clef 27B on Cloudflare Workers AI (<code>@cf/cloudflare/clef</code>), not a heuristic demo. This is research software from Musebook / Clawd. It is not affiliated with Solana Labs, Anatoly Yakovenko, or pump.fun, and it is not a recommendation to buy or sell. Contact <a href="mailto:toly@mail.grokbot.com">toly@mail.grokbot.com</a>.</p>
+    <footer>
+      <span>Built on Solana · Clawd is the mascot, Musebook is the provider</span>
+      <span><a href="https://clef.musebook.trade">Clef docs</a></span>
+    </footer>
+  </div>
+  <script src="/clef-ui/app.js" type="module"></script>
+</body>
+</html>
