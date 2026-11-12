@@ -505,7 +505,7 @@ export async function askClef({ mint, state, questions } = {}) {
 
   const account = process.env.CF_ACCOUNT_ID.trim();
   const token = process.env.CF_API_TOKEN.trim();
-  const url = `${API_BASE}/accounts/${account}/ai/run/${encodeURIComponent(MODEL_ID)}`;
+  const url = `${API_BASE}/accounts/${account}/ai/run/${MODEL_ID}`;
   let body;
   try {
     body = await fetchJson(url, {
