@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import handler from '../api/router.mjs';
+import { resolveSitePage } from '../server/clef.mjs';
 const root = resolve(import.meta.dirname, '../dist');
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.md': 'text/markdown' };
 const port = Number(process.env.PORT) || 4177;
@@ -9,6 +10,17 @@ const host = process.env.HOST || '0.0.0.0';
 createServer(async (req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
   if (pathname.startsWith('/api/')) return handler(req, res);
+  const hosted = resolveSitePage(req.headers.host, pathname);
+  if (hosted) {
+    try {
+      const data = await readFile(resolve(root, '.' + hosted));
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+      res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+      return res.end(data);
+    } catch { res.statusCode = 404; return res.end('Not found'); }
+  }
   if (pathname === '/.well-known/clawd-registry.json') { req.url = '/api/registry'; return handler(req, res); }
   let file = pathname;
   if (pathname === '/kit' || pathname === '/kit/') file = '/kit/index.html';
