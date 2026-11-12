@@ -9,24 +9,118 @@ export const PROGRAM_ID = '3dLst2E3djtCSwG19mFS3REHxtZPngjyga7iYZLDL5xj';
 export const MEMO_PROGRAM = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 export const IDL_ADDRESS = '5cqcAoyYWkWe3Yq6mXwVjVvV5j3EjDPo2N5P6EvSrvEF';
 export const sha256 = text => createHash('sha256').update(text).digest('hex');
+const DEFAULT_HF_AUTHORS = ['solanaclawd', 'ordlibrary'];
+const HUB_CACHE_MS = 45_000;
 let hubCache;
 let inferenceCache;
+
+export function resetHubCache() { hubCache = undefined; }
+
+function hfHeaders() {
+  const headers = { Accept: 'application/json', 'User-Agent': 'OnchainAI/0.2' };
+  if (process.env.HF_TOKEN) headers.Authorization = `Bearer ${process.env.HF_TOKEN}`;
+  return headers;
+}
+
+function uniqueNames(...groups) {
+  const names = [];
+  const seen = new Set();
+  for (const group of groups) {
+    for (const name of group || []) {
+      if (name && !seen.has(name)) { seen.add(name); names.push(name); }
+    }
+  }
+  return names;
+}
+
+export async function hubAuthors() {
+  const extra = (process.env.HF_AUTHORS || '').split(',').map(value => value.trim()).filter(Boolean);
+  const authors = uniqueNames(DEFAULT_HF_AUTHORS, extra);
+  if (!process.env.HF_TOKEN) return { authors, authenticated: false };
+  try {
+    const response = await fetch('https://huggingface.co/api/whoami-v2', { headers: hfHeaders(), signal: AbortSignal.timeout(8000) });
+    if (!response.ok) return { authors, authenticated: false, auth_error: true };
+    const me = await response.json();
+    const orgs = (me.orgs || []).map(org => (typeof org === 'string' ? org : org?.name)).filter(Boolean);
+    return { authors: uniqueNames(authors, [me.name], orgs), authenticated: true, account: me.name || null };
+  } catch {
+    return { authors, authenticated: false, auth_error: true };
+  }
+}
+
+function mapHubItem(item, kind) {
+  return {
+    id: item.id,
+    kind: kind.slice(0, -1),
+    sha: item.sha || null,
+    downloads: item.downloads || 0,
+    downloads_all_time: item.downloadsAllTime ?? item.downloads_all_time ?? item.downloads ?? 0,
+    likes: item.likes || 0,
+    pipeline_tag: item.pipeline_tag || null,
+    tags: item.tags || [],
+    last_modified: item.lastModified || item.last_modified || null,
+    url: `https://huggingface.co/${kind === 'models' ? '' : `${kind}/`}${item.id}`,
+    files: (item.siblings || []).map(file => file.rfilename),
+    card: { license: item.cardData?.license || item.card?.license || null, base_model: item.cardData?.base_model || item.card?.base_model || null },
+  };
+}
+
+function dedupe(items) {
+  const byId = new Map();
+  for (const item of items) if (item?.id) byId.set(item.id, item);
+  return [...byId.values()];
+}
+
+function total(items, key) { return items.reduce((sum, item) => sum + (Number(item[key]) || 0), 0); }
+
+function catalogStats(repos, identity = {}) {
+  const models = repos.models || [];
+  const datasets = repos.datasets || [];
+  const spaces = repos.spaces || [];
+  return {
+    models: models.length,
+    datasets: datasets.length,
+    spaces: spaces.length,
+    model_downloads_30d: total(models, 'downloads'),
+    model_downloads_all_time: total(models, 'downloads_all_time') || total(models, 'downloads'),
+    dataset_downloads_30d: total(datasets, 'downloads'),
+    dataset_downloads_all_time: total(datasets, 'downloads_all_time') || total(datasets, 'downloads'),
+    likes: total([...models, ...datasets, ...spaces], 'likes'),
+    authors: identity.authors || uniqueNames(models.concat(datasets, spaces).map(item => item.id?.split('/')[0])),
+    authenticated: Boolean(identity.authenticated),
+    account: identity.account || null,
+  };
+}
+
 export async function hubCatalog() {
-  if (hubCache && Date.now() - hubCache.at < 300000) return hubCache.data;
+  if (hubCache && Date.now() - hubCache.at < HUB_CACHE_MS) return hubCache.data;
   const snapshot = JSON.parse(await readFile(new URL('../hub-catalog.json', import.meta.url), 'utf8'));
   try {
+    const identity = await hubAuthors();
     const responses = await Promise.all(['models', 'datasets', 'spaces'].map(async kind => {
-      const inventories = await Promise.all(['solanaclawd', 'ordlibrary'].map(async author => {
-        const r = await fetch(`https://huggingface.co/api/${kind}?author=${author}&limit=1000&full=true`, { signal: AbortSignal.timeout(12000) });
-        if (!r.ok) throw new Error(`Hub ${kind}: HTTP ${r.status}`);
-        return r.json();
+      const inventories = await Promise.all(identity.authors.map(async author => {
+        const url = `https://huggingface.co/api/${kind}?author=${encodeURIComponent(author)}&limit=1000&full=true&expand[]=downloads&expand[]=downloadsAllTime&expand[]=likes`;
+        const response = await fetch(url, { headers: hfHeaders(), signal: AbortSignal.timeout(12000) });
+        if (!response.ok) throw new Error(`Hub ${kind}: HTTP ${response.status}`);
+        return response.json();
       }));
-      return [kind, inventories.flat().map(item => ({ id: item.id, kind: kind.slice(0, -1), sha: item.sha || null, downloads: item.downloads || 0, likes: item.likes || 0, pipeline_tag: item.pipeline_tag || null, tags: item.tags || [], url: `https://huggingface.co/${kind === 'models' ? '' : `${kind}/`}${item.id}`, files: (item.siblings || []).map(f => f.rfilename), card: { license: item.cardData?.license || null, base_model: item.cardData?.base_model || null } }))];
+      return [kind, dedupe(inventories.flat().filter(item => item && item.id && !item.private).map(item => mapHubItem(item, kind)))];
     }));
-    const data = { ...Object.fromEntries(responses), updated_at: new Date().toISOString(), source: 'Hugging Face public APIs: solanaclawd and ordlibrary', live: true, degraded: false };
-    hubCache = { at: Date.now(), data }; return data;
+    const repos = Object.fromEntries(responses);
+    const data = {
+      ...repos,
+      stats: catalogStats(repos, identity),
+      updated_at: new Date().toISOString(),
+      source: identity.authenticated
+        ? `Hugging Face account APIs: ${identity.authors.join(', ')}`
+        : `Hugging Face public APIs: ${identity.authors.join(', ')}`,
+      live: true,
+      degraded: Boolean(identity.auth_error),
+    };
+    hubCache = { at: Date.now(), data };
+    return data;
   } catch {
-    return { ...snapshot, live: false, degraded: true, error: 'Hub metadata temporarily unavailable; showing the dated release snapshot.' };
+    return { ...snapshot, stats: catalogStats(snapshot), live: false, degraded: true, error: 'Hub metadata temporarily unavailable; showing the dated release snapshot.' };
   }
 }
 export async function rpc(cluster, method, params = []) {
