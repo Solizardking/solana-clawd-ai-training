@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 const root = path.resolve(import.meta.dirname, '..');
 const out = path.join(root, 'dist');
 await mkdir(out, { recursive: true });
-for (const file of ['brand', 'docs', 'data-catalog.json', 'docs-catalog.json', 'hub-catalog.json', 'registry-idl.json']) await cp(path.join(root, file), path.join(out, file), { recursive: true });
+for (const file of ['brand', 'docs', 'data-catalog.json', 'docs-catalog.json', 'hub-catalog.json', 'registry-idl.json', 'SKILL.md']) await cp(path.join(root, file), path.join(out, file), { recursive: true });
 let kitSource = path.join(root, '../model-kit/frontend');
 try { await access(kitSource); } catch { kitSource = path.join(root, 'kit'); }
 await cp(kitSource, path.join(out, 'kit'), { recursive: true });
