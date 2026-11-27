@@ -1,0 +1,51 @@
+{
+  "name": "onchainai-artifact-registry",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "agent",
+    "version": "v1",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a",
+    "uniquenessKey": "agent:20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a:v1",
+    "payload": {
+      "name": "onchainai-artifact-registry",
+      "owner": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+      "handle": "onchainai-registry",
+      "endpoint": "https://onchainai.fun/registry"
+    },
+    "skillMerkleLeaf": null,
+    "asset": "7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-agent-identity-v1",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: agent\nContent-Hash: sha256-20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a\nVersion: v1\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: agent:20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a:v1",
+      "signature": "4g2nrcmPrFFWPgfeitSVcPBemKuCnPpfcGNBgcqBhj61JbMb3WcFTCoBXQ7qvWzrip77M9bdTDkJgTdNxjsQE5Wu"
+    }
+  },
+  "signatures": {
+    "mint": "5XCezYL3CUa8avkHNsVTe5L2gG2oSZfBrHMDjoyE97tV1t3f6yQoGfaHn1vwxVDJuxYx7TWMizqUGoCBjBEw3nny",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/5XCezYL3CUa8avkHNsVTe5L2gG2oSZfBrHMDjoyE97tV1t3f6yQoGfaHn1vwxVDJuxYx7TWMizqUGoCBjBEw3nny?cluster=devnet",
+      "address": "https://explorer.solana.com/address/7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  }
+}

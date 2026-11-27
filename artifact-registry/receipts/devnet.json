@@ -1,0 +1,397 @@
+{
+  "schema": "onchainai-artifact-registry/receipts/v1",
+  "cluster": "devnet",
+  "mintedAt": "2026-11-27T01:47:24.826Z",
+  "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+  "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+  "collectionSignature": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ",
+  "explorer": {
+    "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+    "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+  },
+  "note": "Throwaway devnet keypair. zk-clawd-primitives is not live; attestations are authority signatures with zk pending. Not submitted to the production registry.musebook.trade API.",
+  "entries": [
+    {
+      "name": "hauhau-qwen36-onchain",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "model",
+        "version": "aeb339dc7de361b468683b1242729c701cba465e",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-ae0d460c540e6940d7da4e6932d2e081f165011a183c189a88fdf975096f32e0",
+        "uniquenessKey": "model:ae0d460c540e6940d7da4e6932d2e081f165011a183c189a88fdf975096f32e0:aeb339dc7de361b468683b1242729c701cba465e",
+        "payload": {
+          "hfRepo": "ordlibrary/hauhau-qwen36-onchain",
+          "revisionSha": "aeb339dc7de361b468683b1242729c701cba465e",
+          "license": "mit",
+          "creator": "ordlibrary",
+          "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-onchain",
+          "baseModel": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+          "files": [
+            {
+              "path": ".gitattributes",
+              "sha256": "sha256-48b460424f20e8c7494e03bb2e96e3ce8591c402e929d6fc8244367b9180d5a2",
+              "size": 1673
+            },
+            {
+              "path": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf",
+              "sha256": "sha256-ba3a1d47a604f17ef74d913f9a9d9a2b456acc6925e7b168bfa2e6527246011c",
+              "size": 11659235456
+            },
+            {
+              "path": "README.md",
+              "sha256": "sha256-d27e32be97c4099105b817c383f1ca54cc399e0e015ace994374f1f34706cd74",
+              "size": 23979
+            }
+          ],
+          "provenance": {
+            "sourceRepo": "Solizardking/solana-clawd-ai-training",
+            "docs": [
+              {
+                "path": "docs/hauhau_qwen36.md",
+                "sha256": "sha256-72bd77af7cf040194aac41a81a64a6dfacc7af587d9cd930def0e0caa89eecac"
+              },
+              {
+                "path": "configs/hauhau_qwen36_llama_cpp.yaml",
+                "sha256": "sha256-86f51584f059a50e0bbea3e61d6823b8dc42ed0486f40952cad42678fe486510"
+              },
+              {
+                "path": "ollama/Modelfile.hauhau-qwen36-onchain",
+                "sha256": "sha256-0f468ebf13f67558cf021fad6bdf185b48129c7006323a4d8f526e5d4ac01532"
+              }
+            ],
+            "note": "Constitution-etched GGUF runtime documented in this training repo. GGUF hash is the Hugging Face LFS SHA-256; other files are SHA-256 of the bytes at this revision."
+          }
+        },
+        "skillMerkleLeaf": null,
+        "asset": "3G13z5Dwc7BFpyiv2hvNbnnhssuKEs2hZNdBBXZdsHke",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-core-asset+registry-record",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "3G13z5Dwc7BFpyiv2hvNbnnhssuKEs2hZNdBBXZdsHke"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: model\nContent-Hash: sha256-ae0d460c540e6940d7da4e6932d2e081f165011a183c189a88fdf975096f32e0\nVersion: aeb339dc7de361b468683b1242729c701cba465e\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: model:ae0d460c540e6940d7da4e6932d2e081f165011a183c189a88fdf975096f32e0:aeb339dc7de361b468683b1242729c701cba465e",
+          "signature": "33HqsUkLbZNeq8nqzZcwDMCarPwbLhaRZ31rG5XUYaoyj1qGsbcyi1RNctfQYH3ZSqj6T6LAM5fo13ws9RgycR6i"
+        }
+      },
+      "signatures": {
+        "mint": "5M7U8brJXNxbYtcbYRjBfmwqEkqKfWPztbqqs1btxt5BoMmEXommc6UfqYhcYnLg1DbDE1KgbatEc3vmaKJ8MBwz",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/5M7U8brJXNxbYtcbYRjBfmwqEkqKfWPztbqqs1btxt5BoMmEXommc6UfqYhcYnLg1DbDE1KgbatEc3vmaKJ8MBwz?cluster=devnet",
+          "address": "https://explorer.solana.com/address/3G13z5Dwc7BFpyiv2hvNbnnhssuKEs2hZNdBBXZdsHke?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    },
+    {
+      "name": "hauhau-qwen36-uncensored",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "model",
+        "version": "007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-84cfb3e7e8ebb410871f420002d823c19c45e74b9b94678dc2de0e1210e797ea",
+        "uniquenessKey": "model:84cfb3e7e8ebb410871f420002d823c19c45e74b9b94678dc2de0e1210e797ea:007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+        "payload": {
+          "hfRepo": "ordlibrary/hauhau-qwen36-uncensored",
+          "revisionSha": "007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+          "license": "mit",
+          "creator": "ordlibrary",
+          "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-uncensored",
+          "baseModel": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+          "files": [
+            {
+              "path": ".gitattributes",
+              "sha256": "sha256-de8e137483f97715f2ccf35aac227801e2a18afd247af2cd05e4d6b4844c759a",
+              "size": 1613
+            },
+            {
+              "path": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf",
+              "sha256": "sha256-ba3a1d47a604f17ef74d913f9a9d9a2b456acc6925e7b168bfa2e6527246011c",
+              "size": 11659235456
+            },
+            {
+              "path": "README.md",
+              "sha256": "sha256-63d07a5f5265b1051b126034cf8abf92935b815b7fc0c4e44a84b06fbd7795f7",
+              "size": 2337
+            }
+          ],
+          "provenance": {
+            "sourceRepo": "Solizardking/solana-clawd-ai-training",
+            "docs": [
+              {
+                "path": "docs/hauhau_qwen36.md",
+                "sha256": "sha256-72bd77af7cf040194aac41a81a64a6dfacc7af587d9cd930def0e0caa89eecac"
+              }
+            ],
+            "note": "Uncensored sibling of the onchain Hauhau recipe. Same GGUF LFS digest as the onchain repo; README and gitattributes differ, so the bound content hash differs."
+          }
+        },
+        "skillMerkleLeaf": null,
+        "asset": "B968XuYsx94LrwngRSYYfGiRnXx2Wgx8MTLCtHz9mK7W",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-core-asset+registry-record",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "B968XuYsx94LrwngRSYYfGiRnXx2Wgx8MTLCtHz9mK7W"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: model\nContent-Hash: sha256-84cfb3e7e8ebb410871f420002d823c19c45e74b9b94678dc2de0e1210e797ea\nVersion: 007d4f0ccbea6236d954d0079fa7c7ea03e5f111\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: model:84cfb3e7e8ebb410871f420002d823c19c45e74b9b94678dc2de0e1210e797ea:007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+          "signature": "2ykMQ3Q6cWKkAZP4YyfNPuxRmxE4YbZB7PXoJQ4VrTN5W1R6FenXrM1hmCMeZx9igXHPEcem1iV9xfj7ngsUrjAx"
+        }
+      },
+      "signatures": {
+        "mint": "67n31rzMVyobjWN1vJCf19rwC7b8fzKLRMd2QKzDXJwWMotAEBmnhNyD8bkaLDoUGJTF68wCSYnKv7qx5dYhv3eo",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/67n31rzMVyobjWN1vJCf19rwC7b8fzKLRMd2QKzDXJwWMotAEBmnhNyD8bkaLDoUGJTF68wCSYnKv7qx5dYhv3eo?cluster=devnet",
+          "address": "https://explorer.solana.com/address/B968XuYsx94LrwngRSYYfGiRnXx2Wgx8MTLCtHz9mK7W?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    },
+    {
+      "name": "skillhub-onchain",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "skill",
+        "version": "1.0.0-onchain.4f387aa2",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46",
+        "uniquenessKey": "skill:f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46:1.0.0-onchain.4f387aa2",
+        "payload": {
+          "slug": "skillhub-onchain",
+          "name": "skillhub-onchain",
+          "bundleHash": "sha256-f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46",
+          "merkleLeaf": "sha256-24484a5bb5712efe6da4539a414f93def47042022774308603421bde3b1ae442",
+          "catalogHash": "sha256-4f387aa29c6ba4a26135abe0e7d36b87eaa371c263d0b1a33a28821fc4aa5849",
+          "catalogMerkleRoot": "sha256-2c4114d939baec093447807cebbd5777ed2116ab912c94c326e53c2bd80a9793",
+          "sourceRepo": "Solizardking/skillhub-main",
+          "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e",
+          "registry": "https://skills.x402.wtf/.well-known/onchain-skill-registry.json",
+          "verification": "https://skills.x402.wtf/api/skills/skillhub-onchain/verification.json"
+        },
+        "skillMerkleLeaf": "sha256-24484a5bb5712efe6da4539a414f93def47042022774308603421bde3b1ae442",
+        "asset": "AqgYUWRAecwmcutFRnKjPvp629B1YDFTGuV9maxkXeWm",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-core-asset+registry-record",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "AqgYUWRAecwmcutFRnKjPvp629B1YDFTGuV9maxkXeWm"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46\nVersion: 1.0.0-onchain.4f387aa2\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46:1.0.0-onchain.4f387aa2",
+          "signature": "2rYAZL8qXkNGES1ETNfXc2Y3W5ZT6LFddioT8qNciFT6S6PapoL36V6AesMe7wjcfRrymMMBP3vkEDeohHNNa7W4"
+        }
+      },
+      "signatures": {
+        "mint": "26F2DKmGXvsBco27ryeCkPJLBEKfNmHrPT9F8AVgmEuRd5VxfBH4Qnu3G97ysD3A8yH7Vsh4GXKD5LB3zi4PjjoW",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/26F2DKmGXvsBco27ryeCkPJLBEKfNmHrPT9F8AVgmEuRd5VxfBH4Qnu3G97ysD3A8yH7Vsh4GXKD5LB3zi4PjjoW?cluster=devnet",
+          "address": "https://explorer.solana.com/address/AqgYUWRAecwmcutFRnKjPvp629B1YDFTGuV9maxkXeWm?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    },
+    {
+      "name": "cheshire-mcp-tools",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "tool",
+        "version": "2026-07-21",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-38d09bb6a2963ff81f990a04428c5edc08200e67abf81f76c33fc7a0a899e283",
+        "uniquenessKey": "tool:38d09bb6a2963ff81f990a04428c5edc08200e67abf81f76c33fc7a0a899e283:2026-07-21",
+        "payload": {
+          "name": "cheshire-mcp-tools",
+          "sourceRepo": "Solizardking/skillhub-main",
+          "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e",
+          "manifestPath": "registry/google/cheshire-mcp-tools-list.json",
+          "manifestHash": "sha256-a2977cc1558760d3c42528e1d2b8345440d35aa6902705064db7c2e57e40e6fe"
+        },
+        "skillMerkleLeaf": null,
+        "asset": "4jCX4V3rnuL7q8zQ8x9jiK8oNrisENzpyf1PoiUJtqvE",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-core-asset+registry-record",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "4jCX4V3rnuL7q8zQ8x9jiK8oNrisENzpyf1PoiUJtqvE"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: tool\nContent-Hash: sha256-38d09bb6a2963ff81f990a04428c5edc08200e67abf81f76c33fc7a0a899e283\nVersion: 2026-07-21\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: tool:38d09bb6a2963ff81f990a04428c5edc08200e67abf81f76c33fc7a0a899e283:2026-07-21",
+          "signature": "3SfvU7HJBosic1sAMs8YWqRsGGDt1i5Y2spZyvztajuf48PnVYnyEabY2xvZXd3m6YNdw2zhYQifesyGkp9TxScT"
+        }
+      },
+      "signatures": {
+        "mint": "3dvPjbNritcdgjMsBMVD7ZLWUjHmbCNunfN4wcnYqA2Aw1Zk6o5D1KGerhv6MNsUZCDqNgyavFCP5f2Cjzo3Jfuc",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/3dvPjbNritcdgjMsBMVD7ZLWUjHmbCNunfN4wcnYqA2Aw1Zk6o5D1KGerhv6MNsUZCDqNgyavFCP5f2Cjzo3Jfuc?cluster=devnet",
+          "address": "https://explorer.solana.com/address/4jCX4V3rnuL7q8zQ8x9jiK8oNrisENzpyf1PoiUJtqvE?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    },
+    {
+      "name": "cheshire-terminal-mcp",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "mcp_server",
+        "version": "2026-07-21",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610",
+        "uniquenessKey": "mcp_server:5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610:2026-07-21",
+        "payload": {
+          "name": "cheshire-terminal",
+          "endpoint": "https://cheshireterminal.ai/mcp",
+          "manifestPath": "registry/google/cheshire-mcp-server-card.json",
+          "manifestHash": "sha256-c326b74073742aaa77c849effabb0ea8eb474efbab905bba6f7590eaabc02004",
+          "packageVersion": "2026-07-21",
+          "sourceRepo": "Solizardking/skillhub-main",
+          "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e"
+        },
+        "skillMerkleLeaf": null,
+        "asset": "XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-core-asset+registry-record",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: mcp_server\nContent-Hash: sha256-5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610\nVersion: 2026-07-21\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: mcp_server:5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610:2026-07-21",
+          "signature": "ray479voQnSKr52QhNJg58BZP5tAiQLVvxX6U1V75ScgMokNnHuFJVx7dxv5LdLoZphSkA2A1ZHgXqaDzPhJEzh"
+        }
+      },
+      "signatures": {
+        "mint": "635N22ukLew4fMNr1ugSQQWvsfEBqdToXDSRz5qDghwi2RoxoeyEaux2C8ikZ2STjtbHHQTXAV7q6mmeTkL5ouH5",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/635N22ukLew4fMNr1ugSQQWvsfEBqdToXDSRz5qDghwi2RoxoeyEaux2C8ikZ2STjtbHHQTXAV7q6mmeTkL5ouH5?cluster=devnet",
+          "address": "https://explorer.solana.com/address/XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    },
+    {
+      "name": "onchainai-artifact-registry",
+      "record": {
+        "schema": "onchainai-artifact-registry/v1",
+        "type": "agent",
+        "version": "v1",
+        "cluster": "devnet",
+        "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+        "contentHash": "sha256-20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a",
+        "uniquenessKey": "agent:20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a:v1",
+        "payload": {
+          "name": "onchainai-artifact-registry",
+          "owner": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+          "handle": "onchainai-registry",
+          "endpoint": "https://onchainai.fun/registry"
+        },
+        "skillMerkleLeaf": null,
+        "asset": "7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe",
+        "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+        "identity": {
+          "standard": "metaplex-agent-identity-v1",
+          "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+          "asset": "7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe"
+        },
+        "attestation": {
+          "kind": "authority-signature",
+          "zk": "pending",
+          "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+          "vkSlot": null,
+          "vkSlotsEmpty": true,
+          "programDeployed": false,
+          "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+          "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: agent\nContent-Hash: sha256-20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a\nVersion: v1\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: agent:20b972465ec851194cd3f48a79f4e053fc4a8f6f1f25a71a566c0fdeb92b1c7a:v1",
+          "signature": "4g2nrcmPrFFWPgfeitSVcPBemKuCnPpfcGNBgcqBhj61JbMb3WcFTCoBXQ7qvWzrip77M9bdTDkJgTdNxjsQE5Wu"
+        }
+      },
+      "signatures": {
+        "mint": "5XCezYL3CUa8avkHNsVTe5L2gG2oSZfBrHMDjoyE97tV1t3f6yQoGfaHn1vwxVDJuxYx7TWMizqUGoCBjBEw3nny",
+        "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+      },
+      "explorer": {
+        "asset": {
+          "tx": "https://explorer.solana.com/tx/5XCezYL3CUa8avkHNsVTe5L2gG2oSZfBrHMDjoyE97tV1t3f6yQoGfaHn1vwxVDJuxYx7TWMizqUGoCBjBEw3nny?cluster=devnet",
+          "address": "https://explorer.solana.com/address/7J9utyfkQkrNMPKQRRmeA6JrQjqfvYtwPpMkBEunnQfe?cluster=devnet"
+        },
+        "collection": {
+          "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+          "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+        }
+      }
+    }
+  ]
+}

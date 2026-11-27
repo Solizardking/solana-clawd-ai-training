@@ -1,0 +1,54 @@
+{
+  "name": "cheshire-terminal-mcp",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "mcp_server",
+    "version": "2026-07-21",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610",
+    "uniquenessKey": "mcp_server:5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610:2026-07-21",
+    "payload": {
+      "name": "cheshire-terminal",
+      "endpoint": "https://cheshireterminal.ai/mcp",
+      "manifestPath": "registry/google/cheshire-mcp-server-card.json",
+      "manifestHash": "sha256-c326b74073742aaa77c849effabb0ea8eb474efbab905bba6f7590eaabc02004",
+      "packageVersion": "2026-07-21",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e"
+    },
+    "skillMerkleLeaf": null,
+    "asset": "XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: mcp_server\nContent-Hash: sha256-5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610\nVersion: 2026-07-21\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: mcp_server:5abb9b91e54dd5a0e742ecda5c9e89f0a4bd1e43ca70a408852c47f5c59ff610:2026-07-21",
+      "signature": "ray479voQnSKr52QhNJg58BZP5tAiQLVvxX6U1V75ScgMokNnHuFJVx7dxv5LdLoZphSkA2A1ZHgXqaDzPhJEzh"
+    }
+  },
+  "signatures": {
+    "mint": "635N22ukLew4fMNr1ugSQQWvsfEBqdToXDSRz5qDghwi2RoxoeyEaux2C8ikZ2STjtbHHQTXAV7q6mmeTkL5ouH5",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/635N22ukLew4fMNr1ugSQQWvsfEBqdToXDSRz5qDghwi2RoxoeyEaux2C8ikZ2STjtbHHQTXAV7q6mmeTkL5ouH5?cluster=devnet",
+      "address": "https://explorer.solana.com/address/XAm3KqhoSGuk1WMJEqNyKRjE8zTZtfPCp1Le5LLjkPo?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  }
+}
