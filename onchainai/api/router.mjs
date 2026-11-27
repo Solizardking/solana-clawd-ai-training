@@ -1,4 +1,5 @@
 import { hubCatalog, rpc, registryStatus, onchainRegistry, decodeRegistryAccount, complete, inferenceModels, publishDataset, PROGRAM_ID, MEMO_PROGRAM, sha256 } from '../server/service.mjs';
+import { askClef, buildBoard, clefHealth, getTokenState } from '../server/clef.mjs';
 import bs58 from 'bs58';
 import { submitSkill, prepareSkillMint, skillGallery, skillDetail, skillMetadata, skillIndexAuthority, SKILL_LIMITS } from '../server/skillhub.mjs';
 import { JEV_MODEL } from '../server/jev.mjs';
@@ -55,7 +56,13 @@ export default async function handler(req, res) {
       if (method === 'POST' && path === 'hf-mint/submit') { rateLimit(ip, 'submit', { max: 20 }); const body = await readBody(req); return send(await submitMint({ transaction: body.transaction })); }
       return send({ ok: false, error: 'Endpoint not available' }, 404);
     }
-    if (method === 'GET' && path === 'health') return send({ ok: true, status: 'ok', version: '0.2.0', service: 'onchainai' });
+    if (method === 'GET' && path === 'health') return send({ ok: true, status: 'ok', version: '0.2.0', service: 'onchainai', clef: clefHealth() });
+    if (method === 'GET' && (path === 'clef' || path === 'clef/health')) return send(clefHealth());
+    if (method === 'GET' && path === 'clef/board') return send(await buildBoard());
+    if (method === 'GET' && path === 'clef/state') {
+      const mint = url.searchParams.get('mint');
+      return send(await getTokenState(mint));
+    }
     if (method === 'GET' && ['hub/catalog', 'model-kit/status', 'models', 'registry'].includes(path)) {
       const catalog = await hubCatalog();
       if (path === 'models') return send({ ok: true, models: catalog.models.filter(m => !url.searchParams.get('hf_id') || m.id === url.searchParams.get('hf_id')), registry_status: 'artifact-catalog', onchain_verified: false });
@@ -89,6 +96,7 @@ export default async function handler(req, res) {
     }
     if (method === 'POST') {
       const body = await readBody(req);
+      if (path === 'clef/ask' || path === 'clef') return send(await askClef(body));
       if (path === 'training/datasets') return send(await publishDataset(body));
       if (path === 'inference/chat') return send(await complete(body));
       if (path === 'register/preview' || path === 'register') {
@@ -103,5 +111,5 @@ export default async function handler(req, res) {
       }
     }
     return send({ ok: false, error: 'Endpoint not available' }, 404);
-  } catch (error) { return send({ ok: false, error: error.status ? error.message : 'The operation failed. Check your token permissions, repository name, and provider availability.' }, error.status || 502); }
+  } catch (error) { return send({ ok: false, error: error.status ? error.message : 'The operation failed. Check your token permissions, repository name, and provider availability.', ...(error.code ? { code: error.code } : {}) }, error.status || 502); }
 }

@@ -54,7 +54,8 @@ test('hub catalog totals live public downloads and skips private repos', async (
     assert.equal(catalog.stats.likes, 6);
     assert.equal(catalog.stats.authenticated, false);
     assert.equal(JSON.stringify(catalog).includes('hf_'), false);
-    assert.ok(stub.calls.every(call => call.url.includes('expand[]=downloadsAllTime')));
+    assert.ok(stub.calls.filter(call => call.url.includes('/api/models') || call.url.includes('/api/datasets')).every(call => call.url.includes('expand[]=downloadsAllTime')));
+    assert.ok(stub.calls.filter(call => call.url.includes('/api/spaces')).every(call => !call.url.includes('expand[]=downloads')));
     assert.equal(await hubCatalog(), catalog);
   } finally {
     stub.restore();
@@ -111,6 +112,28 @@ test('a failed Hub fetch falls back to the dated snapshot with computed stats', 
     assert.equal(catalog.degraded, true);
     assert.ok(catalog.stats.models > 0);
     assert.equal(catalog.stats.model_downloads_30d, catalog.models.reduce((sum, model) => sum + (model.downloads || 0), 0));
+  } finally {
+    stub.restore();
+    restoreEnv('HF_TOKEN', previousToken);
+  }
+});
+
+test('a Spaces expand rejection does not block live model download totals', async () => {
+  resetHubCache();
+  const previousToken = process.env.HF_TOKEN;
+  delete process.env.HF_TOKEN;
+  const stub = installFetch((url) => {
+    if (url.includes('/api/spaces')) return jsonResponse({ error: 'Invalid option' }, 400);
+    if (url.includes('/api/models')) return jsonResponse([item('solanaclawd/core-ai', { downloads: 4, downloadsAllTime: 40, likes: 1 })]);
+    if (url.includes('/api/datasets')) return jsonResponse([]);
+    throw new Error(`unexpected ${url}`);
+  });
+  try {
+    const catalog = await hubCatalog();
+    assert.equal(catalog.live, true);
+    assert.equal(catalog.stats.model_downloads_all_time, 40);
+    assert.equal(catalog.spaces.length, 0);
+    assert.equal(catalog.degraded, true);
   } finally {
     stub.restore();
     restoreEnv('HF_TOKEN', previousToken);

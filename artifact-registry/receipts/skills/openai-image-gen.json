@@ -1,0 +1,56 @@
+{
+  "name": "openai-image-gen",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.4f387aa2",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-2333219c7347c3bd1252d32de91a9aa129188468487ac8b32e09f834854749b9",
+    "uniquenessKey": "skill:2333219c7347c3bd1252d32de91a9aa129188468487ac8b32e09f834854749b9:1.0.0-onchain.4f387aa2",
+    "payload": {
+      "slug": "openai-image-gen",
+      "name": "openai-image-gen",
+      "bundleHash": "sha256-2333219c7347c3bd1252d32de91a9aa129188468487ac8b32e09f834854749b9",
+      "merkleLeaf": "sha256-3016b58825517bd54ba6786ef9406c425f5b652404536fe7f537c869205260bf",
+      "catalogHash": "sha256-4f387aa29c6ba4a26135abe0e7d36b87eaa371c263d0b1a33a28821fc4aa5849",
+      "catalogMerkleRoot": "sha256-2c4114d939baec093447807cebbd5777ed2116ab912c94c326e53c2bd80a9793",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-3016b58825517bd54ba6786ef9406c425f5b652404536fe7f537c869205260bf",
+    "asset": "7tNnFeBPEgFC2eAs93k3MMXiWt9nVrLAwfSm5ziSsNDY",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "7tNnFeBPEgFC2eAs93k3MMXiWt9nVrLAwfSm5ziSsNDY"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-2333219c7347c3bd1252d32de91a9aa129188468487ac8b32e09f834854749b9\nVersion: 1.0.0-onchain.4f387aa2\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:2333219c7347c3bd1252d32de91a9aa129188468487ac8b32e09f834854749b9:1.0.0-onchain.4f387aa2",
+      "signature": "2fRffqmGz7otk1WyyfWuC1dE8CfT5yAqRVXAv79qYdrgwfbd4EmmnTLGm98d8K3U78NpDzSL1VBATYTaVPmCTYuZ"
+    }
+  },
+  "signatures": {
+    "mint": "3Mw7u5TxU4ASzXGArLqcLxL5AE8gXBePPPkJEPyA2s9s4wP33A6p2ngvpsoBCahdUWesh3yTzG1KhSqa83j3q3XM",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/3Mw7u5TxU4ASzXGArLqcLxL5AE8gXBePPPkJEPyA2s9s4wP33A6p2ngvpsoBCahdUWesh3yTzG1KhSqa83j3q3XM?cluster=devnet",
+      "address": "https://explorer.solana.com/address/7tNnFeBPEgFC2eAs93k3MMXiWt9nVrLAwfSm5ziSsNDY?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6483320
+}
