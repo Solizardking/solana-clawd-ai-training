@@ -1,0 +1,21 @@
+{
+  "name": "onchainai-artifact-registry",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Type-generic Metaplex Core artifact registry for OnchainAI (devnet): agent, model, skill, tool, mcp_server. Skill hashes follow SkillHub skill-bundle-v1 / merkleLeaf encoding.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "bash scripts/check.sh",
+    "vectors": "cd formal/lean && lake exe vectors",
+    "register:devnet": "node scripts/register-devnet.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@metaplex-foundation/mpl-core": "^1.4.0",
+    "@metaplex-foundation/umi": "^1.4.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
+    "bs58": "^6.0.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

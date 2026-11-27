@@ -1,0 +1,39 @@
+{
+  "type": "model",
+  "version": "007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+  "payload": {
+    "hfRepo": "ordlibrary/hauhau-qwen36-uncensored",
+    "revisionSha": "007d4f0ccbea6236d954d0079fa7c7ea03e5f111",
+    "license": "mit",
+    "creator": "ordlibrary",
+    "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-uncensored",
+    "baseModel": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+    "files": [
+      {
+        "path": ".gitattributes",
+        "sha256": "sha256-de8e137483f97715f2ccf35aac227801e2a18afd247af2cd05e4d6b4844c759a",
+        "size": 1613
+      },
+      {
+        "path": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf",
+        "sha256": "sha256-ba3a1d47a604f17ef74d913f9a9d9a2b456acc6925e7b168bfa2e6527246011c",
+        "size": 11659235456
+      },
+      {
+        "path": "README.md",
+        "sha256": "sha256-63d07a5f5265b1051b126034cf8abf92935b815b7fc0c4e44a84b06fbd7795f7",
+        "size": 2337
+      }
+    ],
+    "provenance": {
+      "sourceRepo": "Solizardking/solana-clawd-ai-training",
+      "docs": [
+        {
+          "path": "docs/hauhau_qwen36.md",
+          "sha256": "sha256-72bd77af7cf040194aac41a81a64a6dfacc7af587d9cd930def0e0caa89eecac"
+        }
+      ],
+      "note": "Uncensored sibling of the onchain Hauhau recipe. Same GGUF LFS digest as the onchain repo; README and gitattributes differ, so the bound content hash differs."
+    }
+  }
+}

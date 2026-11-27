@@ -1,0 +1,16 @@
+{
+  "type": "skill",
+  "version": "1.0.0-onchain.4f387aa2",
+  "payload": {
+    "slug": "skillhub-onchain",
+    "name": "skillhub-onchain",
+    "bundleHash": "sha256-f393b771a8b5fdfb2665f9eaa1a1205dc9fdf6ed1b118819527152a4d1493c46",
+    "merkleLeaf": "sha256-24484a5bb5712efe6da4539a414f93def47042022774308603421bde3b1ae442",
+    "catalogHash": "sha256-4f387aa29c6ba4a26135abe0e7d36b87eaa371c263d0b1a33a28821fc4aa5849",
+    "catalogMerkleRoot": "sha256-2c4114d939baec093447807cebbd5777ed2116ab912c94c326e53c2bd80a9793",
+    "sourceRepo": "Solizardking/skillhub-main",
+    "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e",
+    "registry": "https://skills.x402.wtf/.well-known/onchain-skill-registry.json",
+    "verification": "https://skills.x402.wtf/api/skills/skillhub-onchain/verification.json"
+  }
+}

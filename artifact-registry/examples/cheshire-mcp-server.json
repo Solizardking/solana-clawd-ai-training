@@ -1,0 +1,13 @@
+{
+  "type": "mcp_server",
+  "version": "2026-07-21",
+  "payload": {
+    "name": "cheshire-terminal",
+    "endpoint": "https://cheshireterminal.ai/mcp",
+    "manifestPath": "registry/google/cheshire-mcp-server-card.json",
+    "manifestHash": "sha256-c326b74073742aaa77c849effabb0ea8eb474efbab905bba6f7590eaabc02004",
+    "packageVersion": "2026-07-21",
+    "sourceRepo": "Solizardking/skillhub-main",
+    "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e"
+  }
+}
