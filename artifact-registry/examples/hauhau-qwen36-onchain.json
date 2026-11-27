@@ -1,0 +1,47 @@
+{
+  "type": "model",
+  "version": "aeb339dc7de361b468683b1242729c701cba465e",
+  "payload": {
+    "hfRepo": "ordlibrary/hauhau-qwen36-onchain",
+    "revisionSha": "aeb339dc7de361b468683b1242729c701cba465e",
+    "license": "mit",
+    "creator": "ordlibrary",
+    "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-onchain",
+    "baseModel": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+    "files": [
+      {
+        "path": ".gitattributes",
+        "sha256": "sha256-48b460424f20e8c7494e03bb2e96e3ce8591c402e929d6fc8244367b9180d5a2",
+        "size": 1673
+      },
+      {
+        "path": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf",
+        "sha256": "sha256-ba3a1d47a604f17ef74d913f9a9d9a2b456acc6925e7b168bfa2e6527246011c",
+        "size": 11659235456
+      },
+      {
+        "path": "README.md",
+        "sha256": "sha256-d27e32be97c4099105b817c383f1ca54cc399e0e015ace994374f1f34706cd74",
+        "size": 23979
+      }
+    ],
+    "provenance": {
+      "sourceRepo": "Solizardking/solana-clawd-ai-training",
+      "docs": [
+        {
+          "path": "docs/hauhau_qwen36.md",
+          "sha256": "sha256-72bd77af7cf040194aac41a81a64a6dfacc7af587d9cd930def0e0caa89eecac"
+        },
+        {
+          "path": "configs/hauhau_qwen36_llama_cpp.yaml",
+          "sha256": "sha256-86f51584f059a50e0bbea3e61d6823b8dc42ed0486f40952cad42678fe486510"
+        },
+        {
+          "path": "ollama/Modelfile.hauhau-qwen36-onchain",
+          "sha256": "sha256-0f468ebf13f67558cf021fad6bdf185b48129c7006323a4d8f526e5d4ac01532"
+        }
+      ],
+      "note": "Constitution-etched GGUF runtime documented in this training repo. GGUF hash is the Hugging Face LFS SHA-256; other files are SHA-256 of the bytes at this revision."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+name = "artifact_registry"
+version = "0.1.0"
+defaultTargets = ["ArtifactRegistry", "vectors"]
+
+[[lean_lib]]
+name = "ArtifactRegistry"
+
+[[lean_exe]]
+name = "vectors"
+root = "Vectors"

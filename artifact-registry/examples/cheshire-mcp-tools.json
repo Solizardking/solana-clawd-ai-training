@@ -1,0 +1,11 @@
+{
+  "type": "tool",
+  "version": "2026-07-21",
+  "payload": {
+    "name": "cheshire-mcp-tools",
+    "sourceRepo": "Solizardking/skillhub-main",
+    "commit": "be3de0244dc1a57e323d8160787ebb40fb64930e",
+    "manifestPath": "registry/google/cheshire-mcp-tools-list.json",
+    "manifestHash": "sha256-a2977cc1558760d3c42528e1d2b8345440d35aa6902705064db7c2e57e40e6fe"
+  }
+}

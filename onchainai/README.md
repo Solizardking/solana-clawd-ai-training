@@ -1,7 +1,7 @@
 # Onchain AI
 
-Production workspace: https://www.onchainai.fund (the apex redirects to www).
-Vercel project: `prj_dbqrFMwxJRwz37ILdFrNWGmyLLVr`, team `clawd`.
+Production workspace: https://onchainai.fun — Railway project `onchainai` (custom domain on port 8080, git root `onchainai`, configured deploy branch `feat/railway-onchainai`).
+`www.onchainai.fun` is a separate Vercel project that currently returns `DEPLOYMENT_DISABLED` (HTTP 402).
 Git project root must be **onchainai**, with `npm run build` and output `dist`.
 
 The site combines public Hugging Face catalogs for **solanaclawd** and **ordlibrary**, the canonical root Model Kit frontend and downloadable source, a browser-local SFT dataset builder, hosted Core AI inference, Trading Factory strategy manifests, and wallet-signed Solana provenance.
@@ -18,6 +18,8 @@ The site combines public Hugging Face catalogs for **solanaclawd** and **ordlibr
 | `/trading-factory` | Deterministic target allocations and exportable research strategy manifests |
 | `/model-kit` | Artifact status, registry evidence, full console and source download |
 | `/kit/` | Canonical Model Kit frontend; external/local runtime needed for arena execution |
+| `/registry` | Metaplex Core artifact registry (agent, model, skill, tool, mcp_server) and devnet receipts |
+| `/zk` | zk-clawd-primitives status: not live, verifying-key slots empty, program not deployed |
 | `/register` | Memo commitments on devnet/mainnet; native model registration on verified devnet |
 | `/docs` | Docs viewer; `/docs/onchain.md` is the root doctrine copy |
 
