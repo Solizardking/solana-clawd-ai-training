@@ -54,7 +54,10 @@ function airdrop(pubkey, keypairPath) {
   const check = execFileSync(solana, ["balance", pubkey, "--url", DEVNET_RPC, "--output", "json"], { encoding: "utf8" });
   const lamports = JSON.parse(check).lamports ?? Math.round(parseFloat(check) * 1e9);
   console.log(`devnet balance ${pubkey}: ${lamports} lamports`);
-  if (lamports >= 1_500_000_000) return;
+  if (lamports >= 800_000_000) {
+    console.log("balance is enough to start minting; skipping airdrop");
+    return;
+  }
   for (const amount of [2, 2]) {
     try {
       const out = execFileSync(solana, ["airdrop", String(amount), pubkey, "--url", DEVNET_RPC], { encoding: "utf8" });
@@ -151,48 +154,64 @@ async function main() {
   const collectionSig = bs58.encode(collectionTx.signature);
   console.log(`collection ${collection} sig ${collectionSig}`);
 
+  const receiptsDir = path.join(root, "receipts");
+  mkdirSync(receiptsDir, { recursive: true });
+
+  function writeReceipts(minted, extraNote = "") {
+    const summary = {
+      schema: "onchainai-artifact-registry/receipts/v1",
+      cluster: "devnet",
+      mintedAt: new Date().toISOString(),
+      authority,
+      collection,
+      collectionSignature: collectionSig,
+      explorer: explorer(collectionSig, collection),
+      note: "Throwaway devnet keypair. zk-clawd-primitives is not live; attestations are authority signatures with zk pending. Not submitted to the production registry.musebook.trade API." + (extraNote ? " " + extraNote : ""),
+      entries: minted,
+    };
+    writeFileSync(path.join(receiptsDir, "devnet.json"), JSON.stringify(summary, null, 2) + "\n");
+    for (const m of minted) {
+      writeFileSync(path.join(receiptsDir, `${m.name}.json`), JSON.stringify(m, null, 2) + "\n");
+    }
+    console.log(`wrote ${minted.length} receipts to ${receiptsDir}`);
+  }
+
   const minted = [];
   for (const item of built) {
     const rec = { ...item.record, collection };
     const assetSigner = generateSigner(umi);
-    const result = await create(umi, {
-      asset: assetSigner,
-      collection: collectionSigner.publicKey,
-      name: item.name.slice(0, 32),
-      uri: `https://github.com/Solizardking/solana-clawd-ai-training/blob/feat/artifact-registry-zk/artifact-registry/receipts/${item.name}.json`,
-      plugins: [{ type: "Attributes", attributeList: metaplexAttributes({ ...rec, collection, asset: assetSigner.publicKey.toString() }) }],
-    }).sendAndConfirm(umi);
-    const asset = assetSigner.publicKey.toString();
-    const sig = bs58.encode(result.signature);
-    const record = { ...rec, asset, identity: { ...rec.identity, collection, asset } };
-    const receipt = {
-      name: item.name,
-      record,
-      signatures: { mint: sig, collection: collectionSig },
-      explorer: { asset: explorer(sig, asset), collection: explorer(collectionSig, collection) },
-    };
-    minted.push(receipt);
-    console.log(`minted ${item.name} asset ${asset} sig ${sig}`);
+    try {
+      const result = await create(umi, {
+        asset: assetSigner,
+        collection: collectionSigner.publicKey,
+        name: item.name.slice(0, 32),
+        uri: `https://github.com/Solizardking/solana-clawd-ai-training/blob/feat/artifact-registry-zk/artifact-registry/receipts/${item.name}.json`,
+        plugins: [{ type: "Attributes", attributeList: metaplexAttributes({ ...rec, collection, asset: assetSigner.publicKey.toString() }) }],
+      }).sendAndConfirm(umi);
+      const asset = assetSigner.publicKey.toString();
+      const sig = bs58.encode(result.signature);
+      const record = { ...rec, asset, identity: { ...rec.identity, collection, asset } };
+      const receipt = {
+        name: item.name,
+        record,
+        signatures: { mint: sig, collection: collectionSig },
+        explorer: { asset: explorer(sig, asset), collection: explorer(collectionSig, collection) },
+      };
+      minted.push(receipt);
+      writeReceipts(minted);
+      console.log(`minted ${item.name} asset ${asset} sig ${sig}`);
+    } catch (e) {
+      const msg = String(e?.message || e);
+      console.error(`mint failed for ${item.name}: ${msg}`);
+      writeReceipts(minted, `Stopped after ${minted.length} asset(s) at ${item.name}: ${msg}`);
+      if (/insufficient|0x1$|custom program error: 0x1|Attempt to debit an account but found no record of a prior credit/i.test(msg)) {
+        console.error("insufficient devnet SOL; keeping receipts for successful mints so far (hauhau first).");
+        return;
+      }
+      throw e;
+    }
   }
-
-  const receiptsDir = path.join(root, "receipts");
-  mkdirSync(receiptsDir, { recursive: true });
-  const summary = {
-    schema: "onchainai-artifact-registry/receipts/v1",
-    cluster: "devnet",
-    mintedAt: new Date().toISOString(),
-    authority,
-    collection,
-    collectionSignature: collectionSig,
-    explorer: explorer(collectionSig, collection),
-    note: "Throwaway devnet keypair. zk-clawd-primitives is not live; attestations are authority signatures with zk pending. Not submitted to the production registry.musebook.trade API.",
-    entries: minted,
-  };
-  writeFileSync(path.join(receiptsDir, "devnet.json"), JSON.stringify(summary, null, 2) + "\n");
-  for (const m of minted) {
-    writeFileSync(path.join(receiptsDir, `${m.name}.json`), JSON.stringify(m, null, 2) + "\n");
-  }
-  console.log(`wrote ${minted.length} receipts to ${receiptsDir}`);
+  writeReceipts(minted);
 }
 
 main().catch((err) => {
