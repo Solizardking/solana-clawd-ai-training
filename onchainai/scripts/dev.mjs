@@ -10,6 +10,8 @@ const host = process.env.HOST || '0.0.0.0';
 createServer(async (req, res) => {
   const pathname = new URL(req.url, 'http://localhost').pathname;
   if (pathname.startsWith('/api/')) return handler(req, res);
+  if (/^\/m\/[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pathname)) { req.url = `/api/hf-mint/metadata/${pathname.slice(3)}`; return handler(req, res); }
+  if (/^\/s\/[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(pathname)) { req.url = `/api/skillhub/metadata/${pathname.slice(3)}`; return handler(req, res); }
   const hosted = resolveSitePage(req.headers.host, pathname);
   if (hosted) {
     try {
@@ -25,6 +27,8 @@ createServer(async (req, res) => {
   let file = pathname;
   if (pathname === '/kit' || pathname === '/kit/') file = '/kit/index.html';
   else if (['/', '/models', '/datasets', '/data', '/studio', '/studio.html', '/trading-factory', '/model-kit', '/register', '/registry', '/zk', '/dashboard', '/chart-agent'].includes(pathname)) file = '/index.html';
+  else if (pathname === '/mint' || pathname === '/mint/') file = '/mint.html';
+  else if (pathname === '/skills' || pathname === '/skills/' || pathname === '/skillhub') file = '/skills.html';
   else if (pathname === '/docs' || pathname === '/docs-index') file = '/docs.html';
   const candidates = [file];
   if (!extname(file)) candidates.push(`${file}.html`, `${file}/index.html`);

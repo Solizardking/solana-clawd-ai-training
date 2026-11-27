@@ -13,6 +13,9 @@
   "license": "MIT",
   "dependencies": {
     "@huggingface/hub": "^2.17.5",
+    "@metaplex-foundation/mpl-core": "^1.10.0",
+    "@metaplex-foundation/umi": "^1.6.0",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.6.0",
     "@solana/kit": "^8.4.0",
     "@wallet-standard/app": "^1.1.1",
     "bs58": "^6.0.0",

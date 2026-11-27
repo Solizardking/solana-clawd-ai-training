@@ -1,0 +1,167 @@
+{
+  "schema": "onchainai-hf-self-serve/receipt/v1",
+  "cluster": "devnet",
+  "mintedAt": "2026-11-27T02:05:37.554Z",
+  "wallet": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+  "asset": "BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge",
+  "signature": "esxNvCAyajcGdvY4Zw2VL5a4kaeLFaDE79y28X1dNcgKto1tHGGNbmo229QLYaodsoDjXjCkTakWPvc1g8DHrDC",
+  "explorer": {
+    "tx": "https://explorer.solana.com/tx/esxNvCAyajcGdvY4Zw2VL5a4kaeLFaDE79y28X1dNcgKto1tHGGNbmo229QLYaodsoDjXjCkTakWPvc1g8DHrDC?cluster=devnet",
+    "asset": "https://explorer.solana.com/address/BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge?cluster=devnet"
+  },
+  "indexAuthority": "4WyA4FYinBKAXv3Tg4q6xMuj6hff2DGc4LaUenwKZdDD",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "model",
+    "version": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23",
+    "uniquenessKey": "model:12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23:0e9e39f249a16976918f6564b8830bc894c89659",
+    "payload": {
+      "hfRepo": "meta-llama/Llama-3.1-8B-Instruct",
+      "revisionSha": "0e9e39f249a16976918f6564b8830bc894c89659",
+      "license": "llama3.1",
+      "creator": "meta-llama",
+      "url": "https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct",
+      "baseModel": "meta-llama/Meta-Llama-3.1-8B",
+      "pipelineTag": "text-generation",
+      "libraryName": "transformers",
+      "hfLastModified": "2024-09-25T17:00:57.000Z",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "sha256": "sha256-11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+          "size": 1519
+        },
+        {
+          "path": "config.json",
+          "sha256": "sha256-29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+          "size": 855
+        },
+        {
+          "path": "generation_config.json",
+          "sha256": "sha256-189fb0c0d7fd8a527db217c0a60a0e013f0394cd8800f9697a666a9e75e5f7fd",
+          "size": 184
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "sha256-64e1b2889b7892e6bbe7a7ed5bfe6ff793c61f9d584345f8f41cf9f5cb30a369",
+          "size": 7627
+        },
+        {
+          "path": "model-00001-of-00004.safetensors",
+          "sha256": "sha256-2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+          "size": 4976698672
+        },
+        {
+          "path": "model-00002-of-00004.safetensors",
+          "sha256": "sha256-09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+          "size": 4999802720
+        },
+        {
+          "path": "model-00003-of-00004.safetensors",
+          "sha256": "sha256-fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+          "size": 4915916176
+        },
+        {
+          "path": "model-00004-of-00004.safetensors",
+          "sha256": "sha256-92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+          "size": 1168138808
+        },
+        {
+          "path": "model.safetensors.index.json",
+          "sha256": "sha256-146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b",
+          "size": 23950
+        },
+        {
+          "path": "original/consolidated.00.pth",
+          "sha256": "sha256-ab33d910f405204e5d388bc3521503584800461dc96808e287821dd451c1edac",
+          "size": 16060617592
+        },
+        {
+          "path": "original/params.json",
+          "sha256": "sha256-b15b6b31b2043c0400b028ecc25c8946e21d76ac260e9ac6a357ed8727c8865f",
+          "size": 199
+        },
+        {
+          "path": "original/tokenizer.model",
+          "sha256": "sha256-82e9d31979e92ab929cd544440f129d9ecd797b69e327f80f17e1c50d5551b55",
+          "size": 2183982
+        },
+        {
+          "path": "README.md",
+          "sha256": "sha256-ed0e2e86f7a40c38b793b0a04dfd993b2c1dfb34906804f96b999f0bbd8d70e6",
+          "size": 44044
+        },
+        {
+          "path": "special_tokens_map.json",
+          "sha256": "sha256-6f38c73729248f6c127296386e3cdde96e254636cc58b4169d3fd32328d9a8ec",
+          "size": 296
+        },
+        {
+          "path": "tokenizer_config.json",
+          "sha256": "sha256-177c7b61e616fecb84c17ce0591acb92c6c4d60e9ac5ababfb940ff23bbcd424",
+          "size": 55351
+        },
+        {
+          "path": "tokenizer.json",
+          "sha256": "sha256-79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4",
+          "size": 9085657
+        },
+        {
+          "path": "USE_POLICY.md",
+          "sha256": "sha256-a568f2ebc73cec3fd74ba2afd992d4e945a8c7a9d851f9b66163aac834b7b859",
+          "size": 4691
+        }
+      ],
+      "provenance": {
+        "source": "huggingface-hub",
+        "registrar": "onchainai-hf/v1",
+        "unhashedFiles": [],
+        "note": "LFS/Xet files use the Hugging Face LFS SHA-256; other files are SHA-256 of the bytes at this revision."
+      }
+    },
+    "skillMerkleLeaf": null,
+    "asset": "BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge",
+    "collection": null,
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": null,
+      "asset": "BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: model\nContent-Hash: sha256-12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23\nVersion: 0e9e39f249a16976918f6564b8830bc894c89659\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: model:12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23:0e9e39f249a16976918f6564b8830bc894c89659",
+      "signature": "23WGP3UbLaMqoBpPeBKbdDSM1txFr3eLh1CAXqmw5Ui4VTdnXmSsGMszyKxpB9aviX4ZoYhqbKXgpY6UkepyuuXj"
+    }
+  },
+  "verify": {
+    "ok": true,
+    "cluster": "devnet",
+    "asset": "BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge",
+    "name": "Llama-3.1-8B-Instruct",
+    "uri": "https://onchainai.fund/m/BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge",
+    "owner": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "updateAuthority": "4WyA4FYinBKAXv3Tg4q6xMuj6hff2DGc4LaUenwKZdDD",
+    "burnt": false,
+    "hfRepo": "meta-llama/Llama-3.1-8B-Instruct",
+    "revisionSha": "0e9e39f249a16976918f6564b8830bc894c89659",
+    "license": "llama3.1",
+    "contentHash": "sha256-12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "source": "onchainai-hf/v1",
+    "signatureValid": true,
+    "explorer": "https://explorer.solana.com/address/BWk2bKuAC8ywQdhL3Fmo4LHjP8Vegq42kvhvWPE9i6Ge?cluster=devnet",
+    "recomputedContentHash": "sha256-12038f3113b089d55cc8148a08b1899d2676ebce2f3e9aba552bb9cdbfb75c23",
+    "hashMatches": true,
+    "immutable": true,
+    "error": null
+  }
+}

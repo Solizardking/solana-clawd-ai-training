@@ -1,0 +1,97 @@
+{
+  "schema": "onchainai-hf-self-serve/receipt/v1",
+  "cluster": "devnet",
+  "mintedAt": "2026-11-27T01:59:36.232Z",
+  "wallet": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+  "asset": "KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV",
+  "signature": "5KUH552C2qy5DW4axDqmEPsuheeT51SsDanrPvHyje81ogY7AJuM5xoJRaJrNqWEmf218GNAJ8MUVRQASVpzXdyg",
+  "explorer": {
+    "tx": "https://explorer.solana.com/tx/5KUH552C2qy5DW4axDqmEPsuheeT51SsDanrPvHyje81ogY7AJuM5xoJRaJrNqWEmf218GNAJ8MUVRQASVpzXdyg?cluster=devnet",
+    "asset": "https://explorer.solana.com/address/KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV?cluster=devnet"
+  },
+  "indexAuthority": "4WyA4FYinBKAXv3Tg4q6xMuj6hff2DGc4LaUenwKZdDD",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "model",
+    "version": "aeb339dc7de361b468683b1242729c701cba465e",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432",
+    "uniquenessKey": "model:929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432:aeb339dc7de361b468683b1242729c701cba465e",
+    "payload": {
+      "hfRepo": "ordlibrary/hauhau-qwen36-onchain",
+      "revisionSha": "aeb339dc7de361b468683b1242729c701cba465e",
+      "license": "mit",
+      "creator": "ordlibrary",
+      "url": "https://huggingface.co/ordlibrary/hauhau-qwen36-onchain",
+      "baseModel": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+      "pipelineTag": "text-generation",
+      "libraryName": "ggml",
+      "hfLastModified": "2026-07-04T19:44:45.000Z",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "sha256": "sha256-48b460424f20e8c7494e03bb2e96e3ce8591c402e929d6fc8244367b9180d5a2",
+          "size": 1673
+        },
+        {
+          "path": "Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-IQ2_M.gguf",
+          "sha256": "sha256-ba3a1d47a604f17ef74d913f9a9d9a2b456acc6925e7b168bfa2e6527246011c",
+          "size": 11659235456
+        },
+        {
+          "path": "README.md",
+          "sha256": "sha256-d27e32be97c4099105b817c383f1ca54cc399e0e015ace994374f1f34706cd74",
+          "size": 23979
+        }
+      ],
+      "provenance": {
+        "source": "huggingface-hub",
+        "registrar": "onchainai-self-serve-hf/v1",
+        "unhashedFiles": [],
+        "note": "LFS/Xet files use the Hugging Face LFS SHA-256; other files are SHA-256 of the bytes at this revision."
+      }
+    },
+    "skillMerkleLeaf": null,
+    "asset": "KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV",
+    "collection": null,
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": null,
+      "asset": "KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: model\nContent-Hash: sha256-929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432\nVersion: aeb339dc7de361b468683b1242729c701cba465e\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: model:929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432:aeb339dc7de361b468683b1242729c701cba465e",
+      "signature": "3gWvMxo3NWTpYoECqmn5UZxhF7fWQsqx4vMMLFC9CxEFtNSxWA4bCvu7KpXcAVTWKdhhYabUKrx41ThzP5vnusgR"
+    }
+  },
+  "verify": {
+    "ok": true,
+    "cluster": "devnet",
+    "asset": "KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV",
+    "name": "hauhau-qwen36-onchain",
+    "uri": "https://onchainai.fund/api/hf-mint/metadata?repo=ordlibrary%2Fhauhau-qwen36-onchain&rev=aeb339dc7de361b468683b1242729c701cba465e",
+    "owner": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "updateAuthority": "4WyA4FYinBKAXv3Tg4q6xMuj6hff2DGc4LaUenwKZdDD",
+    "burnt": false,
+    "hfRepo": "ordlibrary/hauhau-qwen36-onchain",
+    "revisionSha": "aeb339dc7de361b468683b1242729c701cba465e",
+    "license": "mit",
+    "contentHash": "sha256-929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "source": "onchainai-self-serve-hf/v1",
+    "signatureValid": true,
+    "explorer": "https://explorer.solana.com/address/KSGptLiFB9EptevojVjnAE85dXGhudPoNHRbnSWmpBV?cluster=devnet",
+    "recomputedContentHash": "sha256-929b61b17bb68fcfed09b3d27ca54521f43d41f03480dce688e0f3042ee82432",
+    "hashMatches": true,
+    "immutable": true,
+    "error": null
+  }
+}

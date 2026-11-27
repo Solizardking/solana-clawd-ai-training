@@ -19,6 +19,8 @@ The site combines public Hugging Face catalogs for **solanaclawd** and **ordlibr
 | `/model-kit` | Artifact status, registry evidence, full console and source download |
 | `/kit/` | Canonical Model Kit frontend; external/local runtime needed for arena execution |
 | `/registry` | Metaplex Core artifact registry (agent, model, skill, tool, mcp_server) and devnet receipts |
+| `/mint` | Self-serve: paste any Hugging Face model, pin + hash it, mint a Metaplex Core record on devnet in your wallet |
+| `/skills` | Public SkillHub: submit a skill bundle, typed JEV verdict, mint on devnet in your wallet |
 | `/zk` | zk-clawd-primitives status: not live, verifying-key slots empty, program not deployed |
 | `/register` | Memo commitments on devnet/mainnet; native model registration on verified devnet |
 | `/docs` | Docs viewer; `/docs/onchain.md` is the root doctrine copy |
@@ -67,3 +69,31 @@ Read-only: `/api/health`, `/api/hub/catalog`, `/api/model-kit/status`, `/api/mod
 Writes/helpers: `/api/training/datasets` (explicit HF publication), `/api/inference/chat`, `/api/register/preview` (CAAP dry run), `/api/register` (dry run only; never claims a live write), `/api/rpc` (bounded method allowlist; only already-signed transactions can land onchain).
 
 Optional server env: `SOLANA_DEVNET_RPC_URL`, `SOLANA_RPC_URL`, `INFERENCE_BASE_URL`, `INFERENCE_API_KEY`, `HF_TOKEN`, and `HF_AUTHORS` (comma-separated Hub usernames or orgs to include with the default `solanaclawd` and `ordlibrary` namespaces). Keys stay server-side and are never sent to the browser. The public catalog works without `HF_TOKEN`; when a token is set, live download totals, likes, and repo counts also cover the signed-in account and its organizations, while private repositories stay off the public site. Private HF jobs are not inferred from old job IDs or public repository metadata.
+
+## Self-serve minting: `/mint` (Hugging Face models) and `/skills` (SkillHub)
+
+Both pages are **devnet only**. Mainnet is refused: the server checks the RPC genesis hash, refuses any RPC URL containing `mainnet`, builds devnet transactions and broadcasts them itself; wallets are asked to sign for `solana:devnet` only.
+
+**Custody.** The server never holds a signing key. It builds an *unsigned* Metaplex Core `create` transaction. The browser generates a fresh asset keypair and checks that the transaction only calls Metaplex Core, that the user's wallet is fee payer, and that the bytes carry the content hash shown on screen. Then the wallet signs, and the browser adds the asset signature and submits. The user pays fee and rent.
+
+**Same record as the registry.** `src/registry-hash.js` is a dependency-free port of `artifact-registry/src/hash.mjs` and `record.mjs`. Tests assert byte parity with `canonicalJson`, `modelContentHash`, `skillBundleHash`, `skillMerkleLeaf`, `bindingMessage` and `metaplexAttributes`. The page recomputes every hash in the browser.
+- Models: `sha256("model-v1\0" + canonicalJson({hfRepo, revisionSha, files, license, provenance}))`, pinned to the Hub commit sha. LFS/Xet files use the Hub's LFS SHA-256. Other files (≤10 MB each, ≤128 files, ≤40 MB total) are downloaded at that commit and hashed. Anything over the limits, or gated, is listed in `provenance.unhashedFiles` with its git blob id. Private repos are refused. The file hashes for `ordlibrary/hauhau-qwen36-onchain` reproduce the curated registry entry exactly.
+- Skills: content hash = SkillHub `bundleHash` (`skill-bundle-v1`), and `merkleLeaf = sha256(slug \0 bundleHash)`. Version `<frontmatter version>-onchain.<bundleHash[0:8]>`. To fit the 1232-byte transaction, skill attributes leave out `bundleHash` (it equals `contentHash`) and the constant `zkProgramId`/`vkSlotsEmpty`.
+- The wallet signs the registry binding message (free), and the signature is stored as the `bindingSignature` attribute.
+
+**Collection.** Self-serve assets are *not* added to the curated collection `2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy`, because joining a Core collection requires its update authority to sign, and this server will not hold or co-sign with that key. Instead, each asset is minted uncollected. Its update authority is an unsignable index PDA (SPL Memo program, seed `onchainai-hf-model-registry/v1` for models and `onchainai-skillhub/v1` for skills), so the name, URI and attributes are frozen at mint. The minter stays the owner and can transfer or burn. The galleries list assets through Helius DAS `getAssetsByAuthority(<index PDA>)`, and `/m/<asset>` and `/s/<asset>` serve the metadata JSON.
+
+**JEV verification (skills).** `server/jev.mjs` uses the same TypeSafe JEV decision engine as `themusebook/musebook` `musebook-tui/src/jev.ts`: OpenRouter Decisions API, `typesafe/jev-1.13`, typed `noul` answers. A skill is verified only if every check is ≥ 0.90, rejected if any check is ≤ 0.10, and unverified otherwise. A deterministic precheck runs first. Bundles that look like they contain credentials or private keys are refused and never stored. If JEV is unavailable or not configured, the skill stays unverified and is never shown as verified. Unverified and rejected skills can still be minted. The badge shows only when this server holds the typed verdict whose `verdictHash` equals the asset's onchain `jevVerdict`, so a forged attribute cannot show as verified.
+
+**Env vars (server only, never sent to the browser).**
+
+| Var | Needed for |
+| --- | --- |
+| `HF_TOKEN` | Hub API + file hashing (already set on Railway `onchainai`) |
+| `HELIUS_API_KEY` | Devnet DAS galleries / verify (not set on Railway yet) |
+| `OPENROUTER_API_KEY` | JEV verdicts; without it, every skill is `unverified` |
+| `SKILLHUB_STORE_DIR` | Optional persistent dir for submitted bundles + verdicts; without it they're in memory and badges fall back to unverified after a restart |
+| `PUBLIC_BASE_URL` | Optional; metadata URI origin (default `https://onchainai.fund`) |
+| `SOLANA_DEVNET_RPC_URL` | Optional devnet RPC (mainnet URLs refused) |
+
+Tests: `npm test` (unit/parity, offline), `HF_LIVE=1 node --test tests/hf-mint.test.mjs` (live Hub), `node scripts/hf-mint-e2e-devnet.mjs --keypair <throwaway>` (server path on devnet), `tests/mint-browser-e2e.mjs` / `tests/skills-browser-e2e.mjs` (headless UI on devnet with an injected test wallet). Devnet receipts are in `receipts/`.

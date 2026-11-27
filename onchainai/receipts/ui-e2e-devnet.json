@@ -1,0 +1,19 @@
+{
+  "schema": "onchainai-self-serve/ui-e2e/v1",
+  "cluster": "devnet",
+  "note": "Minted through the real /mint and /skills pages in headless Chrome with an injected Wallet Standard test wallet (throwaway devnet key FuGrQ5…UX2k; signing in Node, secret never in the page).",
+  "model": {
+    "hfRepo": "deepseek-ai/DeepSeek-R1",
+    "asset": "D3UmSp5ndeoFBAf745uBwNpZsyAfk9Nh1LVgAHQu8KEz",
+    "signature": "2X31rj6eaWM6GU6AwPFkn4xVc1XUaeCWvTU2pCP92Xxx8fbqrwpE9HStovA9CufPEm26bfdEU9Gf5NKd7x3BMkdL",
+    "contentHash": "sha256-979564755f96f6d4253de179a815ceb7b32cb958b12afd2d381f133dcb7335a3",
+    "explorer": "https://explorer.solana.com/address/D3UmSp5ndeoFBAf745uBwNpZsyAfk9Nh1LVgAHQu8KEz?cluster=devnet"
+  },
+  "skill": {
+    "slug": "devnet-balance-check",
+    "asset": "5V84gLdbi4S9fvDTyYfdzSF6oF7siJxdEjjeCTsg4xRc",
+    "signature": "2NUNSmCd7PJgtb3Z1XNaLhUmQsr7KSYkpsP4QwVqc3eqxXM3hYVwmvi7kJXpU9hKxC6a2jJXwTMm4fY4RmAFeWtT",
+    "jev": "unverified (OPENROUTER_API_KEY not configured on the test server)",
+    "explorer": "https://explorer.solana.com/address/5V84gLdbi4S9fvDTyYfdzSF6oF7siJxdEjjeCTsg4xRc?cluster=devnet"
+  }
+}
