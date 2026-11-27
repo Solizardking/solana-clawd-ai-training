@@ -97,16 +97,26 @@ export async function hubCatalog() {
   const snapshot = JSON.parse(await readFile(new URL('../hub-catalog.json', import.meta.url), 'utf8'));
   try {
     const identity = await hubAuthors();
+    const failures = [];
     const responses = await Promise.all(['models', 'datasets', 'spaces'].map(async kind => {
+      const expand = kind === 'spaces' ? '' : '&expand[]=downloads&expand[]=downloadsAllTime&expand[]=likes';
       const inventories = await Promise.all(identity.authors.map(async author => {
-        const url = `https://huggingface.co/api/${kind}?author=${encodeURIComponent(author)}&limit=1000&full=true&expand[]=downloads&expand[]=downloadsAllTime&expand[]=likes`;
-        const response = await fetch(url, { headers: hfHeaders(), signal: AbortSignal.timeout(12000) });
-        if (!response.ok) throw new Error(`Hub ${kind}: HTTP ${response.status}`);
-        return response.json();
+        const url = `https://huggingface.co/api/${kind}?author=${encodeURIComponent(author)}&limit=1000&full=true${expand}`;
+        try {
+          const response = await fetch(url, { headers: hfHeaders(), signal: AbortSignal.timeout(12000) });
+          if (!response.ok) throw new Error(`Hub ${kind}/${author}: HTTP ${response.status}`);
+          const payload = await response.json();
+          if (!Array.isArray(payload)) throw new Error(`Hub ${kind}/${author}: unexpected response`);
+          return payload;
+        } catch (error) {
+          failures.push(String(error.message || error));
+          return [];
+        }
       }));
       return [kind, dedupe(inventories.flat().filter(item => item && item.id && !item.private).map(item => mapHubItem(item, kind)))];
     }));
     const repos = Object.fromEntries(responses);
+    if (!repos.models.length && !repos.datasets.length && !repos.spaces.length) throw new Error(failures.join('; ') || 'Hub returned no repositories');
     const data = {
       ...repos,
       stats: catalogStats(repos, identity),
@@ -115,12 +125,15 @@ export async function hubCatalog() {
         ? `Hugging Face account APIs: ${identity.authors.join(', ')}`
         : `Hugging Face public APIs: ${identity.authors.join(', ')}`,
       live: true,
-      degraded: Boolean(identity.auth_error),
+      degraded: Boolean(identity.auth_error || failures.length),
+      ...(failures.length ? { error: `Some Hub lists were unavailable: ${failures.join('; ')}` } : {}),
     };
     hubCache = { at: Date.now(), data };
     return data;
-  } catch {
-    return { ...snapshot, stats: catalogStats(snapshot), live: false, degraded: true, error: 'Hub metadata temporarily unavailable; showing the dated release snapshot.' };
+  } catch (error) {
+    const detail = String(error?.message || error).replace(/hf_[A-Za-z0-9]+/g, 'hf_[redacted]').slice(0, 240);
+    console.error('hubCatalog failed:', detail);
+    return { ...snapshot, stats: catalogStats(snapshot), live: false, degraded: true, error: 'Hub metadata temporarily unavailable; showing the dated release snapshot.', detail };
   }
 }
 export async function rpc(cluster, method, params = []) {
