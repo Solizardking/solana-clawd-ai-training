@@ -24,7 +24,7 @@ createServer(async (req, res) => {
   if (pathname === '/.well-known/clawd-registry.json') { req.url = '/api/registry'; return handler(req, res); }
   let file = pathname;
   if (pathname === '/kit' || pathname === '/kit/') file = '/kit/index.html';
-  else if (['/', '/models', '/datasets', '/data', '/studio', '/studio.html', '/trading-factory', '/model-kit', '/register', '/dashboard', '/chart-agent'].includes(pathname)) file = '/index.html';
+  else if (['/', '/models', '/datasets', '/data', '/studio', '/studio.html', '/trading-factory', '/model-kit', '/register', '/registry', '/zk', '/dashboard', '/chart-agent'].includes(pathname)) file = '/index.html';
   else if (pathname === '/docs' || pathname === '/docs-index') file = '/docs.html';
   const candidates = [file];
   if (!extname(file)) candidates.push(`${file}.html`, `${file}/index.html`);
