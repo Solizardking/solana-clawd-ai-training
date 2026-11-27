@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mint any Hugging Face model · Onchain AI (devnet)</title>
+<meta name="description" content="Paste any Hugging Face model. Onchain AI pins it to a commit, hashes every file and mints a Metaplex Core registry record on Solana devnet, signed in your own wallet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/mint.css">
+<link rel="icon" href="/brand/solana-logomark.svg">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="grid-lines"></div></div>
+<header class="top">
+  <a class="mark" href="/">ONCHAIN <span>·</span> AI</a>
+  <nav>
+    <a href="/registry">Registry</a>
+    <a href="/models">Models</a>
+    <a href="/skills">SkillHub</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#how">How it works</a>
+  </nav>
+  <div class="top-right">
+    <span class="net" title="Self-serve minting runs on Solana devnet only. Mainnet is refused."><i></i>DEVNET</span>
+    <button id="wallet" class="btn ghost sm">Connect wallet</button>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div class="pill"><i></i>SELF-SERVE · SOLANA DEVNET · METAPLEX CORE</div>
+    <h1>Mint any model<br><em>onchain.</em></h1>
+    <p class="lede">Paste any public Hugging Face model. We pin it to an exact commit, hash every file the same way our artifact registry does, and you mint a Metaplex Core record in your own wallet. You pay the devnet fee. The server never holds a key.</p>
+    <form id="lookup" class="lookup" autocomplete="off">
+      <label class="sr" for="model-input">Hugging Face model id or URL</label>
+      <input id="model-input" spellcheck="false" placeholder="owner/model  or  https://huggingface.co/owner/model">
+      <button class="btn primary" id="fetch-btn" type="submit">Fetch model</button>
+    </form>
+    <div class="examples"><span>Try</span>
+      <button data-ex="ordlibrary/hauhau-qwen36-onchain">ordlibrary/hauhau-qwen36-onchain</button>
+      <button data-ex="Qwen/Qwen2.5-7B-Instruct">Qwen/Qwen2.5-7B-Instruct</button>
+      <button data-ex="meta-llama/Llama-3.1-8B-Instruct">meta-llama/Llama-3.1-8B-Instruct</button>
+      <button data-ex="deepseek-ai/DeepSeek-R1">deepseek-ai/DeepSeek-R1</button>
+    </div>
+    <p id="lookup-status" class="status" role="status"></p>
+  </section>
+
+  <section id="preview" class="preview" hidden></section>
+
+  <section id="mint" class="mint" hidden>
+    <div class="eyebrow">MINT · STEP BY STEP</div>
+    <h2>Bind it. <em>Sign it.</em></h2>
+    <ol class="steps">
+      <li id="step-wallet"><div class="n">01</div><div><h3>Connect a devnet wallet</h3><p>Phantom, Solflare or any Wallet Standard wallet. Your wallet becomes the record's authority and the asset owner.</p><button class="btn ghost" id="step-wallet-btn">Connect wallet</button><p class="status" id="wallet-status"></p></div></li>
+      <li id="step-bind"><div class="n">02</div><div><h3>Sign the binding message</h3><p>A free message signature (no transaction) that proves your wallet bound this content hash. It is stored in the asset's attributes so anyone can verify it.</p><pre class="msg" id="binding-msg"></pre><button class="btn ghost" id="bind-btn" disabled>Sign binding message</button><p class="status" id="bind-status"></p></div></li>
+      <li id="step-mint"><div class="n">03</div><div><h3>Mint on devnet</h3><p>We build an unsigned Metaplex Core <code>create</code> transaction. Your browser checks it only calls Metaplex Core with your wallet as fee payer before your wallet signs it.</p><div class="kv small" id="tx-facts"></div><label class="consent"><input type="checkbox" id="consent"> I understand this is a devnet record, not proof of model quality or a mainnet asset.</label><button class="btn primary" id="mint-btn" disabled>Sign &amp; mint</button><p class="status" id="mint-status"></p></div></li>
+    </ol>
+    <div id="result" class="result" hidden></div>
+    <aside class="note"><div class="eyebrow">COLLECTION</div><p id="collection-note"></p></aside>
+  </section>
+
+  <section id="gallery" class="gallery-wrap">
+    <div class="section-head"><div><div class="eyebrow">GALLERY · READ FROM CHAIN</div><h2>Minted <em>models.</em></h2></div><button class="btn ghost sm" id="refresh-gallery">Refresh</button></div>
+    <p class="muted" id="gallery-meta">Loading from Helius DAS (devnet)…</p>
+    <div class="gallery" id="gallery-grid"></div>
+  </section>
+
+  <section id="how" class="how">
+    <div class="eyebrow">HOW IT WORKS</div>
+    <h2>The same record as <em>the registry.</em></h2>
+    <div class="cards3">
+      <article class="glass"><h3>Pinned to a commit</h3><p>The Hub API is read at the model's current commit sha with our server key, which never reaches your browser. LFS and Xet files use the Hub's LFS SHA-256. Small files are downloaded at that commit and hashed.</p></article>
+      <article class="glass"><h3>One content hash</h3><p><code>sha256("model-v1\0" + canonicalJson(hfRepo, revisionSha, files, license, provenance))</code>. This is the exact preimage of <code>artifact-registry/src/hash.mjs</code>, recomputed in your browser before you sign.</p></article>
+      <article class="glass"><h3>Frozen on mint</h3><p>The Core asset's update authority is an index address that nobody can sign for, so its name, URI and attributes can never change. You own it and can transfer or burn it. zk attestation is still pending.</p></article>
+    </div>
+  </section>
+</main>
+<footer class="foot">Onchain AI · self-serve model records on <b>Solana devnet</b>. Mainnet is refused. A record binds file hashes at a commit; it does not prove model quality, licensing rights or safety. zk-clawd-primitives is not live: verifying-key slots are empty. <a href="/registry">Curated registry</a> · <a href="/zk">ZK status</a> · <a href="https://github.com/Solizardking/solana-clawd-ai-training" target="_blank" rel="noreferrer">Source</a></footer>
+<script type="module" src="/mint.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkillHub · submit and mint a skill · Onchain AI (devnet)</title>
+<meta name="description" content="Submit an agent skill, get a typed JEV verdict, and mint it as a Metaplex Core record on Solana devnet in your own wallet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/mint.css">
+<link rel="icon" href="/brand/solana-logomark.svg">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div><div class="grid-lines"></div></div>
+<header class="top">
+  <a class="mark" href="/">ONCHAIN <span>·</span> AI</a>
+  <nav><a href="/registry">Registry</a><a href="/mint">Mint a model</a><a href="#hub">SkillHub</a><a href="#how">Verification</a></nav>
+  <div class="top-right"><span class="net" title="Devnet only. Mainnet is refused."><i></i>DEVNET</span><button id="wallet" class="btn ghost sm">Connect wallet</button></div>
+</header>
+<main>
+  <section class="hero">
+    <div class="pill"><i></i>PUBLIC SKILLHUB · JEV-VERIFIED · SOLANA DEVNET</div>
+    <h1>Ship a skill.<br><em>Prove it.</em></h1>
+    <p class="lede">Paste a <code>SKILL.md</code> (plus any helper files). We hash it with SkillHub's <code>skill-bundle-v1</code> encoding, the TypeSafe JEV decision engine returns a typed verdict, and you mint a Metaplex Core record in your own wallet. Skills that aren't verified can still be minted; they show as unverified.</p>
+  </section>
+  <section id="detail" class="mint" hidden></section>
+  <section class="mint" id="submit">
+    <div class="eyebrow">01 · SUBMIT</div>
+    <h2>Your <em>skill bundle.</em></h2>
+    <div class="glass" style="padding:18px">
+      <label class="sr" for="skill-md">SKILL.md</label>
+      <textarea id="skill-md" class="editor" spellcheck="false">---
+name: devnet-balance-check
+description: Check a Solana devnet wallet's SOL balance with a read-only RPC call and report it to the user.
+version: 1.0.0
+---
+# Devnet balance check
+
+1. Ask the user for a public wallet address. Never ask for a private key or seed phrase.
+2. Call `getBalance` on https://api.devnet.solana.com for that address.
+3. Report the balance in SOL. Do not sign or send any transaction.
+</textarea>
+      <div class="row-actions"><label class="btn ghost sm filebtn">Add files<input id="extra-files" type="file" multiple hidden></label><span class="muted mono" id="file-list" style="font-size:12px"></span><span style="flex:1"></span><button class="btn primary" id="submit-btn">Hash &amp; verify with JEV</button></div>
+      <p class="status" id="submit-status"></p>
+    </div>
+    <div id="verdict" hidden></div>
+  </section>
+  <section id="mint" class="mint" hidden>
+    <div class="eyebrow">02 · MINT ON DEVNET</div>
+    <h2>Bind it. <em>Sign it.</em></h2>
+    <ol class="steps">
+      <li id="s-wallet"><div class="n">01</div><div><h3>Connect a devnet wallet</h3><p>Your wallet is the record's authority and owner, and pays the devnet fee.</p><button class="btn ghost" id="s-wallet-btn">Connect wallet</button><p class="status" id="s-wallet-status"></p></div></li>
+      <li id="s-bind"><div class="n">02</div><div><h3>Sign the binding message</h3><p>A free message signature that binds your wallet to this bundle hash. It's stored in the asset's attributes.</p><pre class="msg" id="s-msg"></pre><button class="btn ghost" id="s-bind-btn" disabled>Sign binding message</button><p class="status" id="s-bind-status"></p></div></li>
+      <li id="s-mint"><div class="n">03</div><div><h3>Mint</h3><p>An unsigned Metaplex Core <code>create</code> transaction carries the bundle hash, merkle leaf and JEV verdict hash. Your browser checks it before your wallet signs it.</p><button class="btn primary" id="s-mint-btn" disabled>Sign &amp; mint</button><p class="status" id="s-mint-status"></p></div></li>
+    </ol>
+    <div id="s-result" class="result" hidden></div>
+  </section>
+  <section id="hub" class="gallery-wrap">
+    <div class="section-head"><div><div class="eyebrow">SKILLHUB · READ FROM CHAIN</div><h2>Community <em>skills.</em></h2></div><button class="btn ghost sm" id="refresh">Refresh</button></div>
+    <p class="muted" id="hub-meta">Loading from Helius DAS (devnet)…</p>
+    <div class="gallery" id="hub-grid"></div>
+  </section>
+  <section id="how" class="how">
+    <div class="eyebrow">VERIFICATION</div>
+    <h2>Typed verdicts from <em>JEV.</em></h2>
+    <div class="cards3">
+      <article class="glass"><h3>Deterministic first</h3><p>No inference spent until the bundle passes a precheck: frontmatter present, no credentials or private keys, no <code>curl | sh</code>. Bundles that contain secrets are refused and never stored.</p></article>
+      <article class="glass"><h3>Then JEV decides</h3><p><code>typesafe/jev-1.13</code> answers five typed probability questions (secrets, unconfirmed funds, remote code, instruction override, honest description). Every check has to score at least 0.90 to verify. Any check at 0.10 or below rejects. Anything in between stays unverified.</p></article>
+      <article class="glass"><h3>Fail closed</h3><p>If JEV is unavailable the skill is unverified, never verified. The badge shows only when this server holds the typed verdict whose hash matches the asset's onchain <code>jevVerdict</code> attribute.</p></article>
+    </div>
+  </section>
+</main>
+<footer class="foot">Onchain AI SkillHub · records on <b>Solana devnet</b>; mainnet is refused. Content hash = SkillHub <code>skill-bundle-v1</code> bundleHash; merkleLeaf = sha256(slug ␀ bundleHash). A JEV verdict is an automated review, not an audit. <a href="/registry">Registry</a> · <a href="https://github.com/Solizardking/skillhub-main" target="_blank" rel="noreferrer">skillhub-main</a></footer>
+<script type="module" src="/skills.js"></script>
+</body>
+</html>

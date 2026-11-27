@@ -1,5 +1,8 @@
 import { hubCatalog, rpc, registryStatus, onchainRegistry, decodeRegistryAccount, complete, inferenceModels, publishDataset, PROGRAM_ID, MEMO_PROGRAM, sha256 } from '../server/service.mjs';
 import bs58 from 'bs58';
+import { submitSkill, prepareSkillMint, skillGallery, skillDetail, skillMetadata, skillIndexAuthority, SKILL_LIMITS } from '../server/skillhub.mjs';
+import { JEV_MODEL } from '../server/jev.mjs';
+import { fetchHfModel, prepareMint, submitMint, gallery, verifyAsset, metadataForAsset, metadataJson, mintConfig, rateLimit } from '../server/hf-mint.mjs';
 
 async function readBody(req) {
   if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
@@ -24,6 +27,34 @@ export default async function handler(req, res) {
   const method = req.method;
   const send = (data, status = 200) => { res.statusCode = status; res.end(JSON.stringify(data)); };
   try {
+    if (path.startsWith('skillhub/')) {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'local';
+      if (method === 'GET' && path === 'skillhub/config') return send({ ok: true, cluster: 'devnet', mainnet: 'refused', indexAuthority: skillIndexAuthority(), limits: SKILL_LIMITS, jev: { model: JEV_MODEL, configured: !!process.env.OPENROUTER_API_KEY }, storePersistent: !!process.env.SKILLHUB_STORE_DIR, heliusConfigured: !!process.env.HELIUS_API_KEY });
+      if (method === 'GET' && path === 'skillhub/gallery') { rateLimit(ip, 'sk-gallery', { max: 60 }); return send(await skillGallery({ page: Number(url.searchParams.get('page')) || 1 })); }
+      if (method === 'GET' && path === 'skillhub/skill') { rateLimit(ip, 'sk-detail', { max: 60 }); return send(await skillDetail(url.searchParams.get('asset'))); }
+      if (method === 'GET' && path.startsWith('skillhub/metadata/')) { rateLimit(ip, 'sk-meta', { max: 120 }); const json = await skillMetadata(path.slice('skillhub/metadata/'.length)); res.setHeader('Cache-Control', 'public, max-age=300'); res.setHeader('Access-Control-Allow-Origin', '*'); return send(json); }
+      if (method === 'POST' && path === 'skillhub/submit') { rateLimit(ip, 'sk-submit', { max: 10 }); const body = await readBody(req); return send(await submitSkill({ files: body.files })); }
+      if (method === 'POST' && path === 'skillhub/prepare') { rateLimit(ip, 'sk-prepare', { max: 20 }); const body = await readBody(req); return send(await prepareSkillMint({ bundleHash: body.bundleHash, wallet: body.wallet, asset: body.asset, bindingSignature: body.bindingSignature })); }
+      if (method === 'POST' && path === 'skillhub/submit-tx') { rateLimit(ip, 'sk-submit-tx', { max: 20 }); const body = await readBody(req); return send(await submitMint({ transaction: body.transaction })); }
+      return send({ ok: false, error: 'Endpoint not available' }, 404);
+    }
+    if (path.startsWith('hf-mint/')) {
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'local';
+      if (method === 'GET' && path === 'hf-mint/config') return send(mintConfig());
+      if (method === 'GET' && path === 'hf-mint/model') { rateLimit(ip, 'model', { max: 30 }); return send(await fetchHfModel(url.searchParams.get('id'), { revision: url.searchParams.get('rev') || undefined })); }
+      if (method === 'GET' && path === 'hf-mint/gallery') { rateLimit(ip, 'gallery', { max: 60 }); return send(await gallery({ page: Number(url.searchParams.get('page')) || 1 })); }
+      if (method === 'GET' && path === 'hf-mint/verify') { rateLimit(ip, 'verify', { max: 30 }); return send(await verifyAsset(url.searchParams.get('asset'))); }
+      if (method === 'GET' && (path === 'hf-mint/metadata' || path.startsWith('hf-mint/metadata/'))) {
+        rateLimit(ip, 'metadata', { max: 120 });
+        const asset = path.slice('hf-mint/metadata/'.length);
+        const json = path === 'hf-mint/metadata' ? await metadataJson(url.searchParams.get('repo'), url.searchParams.get('rev')) : await metadataForAsset(asset);
+        res.setHeader('Cache-Control', 'public, max-age=300'); res.setHeader('Access-Control-Allow-Origin', '*');
+        return send(json);
+      }
+      if (method === 'POST' && path === 'hf-mint/prepare') { rateLimit(ip, 'prepare', { max: 20 }); const body = await readBody(req); return send(await prepareMint({ modelId: body.modelId, revision: body.revision, wallet: body.wallet, asset: body.asset, bindingSignature: body.bindingSignature })); }
+      if (method === 'POST' && path === 'hf-mint/submit') { rateLimit(ip, 'submit', { max: 20 }); const body = await readBody(req); return send(await submitMint({ transaction: body.transaction })); }
+      return send({ ok: false, error: 'Endpoint not available' }, 404);
+    }
     if (method === 'GET' && path === 'health') return send({ ok: true, status: 'ok', version: '0.2.0', service: 'onchainai' });
     if (method === 'GET' && ['hub/catalog', 'model-kit/status', 'models', 'registry'].includes(path)) {
       const catalog = await hubCatalog();

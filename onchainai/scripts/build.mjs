@@ -33,10 +33,15 @@ await cp(path.join(root, 'src/index.html'), path.join(out, 'index.html'));
 await build({ entryPoints: [path.join(root, 'src/app.js')], bundle: true, format: 'esm', outfile: path.join(out, 'app.js'), minify: true, target: 'es2022' });
 await build({ entryPoints: [path.join(root, 'src/docs-renderer.js')], bundle: true, format: 'iife', outfile: path.join(out, 'docs-renderer.js'), minify: true, target: 'es2022' });
 await cp(path.join(root, 'src/style.css'), path.join(out, 'style.css'));
+await cp(path.join(root, 'src/mint.html'), path.join(out, 'mint.html'));
+await cp(path.join(root, 'src/mint.css'), path.join(out, 'mint.css'));
+await cp(path.join(root, 'src/skills.html'), path.join(out, 'skills.html'));
+await build({ entryPoints: [path.join(root, 'src/skills.js')], bundle: true, format: 'esm', outfile: path.join(out, 'skills.js'), minify: true, target: 'es2022' });
+await build({ entryPoints: [path.join(root, 'src/mint.js')], bundle: true, format: 'esm', outfile: path.join(out, 'mint.js'), minify: true, target: 'es2022' });
 try { await cp(path.join(root, 'downloads'), path.join(out, 'downloads'), { recursive: true }); } catch { /* Source download is optional for a minimal fork. */ }
 await cp(path.join(root, 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs'), path.join(out, 'pdf.worker.min.mjs'));
 const catalog = JSON.parse(await readFile(path.join(root, 'hub-catalog.json'), 'utf8'));
 const files = {};
-for (const filename of ['app.js', 'style.css', 'kit/app.js', 'docs-renderer.js', 'registry-idl.json']) files[filename] = createHash('sha256').update(await readFile(path.join(out, filename))).digest('hex');
-await writeFile(path.join(out, 'release.json'), JSON.stringify({ version: '0.2.0', built_at: new Date().toISOString(), catalog_updated_at: catalog.updated_at, files, routes: ['/', '/models', '/datasets', '/studio', '/trading-factory', '/chart-agent', '/model-kit', '/register', '/registry', '/zk', '/docs'] }));
+for (const filename of ['app.js', 'style.css', 'mint.js', 'mint.css', 'skills.js', 'kit/app.js', 'docs-renderer.js', 'registry-idl.json']) files[filename] = createHash('sha256').update(await readFile(path.join(out, filename))).digest('hex');
+await writeFile(path.join(out, 'release.json'), JSON.stringify({ version: '0.2.0', built_at: new Date().toISOString(), catalog_updated_at: catalog.updated_at, files, routes: ['/', '/models', '/datasets', '/studio', '/trading-factory', '/chart-agent', '/model-kit', '/register', '/registry', '/mint', '/skills', '/zk', '/docs'] }));
 console.log('Built hub, Studio, dataset builder, Trading Factory, onchain flow and canonical Model Kit frontend.');

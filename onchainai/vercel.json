@@ -11,6 +11,14 @@
   },
   "rewrites": [
     {
+      "source": "/s/:asset",
+      "destination": "/api/router?path=skillhub/metadata/:asset"
+    },
+    {
+      "source": "/m/:asset",
+      "destination": "/api/router?path=hf-mint/metadata/:asset"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/router?path=:path*"
     },
@@ -73,6 +81,22 @@
     {
       "source": "/kit",
       "destination": "/kit/index"
+    },
+    {
+      "source": "/registry",
+      "destination": "/index"
+    },
+    {
+      "source": "/zk",
+      "destination": "/index"
+    },
+    {
+      "source": "/skills",
+      "destination": "/skills.html"
+    },
+    {
+      "source": "/mint",
+      "destination": "/mint.html"
     }
   ],
   "headers": [
