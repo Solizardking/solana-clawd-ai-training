@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { keypairIdentity, generateSigner, publicKey } from "@metaplex-foundation/umi";
-import { create, mplCore } from "@metaplex-foundation/mpl-core";
+import { create, fetchAsset, fetchCollection, mplCore } from "@metaplex-foundation/mpl-core";
 import { buildRecord, signRecord, metaplexAttributes, verifyRecordSignature } from "../src/record.mjs";
 import { skillMerkleLeaf } from "../src/hash.mjs";
 import nacl from "tweetnacl";
@@ -49,10 +49,21 @@ function loadKeypair(p) {
 }
 
 function balanceLamports(pubkey) {
-  const out = execFileSync("solana", ["balance", pubkey, "--url", DEVNET_RPC, "--output", "json"], { encoding: "utf8" });
-  const j = JSON.parse(out);
-  if (typeof j.lamports === "number") return j.lamports;
-  return Math.round(parseFloat(String(j.balance ?? out)) * 1e9);
+  let lastErr;
+  for (let i = 0; i < 8; i++) {
+    try {
+      const out = execFileSync("solana", ["balance", pubkey, "--url", DEVNET_RPC, "--output", "json"], { encoding: "utf8" });
+      const j = JSON.parse(out);
+      if (typeof j.lamports === "number") return j.lamports;
+      return Math.round(parseFloat(String(j.balance ?? out)) * 1e9);
+    } catch (err) {
+      lastErr = err;
+      const msg = String(err?.stderr || err?.message || err);
+      if (!/error sending request|timeout|ECONN|429|503|502|fetch/i.test(msg)) throw err;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000 * (i + 1));
+    }
+  }
+  throw lastErr;
 }
 
 function explorer(sig, address) {
@@ -175,6 +186,10 @@ async function main() {
 
   const umi = createUmi(DEVNET_RPC).use(mplCore());
   umi.use(keypairIdentity(umi.eddsa.createKeypairFromSecretKey(kp.secretKey)));
+  // mpl-core create() expects a CollectionV1 object (publicKey/oracles/lifecycleHooks),
+  // not a raw PublicKey. Passing publicKey(COLLECTION) makes collection.publicKey
+  // undefined, so the asset is minted standalone.
+  const collectionAccount = await fetchCollection(umi, COLLECTION);
 
   const version = `1.0.0-onchain.${String(registry.catalogHash).replace(/^sha256-/, "").slice(0, 8)}`;
   const toMint = queued.slice(0, Number.isFinite(limit) ? limit : queued.length);
@@ -212,7 +227,7 @@ async function main() {
     try {
       const result = await create(umi, {
         asset: assetSigner,
-        collection: publicKey(COLLECTION),
+        collection: collectionAccount,
         name: skill.slug.slice(0, 32),
         uri: `https://github.com/Solizardking/solana-clawd-ai-training/blob/feat/devnet-artifact-receipts/artifact-registry/receipts/skills/${receiptFileName(skill.slug)}`,
         plugins: [{
@@ -222,6 +237,12 @@ async function main() {
       }).sendAndConfirm(umi);
       const asset = assetSigner.publicKey.toString();
       const sig = bs58.encode(result.signature);
+      const onchain = await fetchAsset(umi, asset, { skipDerivePlugins: true });
+      const ua = onchain.updateAuthority;
+      const inCollection = ua?.type === "Collection" && String(ua.address) === COLLECTION;
+      if (!inCollection) {
+        throw new Error(`asset ${asset} (${skill.slug}) was not added to collection ${COLLECTION}; updateAuthority=${JSON.stringify(ua)}`);
+      }
       const after = balanceLamports(authority);
       const receipt = {
         name: skill.slug,

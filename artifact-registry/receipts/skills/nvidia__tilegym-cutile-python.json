@@ -1,0 +1,56 @@
+{
+  "name": "nvidia/tilegym-cutile-python",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.78989d2d",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-6451b4b03d533a3e502c8824012862900645aa93ac73b581e1d5616afb7f5dc9",
+    "uniquenessKey": "skill:6451b4b03d533a3e502c8824012862900645aa93ac73b581e1d5616afb7f5dc9:1.0.0-onchain.78989d2d",
+    "payload": {
+      "slug": "nvidia/tilegym-cutile-python",
+      "name": "tilegym-cutile-python",
+      "bundleHash": "sha256-6451b4b03d533a3e502c8824012862900645aa93ac73b581e1d5616afb7f5dc9",
+      "merkleLeaf": "sha256-723092e5e5b442f05f89e5915ad19efa152ad71b24745c8ae9b6d96d285ac25d",
+      "catalogHash": "sha256-78989d2dcde9749f5685210777b9d893ecd2c13cf82c7e37fdac92539e077708",
+      "catalogMerkleRoot": "sha256-329c4b275593bc66c075fa17aec29a1a1652c23256aacdeff2d0f453332e504a",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-723092e5e5b442f05f89e5915ad19efa152ad71b24745c8ae9b6d96d285ac25d",
+    "asset": "CNZzK4DGtrD9KUyAJJkSMWWhXrxwmkFGumKZ7VtjYc1U",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "CNZzK4DGtrD9KUyAJJkSMWWhXrxwmkFGumKZ7VtjYc1U"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-6451b4b03d533a3e502c8824012862900645aa93ac73b581e1d5616afb7f5dc9\nVersion: 1.0.0-onchain.78989d2d\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:6451b4b03d533a3e502c8824012862900645aa93ac73b581e1d5616afb7f5dc9:1.0.0-onchain.78989d2d",
+      "signature": "5vBjDgTPYogxJzgzEH6nGsi4YsbcX2viG1Y9whNBeCp3fpMx4THxuBw86S4VvT7QYMXybcEv8fqRgX4adiHjk5DZ"
+    }
+  },
+  "signatures": {
+    "mint": "2NrWx4aqmijkMhnPZ1eAYZ4pGGTYKe5uaEKN4pRnNwXs4n7QWP5v1UVAbJ65JY5dvnDVSdbxtx1vLwwBCW3doRAn",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/2NrWx4aqmijkMhnPZ1eAYZ4pGGTYKe5uaEKN4pRnNwXs4n7QWP5v1UVAbJ65JY5dvnDVSdbxtx1vLwwBCW3doRAn?cluster=devnet",
+      "address": "https://explorer.solana.com/address/CNZzK4DGtrD9KUyAJJkSMWWhXrxwmkFGumKZ7VtjYc1U?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6671280
+}

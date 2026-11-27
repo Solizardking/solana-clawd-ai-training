@@ -1,0 +1,56 @@
+{
+  "name": "nvidia/nemotron-policy-generator",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.78989d2d",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-388dcee42fb2cac5a9e6fd7a951dc366ba92f2cf8fadee96fec0a66d61d2a613",
+    "uniquenessKey": "skill:388dcee42fb2cac5a9e6fd7a951dc366ba92f2cf8fadee96fec0a66d61d2a613:1.0.0-onchain.78989d2d",
+    "payload": {
+      "slug": "nvidia/nemotron-policy-generator",
+      "name": "nemotron-policy-generator",
+      "bundleHash": "sha256-388dcee42fb2cac5a9e6fd7a951dc366ba92f2cf8fadee96fec0a66d61d2a613",
+      "merkleLeaf": "sha256-a7dde8c0c3884852cceac1cad7c59be4284e18efd2132e1dcf1c265b4ac0f8e9",
+      "catalogHash": "sha256-78989d2dcde9749f5685210777b9d893ecd2c13cf82c7e37fdac92539e077708",
+      "catalogMerkleRoot": "sha256-329c4b275593bc66c075fa17aec29a1a1652c23256aacdeff2d0f453332e504a",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-a7dde8c0c3884852cceac1cad7c59be4284e18efd2132e1dcf1c265b4ac0f8e9",
+    "asset": "2NApyLX2myGZ1WWmoPFtaA9gLPHmuepBvANSqwNppbP8",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "2NApyLX2myGZ1WWmoPFtaA9gLPHmuepBvANSqwNppbP8"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-388dcee42fb2cac5a9e6fd7a951dc366ba92f2cf8fadee96fec0a66d61d2a613\nVersion: 1.0.0-onchain.78989d2d\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:388dcee42fb2cac5a9e6fd7a951dc366ba92f2cf8fadee96fec0a66d61d2a613:1.0.0-onchain.78989d2d",
+      "signature": "SaF15cpR4xQUvDhCqCHvAskhwtQeBJTeGrJkE942yH8Njgv2knD6Ky3tep11gmsPG6LWN6spZ9ZWNtvb7Gj4tgA"
+    }
+  },
+  "signatures": {
+    "mint": "2CQ7yAXRcL456nrriPry2DDaAZz3AcYX41K1MM8QHEgjiUdQ67QCAZtZEtrUmn85fakk6NNzAL85ypuMZh3jWDyz",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/2CQ7yAXRcL456nrriPry2DDaAZz3AcYX41K1MM8QHEgjiUdQ67QCAZtZEtrUmn85fakk6NNzAL85ypuMZh3jWDyz?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2NApyLX2myGZ1WWmoPFtaA9gLPHmuepBvANSqwNppbP8?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6732240
+}

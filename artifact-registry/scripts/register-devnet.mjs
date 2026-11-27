@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { keypairIdentity, generateSigner, none } from "@metaplex-foundation/umi";
-import { createCollection, create, mplCore } from "@metaplex-foundation/mpl-core";
+import { createCollection, create, fetchAsset, fetchCollection, mplCore } from "@metaplex-foundation/mpl-core";
 import { buildRecord, signRecord, metaplexAttributes, verifyRecordSignature } from "../src/record.mjs";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
@@ -153,6 +153,7 @@ async function main() {
   const collection = collectionSigner.publicKey.toString();
   const collectionSig = bs58.encode(collectionTx.signature);
   console.log(`collection ${collection} sig ${collectionSig}`);
+  const collectionAccount = await fetchCollection(umi, collection);
 
   const receiptsDir = path.join(root, "receipts");
   mkdirSync(receiptsDir, { recursive: true });
@@ -183,13 +184,18 @@ async function main() {
     try {
       const result = await create(umi, {
         asset: assetSigner,
-        collection: collectionSigner.publicKey,
+        collection: collectionAccount,
         name: item.name.slice(0, 32),
         uri: `https://github.com/Solizardking/solana-clawd-ai-training/blob/feat/artifact-registry-zk/artifact-registry/receipts/${item.name}.json`,
         plugins: [{ type: "Attributes", attributeList: metaplexAttributes({ ...rec, collection, asset: assetSigner.publicKey.toString() }) }],
       }).sendAndConfirm(umi);
       const asset = assetSigner.publicKey.toString();
       const sig = bs58.encode(result.signature);
+      const onchain = await fetchAsset(umi, asset, { skipDerivePlugins: true });
+      const ua = onchain.updateAuthority;
+      if (!(ua?.type === "Collection" && String(ua.address) === collection)) {
+        throw new Error(`asset ${asset} was not added to collection ${collection}; updateAuthority=${JSON.stringify(ua)}`);
+      }
       const record = { ...rec, asset, identity: { ...rec.identity, collection, asset } };
       const receipt = {
         name: item.name,

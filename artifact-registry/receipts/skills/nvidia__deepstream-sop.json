@@ -1,0 +1,56 @@
+{
+  "name": "nvidia/deepstream-sop",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.78989d2d",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-a23f8e447215fc6439584c60a17649573dc8df19fd67f358dae3faf5433014a7",
+    "uniquenessKey": "skill:a23f8e447215fc6439584c60a17649573dc8df19fd67f358dae3faf5433014a7:1.0.0-onchain.78989d2d",
+    "payload": {
+      "slug": "nvidia/deepstream-sop",
+      "name": "deepstream-sop",
+      "bundleHash": "sha256-a23f8e447215fc6439584c60a17649573dc8df19fd67f358dae3faf5433014a7",
+      "merkleLeaf": "sha256-2ae47e1a764bbf1a66b8d0b398f7f115503295060216713450b2cda82a0adc55",
+      "catalogHash": "sha256-78989d2dcde9749f5685210777b9d893ecd2c13cf82c7e37fdac92539e077708",
+      "catalogMerkleRoot": "sha256-329c4b275593bc66c075fa17aec29a1a1652c23256aacdeff2d0f453332e504a",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-2ae47e1a764bbf1a66b8d0b398f7f115503295060216713450b2cda82a0adc55",
+    "asset": "CAPrNC3Ajn58Fh4VcnGVAoGzZaJzBvYCmyL1m3ddiyj4",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "CAPrNC3Ajn58Fh4VcnGVAoGzZaJzBvYCmyL1m3ddiyj4"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-a23f8e447215fc6439584c60a17649573dc8df19fd67f358dae3faf5433014a7\nVersion: 1.0.0-onchain.78989d2d\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:a23f8e447215fc6439584c60a17649573dc8df19fd67f358dae3faf5433014a7:1.0.0-onchain.78989d2d",
+      "signature": "5paecZaPEZY8apU8aTH8s6dZmrrWERqCB9FnZxQTAe5PT8Qk4EAdqgRrCY5xb5XBXTV19pA9vosfV8T38dRwufjq"
+    }
+  },
+  "signatures": {
+    "mint": "4L6Auj8UP4uxYG9PBs2SKGUucriwwQGGv64atF3G677ZqtiuusdB2PcVgMd2XXhxeeSY3qKcVtRLsx3P8AqkkrTP",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/4L6Auj8UP4uxYG9PBs2SKGUucriwwQGGv64atF3G677ZqtiuusdB2PcVgMd2XXhxeeSY3qKcVtRLsx3P8AqkkrTP?cluster=devnet",
+      "address": "https://explorer.solana.com/address/CAPrNC3Ajn58Fh4VcnGVAoGzZaJzBvYCmyL1m3ddiyj4?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6564600
+}

@@ -1,0 +1,56 @@
+{
+  "name": "nvidia/holoscan-install-conda",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.78989d2d",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-6c84e921b5fdb90300fcf32837fc92d240e6b72bf9bf533504ad253845a27814",
+    "uniquenessKey": "skill:6c84e921b5fdb90300fcf32837fc92d240e6b72bf9bf533504ad253845a27814:1.0.0-onchain.78989d2d",
+    "payload": {
+      "slug": "nvidia/holoscan-install-conda",
+      "name": "holoscan-install-conda",
+      "bundleHash": "sha256-6c84e921b5fdb90300fcf32837fc92d240e6b72bf9bf533504ad253845a27814",
+      "merkleLeaf": "sha256-610cd4dbcfb66291774c7e5a813f6f9129fc945504fdf29687be5ae9b2f43e3c",
+      "catalogHash": "sha256-78989d2dcde9749f5685210777b9d893ecd2c13cf82c7e37fdac92539e077708",
+      "catalogMerkleRoot": "sha256-329c4b275593bc66c075fa17aec29a1a1652c23256aacdeff2d0f453332e504a",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-610cd4dbcfb66291774c7e5a813f6f9129fc945504fdf29687be5ae9b2f43e3c",
+    "asset": "C7WRpaJUC5V8s6QHWdRkRTH9484R3noLvgf35aNfWymT",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "C7WRpaJUC5V8s6QHWdRkRTH9484R3noLvgf35aNfWymT"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-6c84e921b5fdb90300fcf32837fc92d240e6b72bf9bf533504ad253845a27814\nVersion: 1.0.0-onchain.78989d2d\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:6c84e921b5fdb90300fcf32837fc92d240e6b72bf9bf533504ad253845a27814:1.0.0-onchain.78989d2d",
+      "signature": "5KPCaiLCAWXBUCD9ZCQSf8uuEvWcMQjXFpBrwNXxvcrre5p3hWzkTobudoFgvCXWdNc9AFFzvti67VcVgB53Pfan"
+    }
+  },
+  "signatures": {
+    "mint": "4ECgjcJ8L9bFWtS79PvrGXkBzQLsBmSJHBqgHQyrcGpRLscgn5D4Xiu9dSDZMweXghi33sNz1KwEV2qxYeCqW1XK",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/4ECgjcJ8L9bFWtS79PvrGXkBzQLsBmSJHBqgHQyrcGpRLscgn5D4Xiu9dSDZMweXghi33sNz1KwEV2qxYeCqW1XK?cluster=devnet",
+      "address": "https://explorer.solana.com/address/C7WRpaJUC5V8s6QHWdRkRTH9484R3noLvgf35aNfWymT?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6686520
+}
