@@ -1,0 +1,56 @@
+{
+  "name": "moonpay-discover-tokens",
+  "record": {
+    "schema": "onchainai-artifact-registry/v1",
+    "type": "skill",
+    "version": "1.0.0-onchain.4f387aa2",
+    "cluster": "devnet",
+    "authority": "FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k",
+    "contentHash": "sha256-c122d307cfb235b244fb2c48c050c3cfb063fd4314b2ff05c830f84df4db2657",
+    "uniquenessKey": "skill:c122d307cfb235b244fb2c48c050c3cfb063fd4314b2ff05c830f84df4db2657:1.0.0-onchain.4f387aa2",
+    "payload": {
+      "slug": "moonpay-discover-tokens",
+      "name": "moonpay-discover-tokens",
+      "bundleHash": "sha256-c122d307cfb235b244fb2c48c050c3cfb063fd4314b2ff05c830f84df4db2657",
+      "merkleLeaf": "sha256-bcf4b80dc8d504f9a200b873b3b6d7559db0c73721cd48b3f691938528c9f49b",
+      "catalogHash": "sha256-4f387aa29c6ba4a26135abe0e7d36b87eaa371c263d0b1a33a28821fc4aa5849",
+      "catalogMerkleRoot": "sha256-2c4114d939baec093447807cebbd5777ed2116ab912c94c326e53c2bd80a9793",
+      "sourceRepo": "Solizardking/skillhub-main",
+      "catalog": "catalog.json on origin/main (1password removed; 673 canonical skills)"
+    },
+    "skillMerkleLeaf": "sha256-bcf4b80dc8d504f9a200b873b3b6d7559db0c73721cd48b3f691938528c9f49b",
+    "asset": "Emcwod5t3Zmq4Q26xnwz2CfVQyFijdS6WkuBuenTY3kZ",
+    "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+    "identity": {
+      "standard": "metaplex-core-asset+registry-record",
+      "collection": "2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy",
+      "asset": "Emcwod5t3Zmq4Q26xnwz2CfVQyFijdS6WkuBuenTY3kZ"
+    },
+    "attestation": {
+      "kind": "authority-signature",
+      "zk": "pending",
+      "zkProgramId": "4vJ9JU1bJJE96FWSVKmnrL3xFU5jSBSVdk9x4La2vzhn",
+      "vkSlot": null,
+      "vkSlotsEmpty": true,
+      "programDeployed": false,
+      "note": "zk-clawd-primitives is not live: the clawd-zk program is not deployed and all verifying-key slots are empty, so every proof is refused until circuits and a key ceremony exist.",
+      "message": "onchainai.fun artifact-registry wants you to attest a registry record.\nThis signature only proves the registering authority bound this content hash.\nIt does not authorize any payment. ZK attestation is pending.\n\nType: skill\nContent-Hash: sha256-c122d307cfb235b244fb2c48c050c3cfb063fd4314b2ff05c830f84df4db2657\nVersion: 1.0.0-onchain.4f387aa2\nCluster: devnet\nAuthority: FuGrQ5KbtdcdGDdorYs4xauDTG8yyRZRpPChAwbWUX2k\nUniqueness-Key: skill:c122d307cfb235b244fb2c48c050c3cfb063fd4314b2ff05c830f84df4db2657:1.0.0-onchain.4f387aa2",
+      "signature": "5d2qszEupi6Zxh2oJxFuTnQV4vvnuDxczSKYSAMo4YepAPDs7g4FmYt9G5Ne2togXCrmkNHKEMQbtNg6wEBG4zAC"
+    }
+  },
+  "signatures": {
+    "mint": "48UHFqypYYnXZDBvwzDJ47gRakcfXpvSS6p5dx1gtnThsB2i7fkrKBPTAYwwCH2uMnBVgfya67w5XxAgf65iDRa",
+    "collection": "2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ"
+  },
+  "explorer": {
+    "asset": {
+      "tx": "https://explorer.solana.com/tx/48UHFqypYYnXZDBvwzDJ47gRakcfXpvSS6p5dx1gtnThsB2i7fkrKBPTAYwwCH2uMnBVgfya67w5XxAgf65iDRa?cluster=devnet",
+      "address": "https://explorer.solana.com/address/Emcwod5t3Zmq4Q26xnwz2CfVQyFijdS6WkuBuenTY3kZ?cluster=devnet"
+    },
+    "collection": {
+      "tx": "https://explorer.solana.com/tx/2dN4MRZKXA3urGps4e59ByYDJqDsJCaHmNzkQQfStb8avwFuV27DGsSSUzb7rhQfArtgee2KpMChp5jSh9w5yWKZ?cluster=devnet",
+      "address": "https://explorer.solana.com/address/2Xkbm5YpDqR1hMXiBa3CQaRg7qgvuhUAPj6E4fDCVaPy?cluster=devnet"
+    }
+  },
+  "costLamports": 6590000
+}
